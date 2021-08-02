@@ -1,0 +1,272 @@
+{
+  "addons": [
+    {
+      "name": "AcidIsland",
+      "gamemode": true,
+      "github": "BentoBoxWorld/AcidIsland",
+      "ci": "BentoBoxWorld/AcidIsland",
+      "description": "**AcidIsland** is a **survival game** where players try to survive and expand their island, surrounded by a **sea of acid**.\n\nAcid is everywhere. Acid burns everything.\n\nOh, and rain is acid too.\n\nCreated and maintained by tastybento."
+    },
+    {
+      "name": "AOneBlock",
+      "gamemode": true,
+      "github": "BentoBoxWorld/AOneBlock",
+      "ci": "BentoBoxWorld/AOneBlock",
+      "description": "**AOneBlock** is a OneBlock **survival game**\n\nYou spawn on a block. Just *one* block. What do you do?\n\nCreated and maintained by tastybento."
+    },
+    {
+      "name": "Boxed",
+      "gamemode": true,
+      "github": "BentoBoxWorld/Boxed",
+      "ci": "BentoBoxWorld/Boxed",
+      "description": "**Boxed** is a semi-vanilla **survival game**\n\nA game mode where you are boxed into a tiny space that only expands by completing advancements.\n\n\n\nCreated and maintained by tastybento."
+    },
+    {
+      "name": "BSkyBlock",
+      "gamemode": true,
+      "github": "BentoBoxWorld/BSkyBlock",
+      "ci": "BentoBoxWorld/BSkyBlock",
+      "description": "**BSkyBlock** is a **survival game** where players try to survive on an **island in the sky**.\n\nCreated and maintained by tastybento."
+    },
+    {
+      "name": "CaveBlock",
+      "gamemode": true,
+      "github": "BentoBoxWorld/CaveBlock",
+      "ci": "BentoBoxWorld/CaveBlock",
+      "description": "**CaveBlock** is a **survival game** where players try to survive **underground**.\n\n*An ode to the dwarf's heart in the depths of each person.*\n\nBased on an original idea by the **StoneBlock modpack**.\n\nCreated and maintained by BONNe."
+    },
+    {
+      "name": "SkyGrid",
+      "gamemode": true,
+      "github": "BentoBoxWorld/SkyGrid",
+      "ci": "BentoBoxWorld/SkyGrid",
+      "description": "**SkyGrid** is a **survival game** where players try to survive in a world **made up of scattered blocks**.\n\nCreated and maintained by tastybento."
+    },
+    {
+      "name": "Bank",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Bank",
+      "ci": "BentoBoxWorld/Bank",
+      "description": "**Bank** gives island teams a shared bank and provides a ranking system based on island balances.\n\nCreated and maintained by [tastybento](https://github.com/tastybento)."
+    },
+    {
+      "name": "Biomes",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Biomes",
+      "ci": "BentoBoxWorld/Biomes",
+      "description": "**Biomes** lets your players **change the biome** on their island.\n\nCreated and maintained by [BONNe](https://github.com/bonne)."
+    },
+    {
+      "name": "Border",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Border",
+      "ci": "BentoBoxWorld/Border",
+      "description": "**Border** displays a **world border** around your players' islands.\n\nWorks best with [WorldBorderAPI](https://github.com/yannicklamprecht/WorldBorderAPI/releases).\n\nCreated and maintained by [tastybento](https://github.com/tastybento)."
+    },
+    {
+      "name": "CauldronWitchery",
+      "gamemode": false,
+      "github": "BentoBoxWorld/CauldronWitchery",
+      "ci": "BentoBoxWorld/CauldronWitchery",
+      "description": "**CauldronWitchery** gives your players the opportunity to get their hands on **black magic**.\nLet them **spawn monsters** using a cauldron!\n\n*What does the Witch do with her cauldron?*\n*Black Magic, of course!*\n\n*We are just not sure what could happen afterward...*\n\nBased on an original idea by the **Ex Nihilo mod**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe)."
+    },
+    {
+      "name": "Challenges",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Challenges",
+      "ci": "BentoBoxWorld/Challenges",
+      "description": "**Challenges** lets you create Challenges for your **players to complete!**\n\nCreated and maintained by [BONNe](https://github.com/BONNe)."
+    },
+    {
+      "name": "Chat",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Chat",
+      "ci": "BentoBoxWorld/Chat",
+      "description": "**Chat** lets your players **chat with each other** in an **Island Chat** or a **Team Chat**.\n\nCreated and maintained by [tastybento](https://github.com/tastybento). "
+    },
+    {
+      "name": "CheckMeOut",
+      "gamemode": false,
+      "github": "BentoBoxWorld/CheckMeOut",
+      "ci": "BentoBoxWorld/CheckMeOut",
+      "description": "**CheckMeOut**\nis an island submission addon. This addon enables players to submit their island for consideration by admins. In this way, Admins can set up site-wide challenges or competitions that players can do and then submit their island for consideration. Admins get a GUI that lists submissions and they can teleport to the islands from there. Once an island is reviewed by admins it can be deleted, or when the whole activity is over, all submissions can be cleared.\n\nCreated and maintained by [tastybento](https://github.com/tastybento). "
+    },
+    {
+      "name": "ControlPanel",
+      "gamemode": false,
+      "github": "BentoBoxWorld/ControlPanel",
+      "ci": "BentoBoxWorld/ControlPanel",
+      "description": "**ControlPanel** lets you design a flexible **Control Panel** your players can use to **manage their island**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe)."
+    },
+    {
+      "name": "DimensionalTrees",
+      "gamemode": false,
+      "github": "BentoBoxWorld/DimensionalTrees",
+      "ci": "BentoBoxWorld/DimensionalTrees",
+      "description": "**DimensionalTrees** lets you define **exotic tree types** in **other dimensions**.\n\n*Have you ever dreamed of a glowstone tree in the Nether?*\n*What about an end stone and purpur tree in the End?*\n\nCreated by [Awakened-Redstone](https://github.com/Awakened-Redstone) and maintained by the [BentoBoxWorld Crew](https://github.com/orgs/BentoBoxWorld/teams/crew)."
+    },
+    {
+      "name": "ExtraMobs",
+      "gamemode": false,
+      "github": "BentoBoxWorld/ExtraMobs",
+      "ci": "BentoBoxWorld/ExtraMobs",
+      "description": "**ExtraMobs** changes some mob-spawning rules to make **Shulkers**, **Wither Skeletons** and more **spawn naturally in your worlds**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe)."
+    },
+    {
+      "name": "Greenhouses",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Greenhouses",
+      "ci": "BentoBoxWorld/Greenhouses",
+      "description": "**Greenhouses** lets your players **create biome greenhouses** on their islands.\n\nInteresting variation to the Biomes addon.\n\nAdapted from tastybento's Greenhouses plugin.\n\nCreated and maintained by [tastybento](https://github.com/tastybento)."
+    },
+    {
+      "name": "InvSwitcher",
+      "gamemode": false,
+      "github": "BentoBoxWorld/InvSwitcher",
+      "ci": "BentoBoxWorld/InvSwitcher",
+      "description": "**InvSwitcher** is per-world switcher.\n\nWorld inventory switcher add-on for BentoBox. This add-on will work for any game modes.\n\nThe following can be switched per-world:\n\n* Inventory & armor\n* Advancements\n* Food level\n* Experience\n* Health\n* Enderchest contents\n\nUse the config to set what you want to be switched.\n\nCreated and maintained by [tastybento](https://github.com/tastybento)."
+    },
+    {
+      "name": "IslandFly",
+      "gamemode": false,
+      "github": "BentoBoxWorld/IslandFly",
+      "ci": "BentoBoxWorld/IslandFly",
+      "description": "**IslandFly** lets your players **fly within their islands**!\n\nCreated and maintained by [tastybento](https://github.com/tastybento)."
+    },
+    {
+      "name": "Level",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Level",
+      "ci": "BentoBoxWorld/Level",
+      "description": "**Level** creates a competitive atmosphere by making your players try to **have the highest island level**.\n\nCreated and maintained by [tastybento](https://github.com/tastybento)."
+    },
+    {
+      "name": "Likes",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Likes",
+      "ci": "BentoBoxWorld/Likes",
+      "description": "**Likes** lets your players leave **likes or dislikes** on **islands they visit**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe)."
+    },
+    {
+      "name": "Limits",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Limits",
+      "ci": "BentoBoxWorld/Limits",
+      "description": "**Limits** let you limit how many blocks and entities your players can have on their islands.\n\nCreated and maintained by [tastybento](https://github.com/tastybento)."
+    },
+    {
+      "name": "MagicCobblestoneGenerator",
+      "gamemode": false,
+      "github": "BentoBoxWorld/MagicCobblestoneGenerator",
+      "ci": "BentoBoxWorld/MagicCobblestoneGenerator",
+      "description": "**MagicCobblestoneGenerator** provide players a simple and effective way to generate resources on their islands.\n\nSome specifications about this add-on:\n\n- Offline Generation - ability to disable addon processing on islands where none of members are online.\n- Disabled GameModes - specify Game Modes where MagicCobblestoneGenerator will not work.\n- Generator Tiers - ability to specify default generator tiers\n- GameMode Tiers - ability to specify generator tiers for specific game mode.\n\nCreated and maintained by [BONNe](https://github.com/BONNe)."
+    },
+    {
+      "name": "TwerkingForTrees",
+      "gamemode": false,
+      "github": "BentoBoxWorld/TwerkingForTrees",
+      "ci": "BentoBoxWorld/TwerkingForTrees",
+      "description": "**TwerkingForTrees** lets your players **twerk** that cubic booty to get trees **growing faster**!\n\nInspired by the modded Skyblock experience.\n\nCreated and maintained by [tastybento](https://github.com/tastybento)."
+    },
+    {
+      "name": "Visit",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Visit",
+      "ci": "BentoBoxWorld/Visit",
+      "description": "**Visit** let your players visit other islands.\n\nThe main idea of the addon is to allow faster ways how to visit any island. The main difference from warps addon is that unlike warps, signs are not necessary, and users can travel to any island.\n\nCreated and maintained by [BONNe](https://github.com/BONNe)."
+    },
+    {
+      "name": "VoidPortals",
+      "gamemode": false,
+      "github": "BentoBoxWorld/VoidPortals",
+      "ci": "BentoBoxWorld/VoidPortals",
+      "description": "**VoidPortals** let your players teleport to other dimensions by jumping into the Void!\n\nCreated and maintained by [BONNe](https://github.com/BONNe)."
+    },
+    {
+      "name": "Warps",
+      "gamemode": false,
+      "github": "BentoBoxWorld/Warps",
+      "ci": "BentoBoxWorld/Warps",
+      "description": "**Warps** lets your players create Warps so that other players can visit their islands.\n\nCreated and maintained by [tastybento](https://github.com/tastybento)."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Classic Skyblock",
+      "description": "The Original ASkyBlock experience!",
+      "subtext": "Includes the following addons:",
+      "addons": [
+        "BSkyBlock",
+        "Challenges",
+        "Level",
+        "Warps",
+        "ControlPanel",
+        "DimensionalTrees",
+        "Biomes",
+        "Limits"
+      ],
+      "color": "#ffdd57"
+    },
+    {
+      "name": "AOneBlock",
+      "description": "tastybento's version of OneBlock!",
+      "subtext": "tastybento recommends AOneBlock is run with these addons:",
+      "addons": [
+        "AOneBlock",
+        "Warps",
+        "Likes",
+        "Chat"
+      ],
+      "color": "#48c774"
+    },
+    {
+      "name": "Classic AcidIsland",
+      "description": "The Original AcidIsland experience!",
+      "subtext": "Includes the following addons:",
+      "addons": [
+        "AcidIsland",
+        "Challenges",
+        "Level",
+        "Warps",
+        "ControlPanel",
+        "DimensionalTrees",
+        "Biomes",
+        "Limits"
+      ],
+      "color": "#ffdd57"
+    },
+    {
+      "name": "CaveBlock",
+      "description": "Unique variation to Skyblock!",
+      "subtext": "Survive underground.\n\nIncludes the following addons:",
+      "addons": [
+        "CaveBlock",
+        "Challenges",
+        "Level",
+        "Warps",
+        "ControlPanel",
+        "DimensionalTrees",
+        "Biomes",
+        "Limits"
+      ],
+      "color": "#ffdd57"
+    },
+    {
+      "name": "Boxed",
+      "description": "Survival in a Box!",
+      "subtext": "To play Boxed you need these addons and plugins:",
+      "addons": [
+        "Boxed",
+        "Warps",
+        "Likes",
+        "Chat"
+      ],
+      "dependencies": [
+        "WorldBorderAPI",
+        "WorldGeneratorAPI"
+      ],
+      "dependencyText": "Download these plugins separately:",
+      "color": "#48c774"
+    }
+  ]
+}

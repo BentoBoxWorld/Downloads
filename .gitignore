@@ -1,0 +1,9 @@
+/node_modules
+/dist
+.vscode
+yarn-error.log
+.idea
+.env
+env.json
+jarcache.sqlite
+downloads.sqlite
