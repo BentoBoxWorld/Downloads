@@ -44,11 +44,13 @@ export default function CustomPage() {
                     css={tw`flex-grow flex-shrink block p-2 bg-green-400 text-white rounded-lg mx-auto my-2 focus:outline-none focus:border-none`}
                     onClick={() => {
                         const values = getValues();
-                        const addons = Object.keys(values).filter((key) => values[key]);
+                        const addons = Object.keys(values)
+                            .filter((key) => key != 'beta')
+                            .filter((key) => values[key]);
                         open(
                             `/api/generate?downloads=${encodeURI(
                                 '[' + addons.map((a) => '"' + a + '"').join(',') + ']',
-                            )}`,
+                            )}${`&beta=${values.beta}`}`,
                         );
                     }}
                 >
@@ -146,6 +148,14 @@ export default function CustomPage() {
                 `}
             >
                 <Generator />
+                <div css={tw`mx-auto`}>
+                    <input
+                        type="checkbox"
+                        css={tw`form-checkbox bg-gray-300 md:bg-white`}
+                        {...register('beta', { required: true })}
+                    />
+                    &nbsp;Beta
+                </div>
                 <div css={tw`block mt-1`}>
                     <h2 css={tw`text-gray-700 text-2xl font-semibold mb-2`}>Select Gamemodes</h2>
                     <span css={tw`text-gray-700`}>Gamemodes bring in original games to your server.</span>

@@ -1,12 +1,12 @@
-import { BuildOptions, BLOB, Model, Sequelize, STRING, NUMBER } from 'sequelize';
+import { BLOB, BuildOptions, Model, NUMBER, Sequelize, STRING } from 'sequelize';
 
 export interface DatabaseAttributes {
     name: string;
     release: Buffer;
-    releaseId: string;
+    releaseId: number;
     releaseJarFile: string;
     ci?: Buffer;
-    ciId?: string;
+    ciId?: number;
     ciJarFile?: string;
     lastUpdated: number;
     version: string;
@@ -28,10 +28,10 @@ export function DatabaseFactory(sequelize: Sequelize): DatabaseStatic {
             primaryKey: true,
         },
         release: BLOB,
-        releaseId: STRING,
+        releaseId: NUMBER,
         releaseJarFile: STRING,
         ci: BLOB,
-        ciId: STRING,
+        ciId: NUMBER,
         ciJarFile: STRING,
         lastUpdated: NUMBER,
         version: STRING,

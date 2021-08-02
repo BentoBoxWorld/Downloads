@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
-import { ConfigObject, AddonType, AddonsEntity } from '../config';
+import { AddonsEntity, AddonType, ConfigObject } from '../config';
 import { Octokit } from 'octokit';
 import * as cron from 'node-cron';
-import Archiver = require('archiver');
 import { DatabaseFactory, DatabaseModel, DownloadCountFactory, DownloadCountModel } from './models/database';
 import { Sequelize } from 'sequelize';
+import { JenkinsAPI } from 'jenkins';
+import axios from 'axios';
+import Archiver = require('archiver');
 
 const { throttling } = require('@octokit/plugin-throttling');
 
@@ -12,6 +14,7 @@ export default class ApiManager {
     config: ConfigObject;
     addons: AddonType[] = [];
     octokit: Octokit;
+    jenkins: JenkinsAPI = require('jenkins')({ baseUrl: 'https://ci.codemc.io' });
 
     jarCache = DatabaseFactory(
         new Sequelize('database', 'user', 'password', {
@@ -46,11 +49,18 @@ export default class ApiManager {
                     });
                 }
 
-                this.generateDownloads();
+                await this.generateDownloads();
             }
         });
         this.jarCache.sync().then(async () => {
             const undefinedAddons: AddonsEntity[] = [];
+            configConstructor.addons.push({
+                name: 'BentoBox',
+                github: 'BentoBoxWorld/BentoBox',
+                ci: 'BentoBoxWorld/BentoBox',
+                gamemode: false,
+                description: 'BentoBox',
+            });
             for await (const addon of configConstructor.addons) {
                 const addonDatabase: DatabaseModel | null = await Promise.resolve(
                     this.jarCache.findOne({
@@ -61,6 +71,7 @@ export default class ApiManager {
             }
             const repeats = env && env.github_downloads ? env.github_downloads : 1;
             let updateAddon = 0;
+            let updateCiAddon = 0;
             cron.schedule('*/6 * * * *', () => {
                 this.generateDownloads();
                 if (undefinedAddons.length > 0) {
@@ -75,6 +86,11 @@ export default class ApiManager {
                         if (updateAddon >= configConstructor.addons.length) updateAddon = 0;
                     }
                 }
+                for (let i = 0; i < 4; i++) {
+                    this.updateJenkins(configConstructor.addons[updateCiAddon]).then();
+                    updateCiAddon++;
+                    if (updateCiAddon >= configConstructor.addons.length) updateCiAddon = 0;
+                }
             });
         });
         let env: { github_token?: string; github_downloads?: number; discord_error_webhook_url?: string } = {};
@@ -86,21 +102,69 @@ export default class ApiManager {
             auth: env && env.github_token ? env.github_token : '',
         });
         this.config = configConstructor;
-        configConstructor.addons.forEach(async (addon) => {
-            this.addons.push({
-                name: addon.name,
-                description: addon.description,
-                gamemode: addon.gamemode,
-                github: addon.github,
-                version: (await this.jarCache.findOne({ where: { name: addon.name } }))?.version || '0',
+        configConstructor.addons
+            .filter((addon) => addon.name !== 'BentoBox')
+            .forEach(async (addon) => {
+                this.addons.push({
+                    name: addon.name,
+                    description: addon.description,
+                    gamemode: addon.gamemode,
+                    github: addon.github,
+                    version: (await this.jarCache.findOne({ where: { name: addon.name } }))?.version || '0',
+                });
+            });
+    }
+
+    async updateJenkins(addon: AddonsEntity) {
+        const jenkins = this.jenkins;
+        const getBase64 = this.getBase64;
+        const project = addon.ci;
+        const addonDatabase: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
+        if (addonDatabase === null) return;
+        const latestJenkins = await this.getLatestJenkins(addon);
+        if (addonDatabase.ciId && addonDatabase.ciId === latestJenkins) return;
+        jenkins.build.get(project, latestJenkins, async function (err, data) {
+            let assetURL;
+            if (data.length === 0) {
+                return;
+            } else if (data.artifacts.length === 1) {
+                assetURL = data.artifacts[0].fileName;
+            } else {
+                for (let i = 0; i < data.artifacts.length; i++) {
+                    if (
+                        !data.artifacts[i].fileName
+                            .toLowerCase()
+                            .match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`)
+                    )
+                        continue;
+                    assetURL = data.artifacts[i].fileName;
+                }
+                if (!assetURL) return;
+            }
+            const buffer = await getBase64(
+                `https://ci.codemc.io/job/${project.split('/')[0]}/job/${
+                    project.split('/')[1]
+                }/lastSuccessfulBuild/artifact/target/${assetURL}`,
+            );
+            addonDatabase.update({
+                ci: buffer,
+                ciId: latestJenkins,
+                ciJarFile: assetURL,
             });
         });
-        configConstructor.addons.push({
-            name: 'BentoBox',
-            github: 'BentoBoxWorld/BentoBox',
-            ci: 'BentoBoxWorld/BentoBox',
-            gamemode: false,
-            description: 'BentoBox',
+    }
+
+    async getLatestJenkins(addon: AddonsEntity): Promise<number> {
+        const project = addon.ci;
+        return (<any>await this.getJob(project)).lastSuccessfulBuild.number;
+    }
+
+    getJob(project: string) {
+        return new Promise((res: any, rej) => {
+            this.jenkins.job.get(project, (err, data) => {
+                res(data);
+                rej(err);
+            });
         });
     }
 
@@ -122,6 +186,11 @@ export default class ApiManager {
                 release_id: data.data[data.data.length - 1].id,
             });
         }
+
+        const addonDatabase: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
+
+        if (addonDatabase && latestRelease.data.id === addonDatabase.releaseId) return;
+
         const releaseFiles = await this.octokit.rest.repos.listReleaseAssets({
             owner: addon.github.split('/')[0],
             repo: addon.github.split('/')[1],
@@ -153,12 +222,11 @@ export default class ApiManager {
                 accept: 'application/octet-stream',
             },
         });
-        const addonDatabase: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
         if (addonDatabase === null) {
             await this.jarCache.create({
                 name: addon.name,
                 release: Buffer.from(<ArrayBuffer>(<unknown>asset.data)),
-                releaseId: latestRelease.data.id.toString(),
+                releaseId: latestRelease.data.id,
                 releaseJarFile: assetURL.name,
                 lastUpdated: Date.now(),
                 version: latestRelease.data.tag_name,
@@ -166,7 +234,7 @@ export default class ApiManager {
         } else {
             addonDatabase.update({
                 release: Buffer.from(<ArrayBuffer>(<unknown>asset.data)),
-                releaseId: latestRelease.data.id.toString(),
+                releaseId: latestRelease.data.id,
                 releaseJarFile: assetURL.name,
                 lastUpdated: Date.now(),
                 version: latestRelease.data.tag_name,
@@ -205,6 +273,7 @@ export default class ApiManager {
 
     async generateZIP(req: Request, res: Response) {
         const downloadArg = req.query.downloads;
+        const beta = (req.query.beta && req.query.beta === 'true') || false;
         if (!downloadArg) {
             res.setHeader('Content-Type', 'application/json');
             res.send({ Error: 400, Reason: 'No Addons Selected' });
@@ -274,18 +343,26 @@ export default class ApiManager {
 
         const bentoBoxJar: DatabaseModel | null = await this.jarCache.findOne({ where: { name: 'BentoBox' } });
         if (bentoBoxJar !== null) {
-            archive.append(bentoBoxJar.release, { name: bentoBoxJar.releaseJarFile });
+            if (!beta) {
+                archive.append(bentoBoxJar.release, { name: bentoBoxJar.releaseJarFile });
+            } else if (bentoBoxJar.ci && bentoBoxJar.ciJarFile) {
+                archive.append(bentoBoxJar.ci, { name: bentoBoxJar.ciJarFile });
+            }
         }
         for (const addon of addons) {
             const addonJar: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
             if (addonJar !== null) {
-                archive.append(addonJar.release, { name: 'addons/' + addonJar.releaseJarFile });
+                if (!beta) {
+                    archive.append(addonJar.release, { name: 'addons/' + addonJar.releaseJarFile });
+                } else if (addonJar.ci && addonJar.ciJarFile) {
+                    archive.append(addonJar.ci, { name: 'addons/' + addonJar.ciJarFile });
+                }
             }
         }
         await archive.finalize();
 
         for (const addon of addons) {
-            this.updateDownloadCount(addon.name);
+            await this.updateDownloadCount(addon.name);
         }
     }
 
@@ -303,5 +380,13 @@ export default class ApiManager {
             const downloadCount = await this.downloadCount.findOne({ where: { name: a.name } });
             a.downloads = downloadCount?.downloads;
         });
+    }
+
+    getBase64(url: string) {
+        return axios
+            .get(url, {
+                responseType: 'arraybuffer',
+            })
+            .then((response) => Buffer.from(response.data, 'binary'));
     }
 }
