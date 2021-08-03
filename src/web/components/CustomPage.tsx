@@ -6,6 +6,7 @@ import remarkBreaks from 'remark-breaks';
 import { useForm } from 'react-hook-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import { AddonType } from '../../config';
 
 export default function CustomPage() {
     const [addons, setAddons] = useState<JSX.Element[]>([]);
@@ -45,12 +46,14 @@ export default function CustomPage() {
                     onClick={() => {
                         const values = getValues();
                         const addons = Object.keys(values)
-                            .filter((key) => key != 'beta')
+                            .filter((key) => key != 'version')
                             .filter((key) => values[key]);
+                        if (addons.length < 1) return;
+                        if (Object.keys(values).length <= 2) return;
                         open(
                             `/api/generate?downloads=${encodeURI(
                                 '[' + addons.map((a) => '"' + a + '"').join(',') + ']',
-                            )}${`&beta=${values.beta}`}`,
+                            )}${`&version=${values.version}`}`,
                         );
                     }}
                 >
@@ -62,78 +65,45 @@ export default function CustomPage() {
 
     async function updateAddons() {
         const addons = await GetAddons();
-        setAddons(
-            addons
-                .filter((a) => !a.gamemode)
-                .map((addon) => {
-                    return (
-                        <div key={addon.name}>
-                            <label
-                                css={tw`inline-flex items-center cursor-pointer w-full`}
-                                onMouseEnter={() => {
-                                    setPopupTitle(addon.name);
-                                    setPopupText(addon.description);
-                                }}
+        setAddons(getAddonElements(false, addons));
+        setGamemodes(getAddonElements(true, addons));
+    }
+
+    function getAddonElements(isGamemode: boolean, addons: AddonType[]): JSX.Element[] {
+        return addons
+            .filter((a) => a.gamemode === isGamemode)
+            .map((addon) => {
+                return (
+                    <div key={addon.name}>
+                        <label
+                            css={tw`inline-flex items-center cursor-pointer w-full`}
+                            onMouseEnter={() => {
+                                setPopupTitle(addon.name);
+                                setPopupText(addon.description);
+                            }}
+                        >
+                            <input
+                                type="checkbox"
+                                css={tw`form-checkbox bg-gray-300 md:bg-white`}
+                                {...register(addon.name, { required: true })}
+                            />
+                            <span css={tw`ml-2`}>{addon.name}</span>
+                            <button
+                                css={tw`bg-blue-500 rounded-md text-white px-1 ml-auto`}
+                                onClick={() => window.open('https://github.com/' + addon.github)}
                             >
-                                <input
-                                    type="checkbox"
-                                    css={tw`form-checkbox bg-gray-300 md:bg-white`}
-                                    {...register(addon.name, { required: true })}
-                                />
-                                <span css={tw`ml-2`}>{addon.name}</span>
-                                <button
-                                    css={tw`bg-blue-500 rounded-md text-white px-1 ml-auto`}
-                                    onClick={() => window.open('https://github.com/' + addon.github)}
-                                >
-                                    v{addon.version}
-                                </button>
-                                <div css={tw`bg-green-500 rounded-md text-white px-1 ml-2 flex flex-row flex-nowrap`}>
-                                    <div css={tw`mx-1`}>
-                                        <FontAwesomeIcon icon={faDownload} />
-                                    </div>
-                                    {nFormatter(addon.downloads!, 1)}
+                                v{addon.version}
+                            </button>
+                            <div css={tw`bg-green-500 rounded-md text-white px-1 ml-2 flex flex-row flex-nowrap`}>
+                                <div css={tw`mx-1`}>
+                                    <FontAwesomeIcon icon={faDownload} />
                                 </div>
-                            </label>
-                        </div>
-                    );
-                }),
-        );
-        setGamemodes(
-            addons
-                .filter((a) => a.gamemode)
-                .map((gamemode) => {
-                    return (
-                        <div key={gamemode.name}>
-                            <label
-                                css={tw`inline-flex items-center cursor-pointer w-full`}
-                                onMouseEnter={() => {
-                                    setPopupTitle(gamemode.name);
-                                    setPopupText(gamemode.description);
-                                }}
-                            >
-                                <input
-                                    type="checkbox"
-                                    css={tw`form-checkbox bg-gray-300 md:bg-white`}
-                                    {...register(gamemode.name, { required: true })}
-                                />
-                                <span css={tw`ml-2`}>{gamemode.name}</span>
-                                <button
-                                    css={tw`bg-blue-500 rounded-md text-white px-1 ml-auto`}
-                                    onClick={() => window.open('https://github.com/' + gamemode.github)}
-                                >
-                                    v{gamemode.version}
-                                </button>
-                                <div css={tw`bg-green-500 rounded-md text-white px-1 ml-2 flex flex-row flex-nowrap`}>
-                                    <div css={tw`mx-1`}>
-                                        <FontAwesomeIcon icon={faDownload} />
-                                    </div>
-                                    {nFormatter(gamemode.downloads!, 1)}
-                                </div>
-                            </label>
-                        </div>
-                    );
-                }),
-        );
+                                {nFormatter(addon.downloads || 0, 1)}
+                            </div>
+                        </label>
+                    </div>
+                );
+            });
     }
 
     useEffect(() => {
@@ -149,12 +119,10 @@ export default function CustomPage() {
             >
                 <Generator />
                 <div css={tw`mx-auto`}>
-                    <input
-                        type="checkbox"
-                        css={tw`form-checkbox bg-gray-300 md:bg-white`}
-                        {...register('beta', { required: true })}
-                    />
-                    &nbsp;Beta
+                    <select {...register('version', { required: true })}>
+                        <option value="latest">Latest</option>
+                        <option value="beta">CI (Beta)</option>
+                    </select>
                 </div>
                 <div css={tw`block mt-1`}>
                     <h2 css={tw`text-gray-700 text-2xl font-semibold mb-2`}>Select Gamemodes</h2>

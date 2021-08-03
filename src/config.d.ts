@@ -9,6 +9,7 @@ export interface AddonsEntity {
     ci: string;
     description: string;
     gamemode: boolean;
+    versions?: Record<string, string>;
 }
 
 export interface PresetsEntity {
@@ -30,4 +31,5 @@ export interface AddonType {
     github: github;
     version: string;
     downloads?: number;
+    versions: string[];
 }

@@ -102,17 +102,23 @@ export default class ApiManager {
             auth: env && env.github_token ? env.github_token : '',
         });
         this.config = configConstructor;
-        configConstructor.addons
-            .filter((addon) => addon.name !== 'BentoBox')
-            .forEach(async (addon) => {
+
+        const setAddons = async () => {
+            for await (const addon1 of configConstructor.addons.filter((addon) => addon.name !== 'BentoBox')) {
+                const versions = ['latest', 'beta'];
+                if (addon1.versions) Object.keys(addon1.versions).forEach((v) => versions.push(v));
                 this.addons.push({
-                    name: addon.name,
-                    description: addon.description,
-                    gamemode: addon.gamemode,
-                    github: addon.github,
-                    version: (await this.jarCache.findOne({ where: { name: addon.name } }))?.version || '0',
+                    name: addon1.name,
+                    description: addon1.description,
+                    gamemode: addon1.gamemode,
+                    github: addon1.github,
+                    version: (await this.jarCache.findOne({ where: { name: addon1.name } }))?.version || '0',
+                    versions: versions,
                 });
-            });
+            }
+        };
+
+        setAddons();
     }
 
     async updateJenkins(addon: AddonsEntity) {
@@ -273,7 +279,7 @@ export default class ApiManager {
 
     async generateZIP(req: Request, res: Response) {
         const downloadArg = req.query.downloads;
-        const beta = (req.query.beta && req.query.beta === 'true') || false;
+        const version = req.query.version ? req.query.version : 'latest';
         if (!downloadArg) {
             res.setHeader('Content-Type', 'application/json');
             res.send({ Error: 400, Reason: 'No Addons Selected' });
@@ -343,19 +349,23 @@ export default class ApiManager {
 
         const bentoBoxJar: DatabaseModel | null = await this.jarCache.findOne({ where: { name: 'BentoBox' } });
         if (bentoBoxJar !== null) {
-            if (!beta) {
+            if (version === 'beta') {
+                if (bentoBoxJar.ci && bentoBoxJar.ciJarFile) {
+                    archive.append(bentoBoxJar.ci, { name: bentoBoxJar.ciJarFile });
+                }
+            } else {
                 archive.append(bentoBoxJar.release, { name: bentoBoxJar.releaseJarFile });
-            } else if (bentoBoxJar.ci && bentoBoxJar.ciJarFile) {
-                archive.append(bentoBoxJar.ci, { name: bentoBoxJar.ciJarFile });
             }
         }
         for (const addon of addons) {
             const addonJar: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
             if (addonJar !== null) {
-                if (!beta) {
+                if (version === 'beta') {
+                    if (addonJar.ci && addonJar.ciJarFile) {
+                        archive.append(addonJar.ci, { name: 'addons/' + addonJar.ciJarFile });
+                    }
+                } else {
                     archive.append(addonJar.release, { name: 'addons/' + addonJar.releaseJarFile });
-                } else if (addonJar.ci && addonJar.ciJarFile) {
-                    archive.append(addonJar.ci, { name: 'addons/' + addonJar.ciJarFile });
                 }
             }
         }

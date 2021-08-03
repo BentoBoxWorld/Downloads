@@ -26,7 +26,10 @@
       "gamemode": true,
       "github": "BentoBoxWorld/BSkyBlock",
       "ci": "BentoBoxWorld/BSkyBlock",
-      "description": "**BSkyBlock** is a **survival game** where players try to survive on an **island in the sky**.\n\nCreated and maintained by tastybento."
+      "description": "**BSkyBlock** is a **survival game** where players try to survive on an **island in the sky**.\n\nCreated and maintained by tastybento.",
+      "versions": {
+        "1.16": "1.14.4"
+      }
     },
     {
       "name": "CaveBlock",
