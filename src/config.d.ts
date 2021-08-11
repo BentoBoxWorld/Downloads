@@ -32,4 +32,5 @@ export interface AddonType {
     version: string;
     downloads?: number;
     versions: string[];
+    ci: string;
 }

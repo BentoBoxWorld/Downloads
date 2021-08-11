@@ -93,7 +93,12 @@ export default class ApiManager {
                 }
             });
         });
-        let env: { github_token?: string; github_downloads?: number; discord_error_webhook_url?: string } = {};
+        let env: {
+            github_token?: string;
+            github_downloads?: number;
+            discord_error_webhook_url?: string;
+            port?: number;
+        } = {};
         try {
             env = require('./../../env.json');
         } catch (e) {}
@@ -114,6 +119,7 @@ export default class ApiManager {
                     github: addon1.github,
                     version: (await this.jarCache.findOne({ where: { name: addon1.name } }))?.version || '0',
                     versions: versions,
+                    ci: (await this.jarCache.findOne({ where: { name: addon1.name } }))?.ciId?.toString() || '0',
                 });
             }
         };
@@ -162,11 +168,11 @@ export default class ApiManager {
 
     async getLatestJenkins(addon: AddonsEntity): Promise<number> {
         const project = addon.ci;
-        return (<any>await this.getJob(project)).lastSuccessfulBuild.number;
+        return (await this.getJob(project)).lastSuccessfulBuild.number;
     }
 
-    getJob(project: string) {
-        return new Promise((res: any, rej) => {
+    getJob(project: string): Promise<{ lastSuccessfulBuild: { number: number } }> {
+        return new Promise((res, rej) => {
             this.jenkins.job.get(project, (err, data) => {
                 res(data);
                 rej(err);
