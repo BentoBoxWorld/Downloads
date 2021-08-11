@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PremadeCard from './PremadeCard';
 import tw from 'twin.macro';
-import { GetPresets } from '../ApiRequestManager';
+import { PresetsEntity } from '../../config';
 
-export default function PresetsPage() {
-    const [presets, setPresets] = useState<JSX.Element[]>([]);
-
-    async function updatePresets() {
-        const presets = await GetPresets();
-        setPresets(
-            presets.map((preset) => {
+export default function PresetsPage(props: { presets: PresetsEntity[] }) {
+    const { presets } = props;
+    return (
+        <div css={tw`flex flex-wrap flex-grow`}>
+            {presets.map((preset) => {
                 return (
                     <PremadeCard
                         key={preset.name}
@@ -22,13 +20,7 @@ export default function PresetsPage() {
                         dependencyText={preset.dependencyText || undefined}
                     />
                 );
-            }),
-        );
-    }
-
-    useEffect(() => {
-        updatePresets().then();
-    }, []);
-
-    return <div css={tw`flex flex-wrap flex-grow`}>{presets}</div>;
+            })}
+        </div>
+    );
 }

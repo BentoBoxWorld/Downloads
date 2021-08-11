@@ -7,6 +7,8 @@ import remarkBreaks from 'remark-breaks';
 export default function PremadeCard(props: PremadeCardType) {
     const { addons, color, description, name, subtext, dependencies, dependencyText } = props;
 
+    if (!addons) return <></>;
+
     const addonsList = addons.map((addon) => {
         return <li key={addon}>{addon}</li>;
     });
