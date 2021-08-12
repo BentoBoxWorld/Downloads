@@ -29,8 +29,6 @@ export interface AddonType {
     description: string;
     gamemode: boolean;
     github: github;
-    version: string;
     downloads?: number;
-    versions: string[];
-    ci: string;
+    versions: Record<string, string>;
 }

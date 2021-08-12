@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import tw from 'twin.macro';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
@@ -10,6 +10,8 @@ import { AddonType } from '../../config';
 export default function CustomPage(props: { addonTypes: AddonType[] }) {
     const { addonTypes } = props;
     const [popupTitle, setPopupTitle] = useState('Start crafting your BentoBox!');
+    const [versionTypes, setVersionTypes] = useState<Record<string, string[]>>({});
+    const [versions, updateVersions] = useState<string[]>([]);
     const [popupText, setPopupText] = useState(
         '**[BentoBox](https://bentobox.world/)** is a plugin that does nothing on its own, but once you add Gamemodes and Addons to it, it becomes an incredible playground for your players, with countless possible combinations that will allow you to highly customize your server.\n\nCrafting your own BentoBox is the first step to join a world of never-ending possibilities of games and fun.',
     );
@@ -46,13 +48,19 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                         const values = getValues();
                         const addons = Object.keys(values)
                             .filter((key) => key != 'version')
-                            .filter((key) => values[key]);
+                            .filter((key) => values[key])
+                            .filter((key) =>
+                                Object.keys(addonTypes.filter((addon) => addon.name === key)[0]?.versions).includes(
+                                    value,
+                                ),
+                            );
+                        console.log(addons);
                         if (addons.length < 1) return;
                         if (Object.keys(values).length <= 2) return;
                         open(
                             `/api/generate?downloads=${encodeURI(
                                 '[' + addons.map((a) => '"' + a + '"').join(',') + ']',
-                            )}&version=${values.version}`,
+                            )}&version=${value}`,
                         );
                     }}
                 >
@@ -70,22 +78,44 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
         return getAddonElements(true, addonTypes, version);
     }
 
+    function setVersions() {
+        const oldVersions = versionTypes;
+        for (const addonsKey in addonTypes) {
+            const versions = Object.keys(addonTypes[addonsKey].versions);
+            if (!versions || Object.keys(versions).length < 1) return;
+            oldVersions[addonsKey] = versions;
+        }
+        setVersionTypes(oldVersions);
+        const versionValues = Object.values(versionTypes).flat(1);
+
+        updateVersions(
+            versionValues.filter(function (item, pos) {
+                return item != 'latest' && item != 'beta' && versionValues.indexOf(item) == pos;
+            }),
+        );
+    }
+
     function getAddonElements(isGamemode: boolean, addons: AddonType[], inVersion: string): JSX.Element[] {
         return addons
             .filter((a) => a.gamemode === isGamemode)
             .map((addon) => {
-                let version: string;
-                let color = '#3b82f6';
+                let version = '';
+                let color = '#efd112';
                 if (inVersion === 'beta') {
-                    version = 'b-' + addon.ci;
+                    version = 'b-' + addon.versions[inVersion];
                     color = '#f72811';
                 } else {
-                    version = 'v' + addon.version;
+                    if (addon.versions[inVersion]) version = 'v' + addon.versions[inVersion];
                 }
+                if (inVersion === 'latest') color = '#3b82f6';
+                const enabled = Object.keys(addon.versions).includes(value);
                 return (
                     <div key={addon.name}>
                         <label
-                            css={tw`inline-flex items-center cursor-pointer w-full`}
+                            css={`
+                                ${tw`inline-flex items-center cursor-pointer w-full flex-wrap`}
+                                ${!enabled && tw`opacity-50 cursor-pointer`}
+                            `}
                             onMouseEnter={() => {
                                 setPopupTitle(addon.name);
                                 setPopupText(addon.description);
@@ -93,13 +123,16 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                         >
                             <input
                                 type="checkbox"
-                                css={tw`form-checkbox bg-gray-300 md:bg-white`}
+                                css={tw`form-checkbox bg-gray-300 md:bg-white
+                                `}
                                 {...register(addon.name, { required: true })}
+                                disabled={!enabled}
                             />
                             <span css={tw`ml-2`}>{addon.name}</span>
                             <button
                                 css={`
-                                    ${tw`rounded-md text-white px-1 ml-auto`} background-color: ${color}
+                                    ${tw`rounded-md text-white px-1 ml-auto`}
+                                    background-color: ${color}
                                 `}
                                 onClick={() => window.open('https://github.com/' + addon.github)}
                             >
@@ -117,6 +150,10 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
             });
     }
 
+    useEffect(() => {
+        setVersions();
+    }, []);
+
     return (
         <div css={tw`flex flex-col md:flex-row`}>
             <div
@@ -129,7 +166,21 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                     <select {...register('version', { required: true })}>
                         <option value="latest">Latest</option>
                         <option value="beta">CI (Beta)</option>
+                        {versions.reverse().map((version) => {
+                            return (
+                                <option key={version} value={version}>
+                                    {version}
+                                </option>
+                            );
+                        })}
                     </select>
+                </div>
+                <div css={tw`mx-auto mt-3 mb-1 bg-red-600 text-white rounded-lg p-2 text-center`}>
+                    {value === 'latest'
+                        ? 'These Versions are for the Latest Version of Minecraft'
+                        : value === 'beta'
+                        ? 'Beta Versions Are Not Neccicarily Stable. Use With Caution'
+                        : 'These Versions May Be Old and Unsupported! Proceed With Caution'}
                 </div>
                 <div css={tw`block mt-1`}>
                     <h2 css={tw`text-gray-700 text-2xl font-semibold mb-2`}>Select Gamemodes</h2>

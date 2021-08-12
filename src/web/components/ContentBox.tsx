@@ -39,7 +39,12 @@ export default function ContentBox() {
                 </Switch>
             </Router>
             <div css={tw`w-full h-12 flex text-center`}>
-                <div css={tw`mx-auto mt-auto`}>
+                <div
+                    css={`
+                        ${tw`mx-auto mt-auto`}
+                        word-break: break-word
+                    `}
+                >
                     Site By&nbsp;<a href={'https://github.com/Fredthedoggy'}>Fredthedoggy</a>
                     ,&nbsp;BentoBox&nbsp;&amp;&nbsp;BentoBoxWorld by&nbsp;
                     <a href={'https://github.com/tastybento'}>tastybento</a>&nbsp;and&nbsp;

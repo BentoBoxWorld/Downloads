@@ -1,6 +1,6 @@
 import { BLOB, BuildOptions, Model, NUMBER, Sequelize, STRING } from 'sequelize';
 
-export interface DatabaseAttributes {
+interface DatabaseAttributes {
     name: string;
     release: Buffer;
     releaseId: number;
@@ -13,8 +13,6 @@ export interface DatabaseAttributes {
 }
 
 export interface DatabaseModel extends Model<DatabaseAttributes>, DatabaseAttributes {}
-
-export class Database extends Model<DatabaseModel, DatabaseAttributes> {}
 
 export type DatabaseStatic = typeof Model & {
     new (values?: Record<string, unknown>, options?: BuildOptions): DatabaseModel;
@@ -59,5 +57,32 @@ export function DownloadCountFactory(sequelize: Sequelize): DownloadCountStatic 
             primaryKey: true,
         },
         downloads: NUMBER,
+    });
+}
+
+export interface OldVersionAttributes {
+    name: string;
+    release: Buffer;
+    releaseId: number;
+    releaseJarFile: string;
+    version: string;
+}
+
+export interface OldVersionModel extends Model<OldVersionAttributes>, OldVersionAttributes {}
+
+export type OldVersionStatic = typeof Model & {
+    new (values?: Record<string, unknown>, options?: BuildOptions): OldVersionModel;
+};
+
+export function OldVersionFactory(sequelize: Sequelize): OldVersionStatic {
+    return <OldVersionStatic>sequelize.define('oldversions', {
+        name: STRING,
+        release: BLOB,
+        releaseId: NUMBER,
+        releaseJarFile: {
+            type: STRING,
+            unique: true,
+        },
+        version: STRING,
     });
 }
