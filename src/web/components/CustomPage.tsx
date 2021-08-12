@@ -177,9 +177,9 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                 </div>
                 <div css={tw`mx-auto mt-3 mb-1 bg-red-600 text-white rounded-lg p-2 text-center`}>
                     {value === 'latest'
-                        ? 'These Versions are for the Latest Version of Minecraft'
+                        ? 'These Versions are for the Latest Version of Minecraft Only'
                         : value === 'beta'
-                        ? 'Beta Versions Are Not Neccicarily Stable. Use With Caution'
+                        ? 'Beta Versions Are Not Necessarily Stable. Use With Caution'
                         : 'These Versions May Be Old and Unsupported! Proceed With Caution'}
                 </div>
                 <div css={tw`block mt-1`}>
