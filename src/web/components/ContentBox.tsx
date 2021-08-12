@@ -9,32 +9,50 @@ const PresetsPage = React.lazy(() => import('./PresetsPage'));
 const CustomPage = React.lazy(() => import('./CustomPage'));
 
 export default function ContentBox() {
-    const addonTypes = () => GetAddons().then((res) => res);
-    const presets = () => GetPresets().then((res) => res);
+    function CustomElement() {
+        const addonTypes = () => GetAddons().then((res) => res);
+        return (
+            <Suspense fallback={<div />}>
+                <Async promiseFn={addonTypes}>
+                    {({ data, isLoading }) => {
+                        if (isLoading) return <></>;
+                        if (data) return <CustomPage addonTypes={data.filter((a) => a)} />;
+                    }}
+                </Async>
+            </Suspense>
+        );
+    }
+
+    function PresetsElement() {
+        const presets = () => GetPresets().then((res) => res);
+        return (
+            <Suspense fallback={<div />}>
+                <Async promiseFn={presets}>
+                    {({ data, isLoading }) => {
+                        if (isLoading) return <></>;
+                        if (data) return <PresetsPage presets={data.filter((a) => a)} />;
+                    }}
+                </Async>
+            </Suspense>
+        );
+    }
+
     return (
         <div css={tw`m-0 md:mx-auto md:my-12 bg-yellow-50 bg-opacity-75 md:w-3/4 max-w-screen-lg p-12 min-h-screen`}>
             <Router>
                 <Navigation />
                 <Switch>
                     <Route path="/custom">
-                        <Suspense fallback={<div />}>
-                            <Async promiseFn={addonTypes}>
-                                {({ data, isLoading }) => {
-                                    if (isLoading) return <></>;
-                                    if (data) return <CustomPage addonTypes={data} />;
-                                }}
-                            </Async>
-                        </Suspense>
+                        <CustomElement />
                     </Route>
-                    <Route path={'/'}>
-                        <Suspense fallback={<div />}>
-                            <Async promiseFn={presets}>
-                                {({ data, isLoading }) => {
-                                    if (isLoading) return <></>;
-                                    if (data) return <PresetsPage presets={data} />;
-                                }}
-                            </Async>
-                        </Suspense>
+                    <Route exact path={'/'}>
+                        <PresetsElement />
+                    </Route>
+                    <Route path="*">
+                        <div css={tw`mx-auto my-2 pt-10 text-center\t`}>
+                            <p css={tw`text-3xl font-semibold`}>404</p>
+                            <p css={tw`text-lg`}>Page Not Found</p>
+                        </div>
                     </Route>
                 </Switch>
             </Router>

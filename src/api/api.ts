@@ -476,7 +476,8 @@ export default class ApiManager {
                 tag: details.version,
             });
         } catch (e) {
-            throw e;
+            console.log(details.addon + " does not have version '" + details.version + "'. Please Fix Your Config");
+            return;
         }
 
         const releaseFiles = await this.octokit.rest.repos.listReleaseAssets({
@@ -484,6 +485,7 @@ export default class ApiManager {
             repo: addon.github.split('/')[1],
             release_id: release.data.id,
         });
+
         let assetURL;
         if (releaseFiles.data.length === 0) {
             return;
