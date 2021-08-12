@@ -25,6 +25,7 @@ try {
 const port = env.port || 8080;
 
 app.use(helmet());
+
 app.set('X-Powered-By', 'BentoBox');
 
 app.get('/api/*', function (req, res) {
@@ -32,6 +33,7 @@ app.get('/api/*', function (req, res) {
 });
 
 app.get('*', function (req, res) {
+    res.set('Content-Security-Policy', "style-src 'self' 'unsafe-inline'");
     if (publicFiles.has(req.url.slice(1))) {
         res.set('Content-Type', mime.lookup(req.url.slice(1)) || '');
         switch (mime.lookup(req.url.slice(1))) {
@@ -54,3 +56,9 @@ app.get('*', function (req, res) {
 app.listen(port, () => {
     console.log(`Web server running on http://localhost${port != 80 ? `:${port}` : ''}/`);
 });
+
+process.on('uncaughtException', function (err) {
+    console.log('Caught exception: ' + err);
+});
+
+throw new Error();
