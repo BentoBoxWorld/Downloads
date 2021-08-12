@@ -29,7 +29,17 @@ app.get('/api/*', function (req, res) {
 
 app.get('*', function (req, res) {
     if (publicFiles.has(req.url.slice(1))) {
-        res.header('Content-Type', mime.lookup(req.url.slice(1)) || '');
+        res.set('Content-Type', mime.lookup(req.url.slice(1)) || '');
+        switch (mime.lookup(req.url.slice(1))) {
+            case 'image/jpeg':
+            case 'text/css':
+            case 'text/javascript':
+            case 'application/javascript':
+                res.set('Cache-Control', 'public, max-age=1200');
+                break;
+            default:
+                break;
+        }
         res.end(publicFiles.get(req.url.slice(1)));
         return;
     }
