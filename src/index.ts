@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as mime from 'mime-types';
 import helmet from 'helmet';
 import { ConfigObject } from './config';
+import * as https from 'https';
 
 const config: ConfigObject = JSON.parse(fs.readFileSync('./../config.json').toString());
 
@@ -58,7 +59,30 @@ app.listen(port, () => {
 });
 
 process.on('uncaughtException', function (err) {
-    console.log('Caught exception: ' + err);
+    if (env.discord_error_webhook_url) {
+        console.log('Caught exception: ' + err);
+        const data = new TextEncoder().encode(
+            JSON.stringify({
+                embeds: [
+                    {
+                        title: '**Website Error**',
+                        description: 'The Downloads Site Has Thrown a new Exception: \n`' + err + '`',
+                        color: 16711680,
+                    },
+                ],
+            }),
+        );
+        const req = https.request({
+            hostname: 'discord.com',
+            port: 443,
+            path: env.discord_error_webhook_url,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': data.length,
+            },
+        });
+        req.write(data);
+        req.end();
+    }
 });
-
-throw new Error();
