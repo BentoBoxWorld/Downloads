@@ -166,13 +166,16 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                     <select {...register('version', { required: true })}>
                         <option value="latest">Latest</option>
                         <option value="beta">CI (Beta)</option>
-                        {versions.reverse().map((version) => {
-                            return (
-                                <option key={version} value={version}>
-                                    {version}
-                                </option>
-                            );
-                        })}
+                        {versions
+                            .sort()
+                            .reverse()
+                            .map((version) => {
+                                return (
+                                    <option key={version} value={version}>
+                                        {version}
+                                    </option>
+                                );
+                            })}
                     </select>
                 </div>
                 <div css={tw`mx-auto mt-3 mb-1 bg-red-600 text-white rounded-lg p-2 text-center`}>
