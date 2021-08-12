@@ -36,6 +36,7 @@
         "clean-webpack-plugin": "^4.0.0-alpha.0",
         "copy-webpack-plugin": "^9.0.1",
         "express": "^4.17.1",
+        "helmet": "^4.6.0",
         "jenkins": "^0.28.1",
         "mime-types": "^2.1.31",
         "node-cron": "^3.0.0",

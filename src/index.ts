@@ -2,6 +2,7 @@ import * as express from 'express';
 import apiClass from './api/api';
 import * as fs from 'fs';
 import * as mime from 'mime-types';
+import helmet from 'helmet';
 import { ConfigObject } from './config';
 
 const config: ConfigObject = JSON.parse(fs.readFileSync('./../config.json').toString());
@@ -22,6 +23,9 @@ try {
 } catch (e) {}
 
 const port = env.port || 8080;
+
+app.use(helmet());
+app.set('X-Powered-By', 'BentoBox');
 
 app.get('/api/*', function (req, res) {
     apiManager.manageRequest(req, res);

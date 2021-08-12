@@ -81,15 +81,13 @@ export default class ApiManager {
             });
             const oldAddonList: { addon: string; version: string }[] = [];
             for (const oldAddonsKey in oldAddons) {
-                const addonVersions = await this.oldVersionCache.findAll({
-                    where: {
-                        name: oldAddonsKey,
-                    },
-                });
                 for (const versionID in oldAddons[oldAddonsKey]) {
-                    const version = addonVersions.filter((a) => {
-                        return a.version === oldAddons[oldAddonsKey][versionID];
-                    })[0];
+                    const version = await this.oldVersionCache.findAll({
+                        where: {
+                            name: oldAddonsKey,
+                            version: oldAddons[oldAddonsKey][versionID],
+                        },
+                    });
                     if (!version) {
                         oldAddonList.push({ addon: oldAddonsKey, version: oldAddons[oldAddonsKey][versionID] });
                     }
@@ -512,12 +510,35 @@ export default class ApiManager {
                 accept: 'application/octet-stream',
             },
         });
-        await this.oldVersionCache.create({
-            name: addon.name,
-            release: Buffer.from(<ArrayBuffer>(<unknown>asset.data)),
-            releaseId: release.data.id,
-            releaseJarFile: assetURL.name,
-            version: release.data.tag_name,
+        const addonVersion = await this.oldVersionCache.findOne({
+            where: {
+                name: addon.name,
+                version: release.data.tag_name,
+            },
         });
+        if (addonVersion) {
+            console.log(
+                "Addon Already Exists... Report This Issue. Details: { name: '" +
+                    addon.name +
+                    "', version: '" +
+                    release.data.tag_name +
+                    "' }",
+            );
+            await addonVersion.update({
+                name: addon.name,
+                release: Buffer.from(<ArrayBuffer>(<unknown>asset.data)),
+                releaseId: release.data.id,
+                releaseJarFile: assetURL.name,
+                version: release.data.tag_name,
+            });
+        } else {
+            await this.oldVersionCache.create({
+                name: addon.name,
+                release: Buffer.from(<ArrayBuffer>(<unknown>asset.data)),
+                releaseId: release.data.id,
+                releaseJarFile: assetURL.name,
+                version: release.data.tag_name,
+            });
+        }
     }
 }
