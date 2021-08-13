@@ -399,9 +399,11 @@ export default class ApiManager {
                     name: 'BentoBox',
                 },
             });
-            const bentoBoxJar = bentoBoxVersions.filter(
-                (a) => a.version === addons.filter((a) => a.name === 'BentoBox')[0].versions[<string>version],
-            )[0];
+            const bentoBoxJar = bentoBoxVersions.filter((a) => {
+                const addons = this.configConstructor.addons.filter((a) => a.name === 'BentoBox')[0];
+                if (!addons.versions) return;
+                return a.version === addons.versions[<string>version];
+            })[0];
             if (bentoBoxJar) {
                 archive.append(bentoBoxJar.release, { name: bentoBoxJar.releaseJarFile });
             }
