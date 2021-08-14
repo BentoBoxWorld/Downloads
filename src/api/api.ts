@@ -26,7 +26,7 @@ export default class ApiManager {
         host: 'localhost',
         dialect: 'sqlite',
         logging: false,
-        storage: './../JarCache.sqlite',
+        storage: './../JarCache.old.sqlite',
     });
 
     jarCache = DatabaseFactory(this.jarSequelize);
@@ -162,7 +162,7 @@ export default class ApiManager {
         if (addonDatabase === null) return;
         const latestJenkins = await this.getLatestJenkins(addon);
         if (addonDatabase.ciId && addonDatabase.ciId === latestJenkins) return;
-        jenkins.build.get(project, latestJenkins, async function (err, data) {
+        jenkins.build.get(project, latestJenkins, async (err, data) => {
             let assetURL;
             if (data.length === 0) {
                 return;
@@ -191,6 +191,7 @@ export default class ApiManager {
                 ciId: latestJenkins,
                 ciJarFile: assetURL,
             });
+            this.addons.filter((a) => a.name === addon.name)[0].versions.ci = String(latestJenkins);
         });
     }
 
@@ -406,6 +407,8 @@ export default class ApiManager {
             })[0];
             if (bentoBoxJar) {
                 archive.append(bentoBoxJar.release, { name: bentoBoxJar.releaseJarFile });
+            } else {
+                throw new Error("BentoBox's Jar was not found!");
             }
         }
         for (const addon of addons) {
@@ -416,6 +419,8 @@ export default class ApiManager {
                     if (addonJar.ci && addonJar.ciJarFile) {
                         archive.append(addonJar.ci, { name: 'addons/' + addonJar.ciJarFile });
                     }
+                } else {
+                    throw new Error(addon.name + "'s AddonJar was not found!");
                 }
             } else if (version === 'latest') {
                 const addonJar: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
