@@ -26,7 +26,7 @@ export default class ApiManager {
         host: 'localhost',
         dialect: 'sqlite',
         logging: false,
-        storage: './../JarCache.old.sqlite',
+        storage: './../JarCache.sqlite',
     });
 
     jarCache = DatabaseFactory(this.jarSequelize);
