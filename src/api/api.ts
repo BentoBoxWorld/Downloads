@@ -191,7 +191,7 @@ export default class ApiManager {
                 ciId: latestJenkins,
                 ciJarFile: assetURL,
             });
-            this.addons.filter((a) => a.name === addon.name)[0].versions.ci = String(latestJenkins);
+            this.addons.filter((a) => a.name === addon.name)[0].versions.beta = String(latestJenkins);
         });
     }
 
