@@ -407,8 +407,6 @@ export default class ApiManager {
             })[0];
             if (bentoBoxJar) {
                 archive.append(bentoBoxJar.release, { name: bentoBoxJar.releaseJarFile });
-            } else {
-                throw new Error("BentoBox's Jar was not found!");
             }
         }
         for (const addon of addons) {
@@ -419,8 +417,6 @@ export default class ApiManager {
                     if (addonJar.ci && addonJar.ciJarFile) {
                         archive.append(addonJar.ci, { name: 'addons/' + addonJar.ciJarFile });
                     }
-                } else {
-                    throw new Error(addon.name + "'s AddonJar was not found!");
                 }
             } else if (version === 'latest') {
                 const addonJar: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
@@ -481,7 +477,6 @@ export default class ApiManager {
                 tag: details.version,
             });
         } catch (e) {
-            console.log(details.addon + " does not have version '" + details.version + "'. Please Fix Your Config");
             return;
         }
 

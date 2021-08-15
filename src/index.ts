@@ -5,6 +5,7 @@ import * as mime from 'mime-types';
 import helmet from 'helmet';
 import { ConfigObject } from './config';
 import * as https from 'https';
+import axios from 'axios';
 
 const config: ConfigObject = JSON.parse(fs.readFileSync('./../config.json').toString());
 
@@ -58,15 +59,24 @@ app.listen(port, () => {
     console.log(`Web server running on http://localhost${port != 80 ? `:${port}` : ''}/`);
 });
 
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException', async function (err) {
+    const stack = await axios.post('https://paste.md-5.net/documents', err.stack, {
+        headers: { 'Content-Type': 'text/plain' },
+    });
+    console.log('Caught exception: ' + err);
+    console.log('Stack: https://paste.md-5.net/' + stack.data.key);
+
     if (env.discord_error_webhook_url) {
-        console.log('Caught exception: ' + err);
         const data = new TextEncoder().encode(
             JSON.stringify({
                 embeds: [
                     {
                         title: '**Website Error**',
-                        description: 'The Downloads Site Has Thrown a new Exception: \n`' + err + '`',
+                        description:
+                            'The Downloads Site Has Thrown a new Exception: \n`' +
+                            err +
+                            '`\nStack: https://paste.md-5.net/' +
+                            stack.data.key,
                         color: 16711680,
                     },
                 ],
