@@ -15,7 +15,8 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
     const [popupText, setPopupText] = useState(
         '**[BentoBox](https://bentobox.world/)** is a plugin that does nothing on its own, but once you add Gamemodes and Addons to it, it becomes an incredible playground for your players, with countless possible combinations that will allow you to highly customize your server.\n\nCrafting your own BentoBox is the first step to join a world of never-ending possibilities of games and fun.',
     );
-    const { register, getValues, watch } = useForm();
+    const [copied, setCopied] = useState('Copy URL To Setup');
+    const { register, getValues, setValue, watch } = useForm();
 
     const value = watch('version');
 
@@ -54,7 +55,6 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                                     value,
                                 ),
                             );
-                        console.log(addons);
                         if (addons.length < 1) return;
                         if (Object.keys(values).length <= 2) return;
                         open(
@@ -152,6 +152,18 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
 
     useEffect(() => {
         setVersions();
+        const hash = location.hash;
+        if (hash.length < 2) return;
+        let addonNames: string[];
+        try {
+            addonNames = JSON.parse(decodeURI(hash.slice(1, hash.length)));
+        } catch (e) {
+            console.error(e);
+            return;
+        }
+        addonNames.forEach((addonName) => {
+            setValue(addonName, true);
+        });
     }, []);
 
     return (
@@ -163,6 +175,7 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
             >
                 <Generator />
                 <div css={tw`mx-auto`}>
+                    Minecraft Version&nbsp;
                     <select {...register('version', { required: true })}>
                         <option value="latest">Latest</option>
                         <option value="beta">CI (Beta)</option>
@@ -178,7 +191,12 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                             })}
                     </select>
                 </div>
-                <div css={tw`mx-auto mt-3 mb-1 bg-red-600 text-white rounded-lg p-2 text-center`}>
+                <div
+                    css={`
+                        ${tw`mx-auto mt-3 mb-1 text-white rounded-lg p-2 text-center`}
+                        ${value === 'latest' ? tw`bg-green-500` : value === 'beta' ? tw`bg-yellow-500` : tw`bg-red-600`}
+                    `}
+                >
                     {value === 'latest'
                         ? 'These Versions are for the Latest Version of Minecraft Only'
                         : value === 'beta'
@@ -200,6 +218,31 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                     </form>
                 </div>
                 <Generator />
+                <button
+                    css={tw`flex-grow flex-shrink block p-2 bg-blue-400 text-white rounded-lg mx-auto my-2 focus:outline-none focus:border-none`}
+                    onClick={() => {
+                        const values = getValues();
+                        const addons = Object.keys(values)
+                            .filter((key) => key != 'version')
+                            .filter((key) => values[key])
+                            .filter((key) =>
+                                Object.keys(addonTypes.filter((addon) => addon.name === key)[0]?.versions).includes(
+                                    value,
+                                ),
+                            );
+                        navigator.clipboard.writeText(
+                            `https://download.bentobox.world/custom#${encodeURI(
+                                '[' + addons.map((a) => '"' + a + '"').join(',') + ']',
+                            )}`,
+                        );
+                        setCopied('Copied!');
+                        setTimeout(() => {
+                            setCopied('Copy URL To Setup');
+                        }, 3000);
+                    }}
+                >
+                    {copied}
+                </button>
             </div>
             <div
                 css={`
