@@ -62,7 +62,7 @@ export default function PremadeCard(props: PremadeCardType) {
                         css={tw`m-auto inset-0 text-sm font-medium leading-normal text-center py-2`}
                         href={`/custom#${encodeURI('[' + addons.map((a) => '"' + a + '"').join(',') + ']')}`}
                     >
-                        Edit
+                        Customize
                     </a>
                 </div>
             </div>
