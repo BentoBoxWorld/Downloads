@@ -46,7 +46,7 @@ export default function PremadeCard(props: PremadeCardType) {
                     </ul>
                 </>
             )}
-            <div css={tw`rounded mr-auto mt-auto`}>
+            <div css={tw`rounded mr-auto mt-auto flex flex-row`}>
                 <div css={tw`opacity-95 border rounded-lg border-gray-700 px-4`}>
                     <a
                         css={tw`m-auto inset-0 text-sm font-medium leading-normal text-center py-2`}
@@ -55,6 +55,14 @@ export default function PremadeCard(props: PremadeCardType) {
                         )}`}
                     >
                         Download
+                    </a>
+                </div>
+                <div css={tw`opacity-95 border rounded-lg border-gray-700 px-4 ml-3`}>
+                    <a
+                        css={tw`m-auto inset-0 text-sm font-medium leading-normal text-center py-2`}
+                        href={`/custom#${encodeURI('[' + addons.map((a) => '"' + a + '"').join(',') + ']')}`}
+                    >
+                        Edit
                     </a>
                 </div>
             </div>
