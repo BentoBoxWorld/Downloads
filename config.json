@@ -103,8 +103,8 @@
       "ci": "BentoBoxWorld/CauldronWitchery",
       "description": "**CauldronWitchery** gives your players the opportunity to get their hands on **black magic**.\nLet them **spawn monsters** using a cauldron!\n\n*What does the Witch do with her cauldron?*\n*Black Magic, of course!*\n\n*We are just not sure what could happen afterward...*\n\nBased on an original idea by the **Ex Nihilo mod**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "versions": {
-        "1.16": "1.5.0.0",
-        "1.15": "1.5.0.0"
+        "1.16": "1.6.0",
+        "1.15": "1.6.0"
       }
     },
     {
