@@ -82,12 +82,14 @@ export default class ApiManager {
             const oldAddonList: { addon: string; version: string }[] = [];
             for (const oldAddonsKey in oldAddons) {
                 for (const versionID in oldAddons[oldAddonsKey]) {
-                    const version = await this.oldVersionCache.findAll({
-                        where: {
-                            name: oldAddonsKey,
-                            version: oldAddons[oldAddonsKey][versionID],
-                        },
-                    });
+                    const version = await this.oldVersionCache
+                        .findAll({
+                            where: {
+                                name: oldAddonsKey,
+                                version: oldAddons[oldAddonsKey][versionID],
+                            },
+                        })
+                        .then((r) => r && r.length > 0);
                     if (!version) {
                         oldAddonList.push({ addon: oldAddonsKey, version: oldAddons[oldAddonsKey][versionID] });
                     }
