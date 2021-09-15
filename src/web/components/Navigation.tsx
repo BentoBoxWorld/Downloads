@@ -44,7 +44,7 @@ export default function Navigation() {
                 </li>
                 <li>
                     <div css={tw`m-2 w-24 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}>
-                        <a href={'https://discord.gg/KwjFBUaNSt'}>
+                        <a href={'https://discord.gg/KwjFBUaNSt'} target={'noopener'}>
                             <FontAwesomeIcon icon={faDiscord} />
                             &nbsp;Discord
                         </a>

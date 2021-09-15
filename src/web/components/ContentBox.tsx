@@ -4,6 +4,9 @@ import tw from 'twin.macro';
 import Navigation from './Navigation';
 import { GetAddons, GetPresets } from '../ApiRequestManager';
 import { Async } from 'react-async';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
+import { faQuestion } from '@fortawesome/free-solid-svg-icons';
 
 const PresetsPage = React.lazy(() => import('./PresetsPage'));
 const CustomPage = React.lazy(() => import('./CustomPage'));
@@ -56,18 +59,22 @@ export default function ContentBox() {
                     </Route>
                 </Switch>
             </Router>
-            <div css={tw`w-full h-12 flex text-center`}>
-                <div
-                    css={`
-                        ${tw`mx-auto mt-auto`}
-                        word-break: break-word
-                    `}
-                >
-                    Site By&nbsp;<a href={'https://github.com/Fredthedoggy'}>Fredthedoggy</a>
-                    ,&nbsp;BentoBox&nbsp;&amp;&nbsp;BentoBoxWorld by&nbsp;
-                    <a href={'https://github.com/tastybento'}>tastybento</a>&nbsp;and&nbsp;
-                    <a href={'https://github.com/poslovitch'}>Poslovitch</a>&nbsp;
-                </div>
+            <div css={tw`w-max h-12 mx-auto mt-auto text-center`}>
+                Site By&nbsp;<a href={'https://github.com/Fredthedoggy'}>Fredthedoggy</a>
+                ,&nbsp;BentoBox&nbsp;&amp;&nbsp;BentoBoxWorld by&nbsp;
+                <a href={'https://github.com/tastybento'}>tastybento</a>&nbsp;and&nbsp;
+                <a href={'https://github.com/poslovitch'}>Poslovitch</a>&nbsp;
+            </div>
+            <div css={tw`w-max ml-auto flex flex-row space-x-1.5`}>
+                <a href={'https://discord.gg/KwjFBUaNSt'} css={tw`text-blue-600`} target={'noopener'}>
+                    <FontAwesomeIcon icon={faDiscord} size={'lg'} />
+                </a>
+                <a href={'https://docs.bentobox.world/'} target={'noopener'}>
+                    <FontAwesomeIcon icon={faQuestion} size={'lg'} />
+                </a>
+                <a href={'https://github.com/BentoBoxWorld'} target={'noopener'}>
+                    <FontAwesomeIcon icon={faGithub} size={'lg'} />
+                </a>
             </div>
         </div>
     );
