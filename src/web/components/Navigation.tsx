@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faImage, faWrench } from '@fortawesome/free-solid-svg-icons';
 import React, { useEffect } from 'react';
+import { faDiscord } from '@fortawesome/free-brands-svg-icons';
 
 export default function Navigation() {
     const location = useLocation();
@@ -39,6 +40,14 @@ export default function Navigation() {
                             <FontAwesomeIcon icon={faWrench} />
                             &nbsp;Custom
                         </NavLink>
+                    </div>
+                </li>
+                <li>
+                    <div css={tw`m-2 w-24 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}>
+                        <a href={'https://discord.gg/KwjFBUaNSt'}>
+                            <FontAwesomeIcon icon={faDiscord} />
+                            &nbsp;Discord
+                        </a>
                     </div>
                 </li>
             </ul>
