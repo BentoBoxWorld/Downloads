@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { AddonType } from '../../config';
+import { useLocation } from 'react-router';
 
 export default function CustomPage(props: { addonTypes: AddonType[] }) {
     const { addonTypes } = props;
@@ -77,6 +78,8 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
     function gamemodes(version: string) {
         return getAddonElements(true, addonTypes, version);
     }
+
+    const queryVersion = useQuery().get('v');
 
     function setVersions() {
         const oldVersions = versionTypes;
@@ -150,6 +153,10 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
             });
     }
 
+    function useQuery() {
+        return new URLSearchParams(useLocation().search);
+    }
+
     useEffect(() => {
         setVersions();
         const hash = location.hash;
@@ -165,6 +172,10 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
             setValue(addonName, true);
         });
     }, []);
+
+    useEffect(() => {
+        if (queryVersion && versions.includes(queryVersion)) setValue('version', queryVersion);
+    }, [versions]);
 
     return (
         <div css={tw`flex flex-col md:flex-row`}>
@@ -231,9 +242,11 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                                 ),
                             );
                         navigator.clipboard.writeText(
-                            `https://download.bentobox.world/custom#${encodeURI(
-                                '[' + addons.map((a) => '"' + a + '"').join(',') + ']',
-                            )}`,
+                            `${location.protocol}//${location.host}/custom${value === 'latest' ? '' : `?v=${value}`}${
+                                addons.length === 0
+                                    ? ''
+                                    : '#' + encodeURI('[' + addons.map((a) => '"' + a + '"').join(',') + ']')
+                            }`,
                         );
                         setCopied('Copied!');
                         setTimeout(() => {

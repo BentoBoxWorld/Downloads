@@ -420,9 +420,9 @@ export default class ApiManager {
                     '{[setup-info]}',
                     `Addons: ${addons.map(
                         (a) => `\n   ${a.name}`,
-                    )} \n\nSetup Link: https://download.bentobox.world/custom#${
-                        '[' + addonNames.map((a) => '"' + a + '"').join(',') + ']'
-                    }`,
+                    )} \n\nSetup Link: https://download.bentobox.world/custom${
+                        version && version !== 'latest' ? `?v=${version}` : ''
+                    }#${'[' + addonNames.map((a) => '"' + a + '"').join(',') + ']'}`,
                 ),
             {
                 name: 'Installation-Guide.txt',
