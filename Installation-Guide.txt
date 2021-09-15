@@ -1,0 +1,13 @@
+# Useful Links
+BentoBox Repo: https://bentobox.world/
+Spigot: https://www.spigotmc.org/resources/bentobox-bskyblock-acidisland-skygrid-caveblock-aoneblock-boxed.73261/
+Docs: https://docs.bentobox.world/en/latest/
+Discord: https://discord.gg/KwjFBUaNSt
+
+# Setup Information
+{[setup-info]}
+
+# How To Install
+Extract This ZIP File Into Your '/plugins' directory, so that your BentoBox.jar is in the '/plugins' directory, and the addons are in '/plugins/BentoBox/addons'
+
+Confused? Check Out Our Docs (Linked Above), or our Support Discord (Linked Above)

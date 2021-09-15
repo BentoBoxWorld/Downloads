@@ -12,6 +12,7 @@ import {
 import { Sequelize } from 'sequelize';
 import { JenkinsAPI } from 'jenkins';
 import axios from 'axios';
+import * as fs from 'fs';
 import Archiver = require('archiver');
 
 const { throttling } = require('@octokit/plugin-throttling');
@@ -21,6 +22,7 @@ export default class ApiManager {
     addons: AddonType[] = [];
     octokit: Octokit;
     jenkins: JenkinsAPI = require('jenkins')({ baseUrl: 'https://ci.codemc.io' });
+    tutorial = fs.readFileSync('../Installation-Guide.txt');
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
         host: 'localhost',
@@ -411,19 +413,34 @@ export default class ApiManager {
                 archive.append(bentoBoxJar.release, { name: bentoBoxJar.releaseJarFile });
             }
         }
+        archive.append(
+            this.tutorial
+                .toString()
+                .replace(
+                    '{[setup-info]}',
+                    `Addons: ${addons.map(
+                        (a) => `\n   ${a.name}`,
+                    )} \n\nSetup Link: https://download.bentobox.world/custom#${
+                        '[' + addonNames.map((a) => '"' + a + '"').join(',') + ']'
+                    }`,
+                ),
+            {
+                name: 'Installation-Guide.txt',
+            },
+        );
         for (const addon of addons) {
             if (typeof version !== 'string') version = 'latest';
             if (version === 'beta') {
                 const addonJar: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
                 if (addonJar) {
                     if (addonJar.ci && addonJar.ciJarFile) {
-                        archive.append(addonJar.ci, { name: 'addons/' + addonJar.ciJarFile });
+                        archive.append(addonJar.ci, { name: 'BentoBox/addons/' + addonJar.ciJarFile });
                     }
                 }
             } else if (version === 'latest') {
                 const addonJar: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
                 if (addonJar) {
-                    archive.append(addonJar.release, { name: 'addons/' + addonJar.releaseJarFile });
+                    archive.append(addonJar.release, { name: 'BentoBox/addons/' + addonJar.releaseJarFile });
                 }
             } else {
                 const addonVersions = await this.oldVersionCache.findAll({
@@ -433,7 +450,7 @@ export default class ApiManager {
                 });
                 const addonJar = addonVersions.filter((a) => a.version === addon.versions[<string>version])[0];
                 if (addonJar) {
-                    archive.append(addonJar.release, { name: 'addons/' + addonJar.releaseJarFile });
+                    archive.append(addonJar.release, { name: 'BentoBox/addons/' + addonJar.releaseJarFile });
                 }
             }
         }
