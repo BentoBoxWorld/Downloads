@@ -1,0 +1,42 @@
+{
+  "addons": {
+    "VoidSpawn": {
+      "Author": "tcvs",
+      "AuthorLink": "https://www.spigotmc.org/resources/authors/tcvs.6322/",
+      "Releases": "https://www.spigotmc.org/resources/voidspawn.19350/",
+      "Github": "https://github.com/endercrest/VoidSpawn",
+      "Issues": "https://github.com/endercrest/VoidSpawn/issues",
+      "Description": "This plugin will teleport players to their own island when they enter the void.",
+      "Tags": [
+        "plugin",
+        "verified"
+      ]
+    },
+    "DragonFight": {
+      "Author": "BONNe",
+      "AuthorLink": "https://www.spigotmc.org/resources/authors/bonne_lv.640448/",
+      "Releases": "https://www.spigotmc.org/resources/dragonfight.94048/",
+      "Github": "https://github.com/BONNePlayground/DragonFights",
+      "Issues": "https://github.com/BONNePlayground/DragonFights/issues",
+      "Description": "This BentoBox addon changes that and enables the ability to fight ender dragons on each end island. Now every player will be able to have its own dragon to kill.",
+      "Tags": [
+        "addon",
+        "verified"
+      ]
+    }
+  },
+  "tags": {
+    "plugin": {
+      "color": "#fc3003",
+      "description": "A Spigot Plugin That Links to BentoBox"
+    },
+    "addon": {
+      "color": "#03dffc",
+      "description": "A BentoBox Addon"
+    },
+    "verified": {
+      "color": "#03fc03",
+      "description": "Verified by the BentoBox team"
+    }
+  }
+}

@@ -32,3 +32,23 @@ export interface AddonType {
     downloads?: number;
     versions: Record<string, string>;
 }
+
+export interface ThirdParty {
+    addons: Record<string, thirdPartyAddon>;
+    tags: Record<string, tag>;
+}
+
+export interface thirdPartyAddon {
+    Author: string;
+    AuthorLink?: string;
+    Releases: string;
+    Github?: string;
+    Issues?: string;
+    Description: string;
+    Tags?: string[];
+}
+
+export interface tag {
+    color: string;
+    description: string;
+}

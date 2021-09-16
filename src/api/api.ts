@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { AddonsEntity, AddonType, ConfigObject } from '../config';
+import { AddonsEntity, AddonType, ConfigObject, ThirdParty } from '../config';
 import { Octokit } from 'octokit';
 import * as cron from 'node-cron';
 import {
@@ -23,6 +23,7 @@ export default class ApiManager {
     octokit: Octokit;
     jenkins: JenkinsAPI = require('jenkins')({ baseUrl: 'https://ci.codemc.io' });
     tutorial = fs.readFileSync('../Installation-Guide.txt');
+    thirdParty: ThirdParty = JSON.parse(fs.readFileSync('./../thirdparty.json').toString());
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
         host: 'localhost',
@@ -303,6 +304,11 @@ export default class ApiManager {
             case 'addons':
                 res.setHeader('Content-Type', 'application/json');
                 res.send(this.addons);
+                res.end();
+                break;
+            case 'thirdparty':
+                res.setHeader('Content-Type', 'application/json');
+                res.send(this.thirdParty);
                 res.end();
                 break;
             case 'generate':

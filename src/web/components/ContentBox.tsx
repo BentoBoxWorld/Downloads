@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import tw from 'twin.macro';
 import Navigation from './Navigation';
-import { GetAddons, GetPresets } from '../ApiRequestManager';
+import { GetAddons, GetPresets, GetThirdParty } from '../ApiRequestManager';
 import { Async } from 'react-async';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
@@ -10,10 +10,11 @@ import { faQuestion } from '@fortawesome/free-solid-svg-icons';
 
 const PresetsPage = React.lazy(() => import('./PresetsPage'));
 const CustomPage = React.lazy(() => import('./CustomPage'));
+const ThirdPartyPage = React.lazy(() => import('./ThirdParty'));
 
 export default function ContentBox() {
     function CustomElement() {
-        const addonTypes = () => GetAddons().then((res) => res);
+        const addonTypes = () => GetAddons();
         return (
             <Suspense fallback={<div />}>
                 <Async promiseFn={addonTypes}>
@@ -27,7 +28,7 @@ export default function ContentBox() {
     }
 
     function PresetsElement() {
-        const presets = () => GetPresets().then((res) => res);
+        const presets = () => GetPresets();
         return (
             <Suspense fallback={<div />}>
                 <Async promiseFn={presets}>
@@ -40,13 +41,30 @@ export default function ContentBox() {
         );
     }
 
+    function ThirdPartyElement() {
+        const data = () => GetThirdParty();
+        return (
+            <Suspense fallback={<div />}>
+                <Async promiseFn={data}>
+                    {({ data, isLoading }) => {
+                        if (isLoading) return <></>;
+                        if (data) return <ThirdPartyPage data={data} />;
+                    }}
+                </Async>
+            </Suspense>
+        );
+    }
+
     return (
         <div css={tw`m-0 md:mx-auto md:my-12 bg-yellow-50 bg-opacity-75 md:w-3/4 max-w-screen-lg p-12 min-h-screen`}>
             <Router>
                 <Navigation />
                 <Switch>
-                    <Route path="/custom">
+                    <Route path={'/custom'}>
                         <CustomElement />
+                    </Route>
+                    <Route path={'/thirdparty'}>
+                        <ThirdPartyElement />
                     </Route>
                     <Route exact path={'/'}>
                         <PresetsElement />
