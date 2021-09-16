@@ -26,11 +26,13 @@ export default function PresetsPage({ data }: { data: ThirdParty }) {
                 Filter By Tag:&nbsp;
                 <select {...register('tag', { required: true })}>
                     <option value={'none'}>none</option>
-                    {Object.keys(data.tags).map((tag) => (
-                        <option key={tag} value={tag}>
-                            {tag}
-                        </option>
-                    ))}
+                    {Object.keys(data.tags)
+                        .sort()
+                        .map((tag) => (
+                            <option key={tag} value={tag}>
+                                {tag}
+                            </option>
+                        ))}
                 </select>
             </div>
             <ul
@@ -42,6 +44,7 @@ export default function PresetsPage({ data }: { data: ThirdParty }) {
             >
                 <div css={tw`p-4 grid gap-3 auto-rows-max grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-flow-row`}>
                     {Object.keys(data.addons)
+                        .sort()
                         .filter((a) => filter === 'none' || !filter || data.addons[a].Tags?.includes(filter))
                         .map((a) => {
                             const addon = data.addons[a];
@@ -61,7 +64,7 @@ export default function PresetsPage({ data }: { data: ThirdParty }) {
                                     <div css={tw`m-2`}>{addon.Description}</div>
                                     {addon.Tags && (
                                         <div>
-                                            {addon.Tags.map((tag) => (
+                                            {addon.Tags.sort().map((tag) => (
                                                 <div
                                                     key={tag}
                                                     css={css`
