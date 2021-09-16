@@ -139,7 +139,7 @@ export default class ApiManager {
         this.config = configConstructor;
 
         const setAddons = async () => {
-            for await (const addon1 of configConstructor.addons.filter((addon) => addon.name !== 'BentoBox')) {
+            for await (const addon1 of configConstructor.addons) {
                 const versions = {
                     latest: (await this.jarCache.findOne({ where: { name: addon1.name } }))?.version || '0',
                     beta: (await this.jarCache.findOne({ where: { name: addon1.name } }))?.ciId?.toString() || '0',
@@ -360,7 +360,7 @@ export default class ApiManager {
         addonNames.forEach((addon) => {
             if (doReturn) return;
             const addonByType = this.addons.filter((a) => a.name === addon);
-            if (addonByType.length === 0) {
+            if (addonByType.length === 0 || addon.toLowerCase() === 'bentobox') {
                 res.setHeader('Content-Type', 'application/json');
                 res.send({ Error: 400, Reason: 'Invalid Addon' });
                 res.statusCode = 400;

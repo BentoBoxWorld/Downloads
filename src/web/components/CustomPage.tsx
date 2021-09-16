@@ -101,6 +101,7 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
     function getAddonElements(isGamemode: boolean, addons: AddonType[], inVersion: string): JSX.Element[] {
         return addons
             .filter((a) => a.gamemode === isGamemode)
+            .filter((a) => a.name.toLowerCase() != 'bentobox')
             .map((addon) => {
                 let version = '';
                 let color = '#efd112';
@@ -186,7 +187,7 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
             >
                 <Generator />
                 <div css={tw`mx-auto`}>
-                    Minecraft Version&nbsp;
+                    Minecraft Version:&nbsp;
                     <select {...register('version', { required: true })}>
                         <option value="latest">Latest</option>
                         <option value="beta">CI (Beta)</option>
@@ -201,6 +202,12 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                                 );
                             })}
                     </select>
+                    <br />
+                    BentoBox Version:&nbsp;
+                    <code css={tw`bg-gray-300 rounded-sm text-sm px-1`}>
+                        {value === 'beta' && 'b-'}
+                        {addonTypes.filter((a) => a.name.toLowerCase() === 'bentobox')[0].versions[value]}
+                    </code>
                 </div>
                 <div
                     css={`
