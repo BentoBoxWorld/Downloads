@@ -6,7 +6,7 @@
       "Releases": "https://www.spigotmc.org/resources/voidspawn.19350/",
       "Github": "https://github.com/endercrest/VoidSpawn",
       "Issues": "https://github.com/endercrest/VoidSpawn/issues",
-      "Description": "This plugin will teleport players to their own island when they enter the void.",
+      "Description": "This plugin can teleport players to their own island when they enter the void.\n(Requires Configuration)",
       "Tags": [
         "plugin",
         "verified"
