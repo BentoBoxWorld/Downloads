@@ -12,13 +12,25 @@
         "verified"
       ]
     },
-	"RoseStacker Hook": {
+    "RoseStacker Hook": {
       "Author": "BONNe",
       "AuthorLink": "https://github.com/BONNePlayground",
       "Releases": "https://github.com/BONNePlayground/RoseStackerHook/releases",
       "Github": "https://github.com/BONNePlayground/RoseStackerHook",
       "Issues": "https://github.com/BONNePlayground/RoseStackerHook/issues",
       "Description": "This addon adds 5 new flags for islands. There is protection flag for accessing stacked item GUI as well as 4 flags that allows toggling stacking for items, blocks, entities and spawners.",
+      "Tags": [
+        "addon",
+        "verified"
+      ]
+    },
+    "WildStacker Hook": {
+      "Author": "BONNe",
+      "AuthorLink": "https://github.com/BONNePlayground",
+      "Releases": "https://github.com/BONNePlayground/WildStackerHook/releases",
+      "Github": "https://github.com/BONNePlayground/WildStackerHook",
+      "Issues": "https://github.com/BONNePlayground/WildStackerHook/issues",
+      "Description": "This addon adds 5 new flags for islands. There is protection flag for accessing stacked item GUI as well as 4 flags that allows toggling stacking.",
       "Tags": [
         "addon",
         "verified"
