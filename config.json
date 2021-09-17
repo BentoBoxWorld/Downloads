@@ -38,7 +38,7 @@
       "ci": "BentoBoxWorld/BSkyBlock",
       "description": "**BSkyBlock** is a **survival game** where players try to survive on an **island in the sky**.\n\nCreated and maintained by tastybento.",
       "versions": {
-        "1.16": "1.14.4",
+        "1.16": "1.15.2",
         "1.15": "1.14.3"
       }
     },
@@ -301,7 +301,7 @@
       "gamemode": false,
       "description": "BentoBox",
       "versions": {
-        "1.16": "1.16.2",
+        "1.16": "1.16.5",
         "1.15": "1.14.2"
       }
     }
