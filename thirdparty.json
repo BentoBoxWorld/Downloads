@@ -12,6 +12,18 @@
         "verified"
       ]
     },
+	"WildStacker Hook": {
+      "Author": "BONNe",
+      "AuthorLink": "https://github.com/BONNePlayground",
+      "Releases": "https://github.com/BONNePlayground/WildStackerHook/releases",
+      "Github": "https://github.com/BONNePlayground/WildStackerHook",
+      "Issues": "https://github.com/BONNePlayground/WildStackerHook/issues",
+      "Description": "This addon adds 5 new flags for islands. There is protection flag for accessing stacked item GUI as well as 4 flags that allows toggling stacking.",
+      "Tags": [
+        "addon",
+        "verified"
+      ]
+    },
     "DragonFight": {
       "Author": "BONNe",
       "AuthorLink": "https://www.spigotmc.org/resources/authors/bonne_lv.640448/",
