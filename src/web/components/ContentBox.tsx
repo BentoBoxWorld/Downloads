@@ -77,7 +77,7 @@ export default function ContentBox() {
                     </Route>
                 </Switch>
             </Router>
-            <div css={tw`w-max h-12 mx-auto mt-auto text-center`}>
+            <div css={tw`h-12 mx-auto mt-auto text-center`}>
                 Site By&nbsp;<a href={'https://github.com/Fredthedoggy'}>Fredthedoggy</a>
                 ,&nbsp;BentoBox&nbsp;&amp;&nbsp;BentoBoxWorld by&nbsp;
                 <a href={'https://github.com/tastybento'}>tastybento</a>&nbsp;and&nbsp;

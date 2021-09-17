@@ -9,9 +9,6 @@ module.exports = {
             height: () => ({
                 content: 'fit-content',
             }),
-            width: () => ({
-                26: '6.5rem',
-            }),
             minWidth: {
                 '1/4': '25%',
                 '3/8': '37.5%',
@@ -19,6 +16,7 @@ module.exports = {
                 '3/4': '75%',
                 card: 'max(250px, 37.5%)',
                 60: '15rem',
+                26: '6.5rem',
             },
             minHeight: {
                 60: '15rem',

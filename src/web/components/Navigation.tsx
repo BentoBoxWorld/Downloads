@@ -17,7 +17,7 @@ export default function Navigation() {
                 <li>
                     <div
                         css={`
-                            ${tw`m-2 w-26 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}
+                            ${tw`m-2 min-w-26 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}
                             ${window.location.pathname === '/' &&
                             tw`text-blue-700 border-0 border-b border-solid border-blue-700`}
                         `}
@@ -31,7 +31,7 @@ export default function Navigation() {
                 <li>
                     <div
                         css={`
-                            ${tw`m-2 w-26 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}
+                            ${tw`m-2 min-w-26 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}
                             ${window.location.pathname === '/custom' &&
                             tw`text-blue-700 border-0 border-b border-solid border-blue-700`}
                         `}
@@ -45,7 +45,7 @@ export default function Navigation() {
                 <li>
                     <div
                         css={`
-                            ${tw`m-2 w-26 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}
+                            ${tw`m-2 min-w-26 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}
                             ${window.location.pathname === '/thirdparty' &&
                             tw`text-blue-700 border-0 border-b border-solid border-blue-700`}
                         `}
@@ -57,7 +57,9 @@ export default function Navigation() {
                     </div>
                 </li>
                 <li>
-                    <div css={tw`m-2 w-26 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}>
+                    <div
+                        css={tw`m-2 min-w-26 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}
+                    >
                         <a href={'https://discord.gg/KwjFBUaNSt'} target={'noopener'}>
                             <FontAwesomeIcon icon={faDiscord} />
                             &nbsp;Discord
