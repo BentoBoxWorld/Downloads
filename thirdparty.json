@@ -47,6 +47,18 @@
         "addon",
         "verified"
       ]
+    },
+    "BoxedEyes": {
+     "Author": "Fredthedoggy",
+      "AuthorLink": "https://github.com/Fredthedoggy",
+      "Releases": "https://github.com/Fredthedoggy/BoxedEyes/releases",
+      "Github": "https://github.com/Fredthedoggy/BoxedEyes",
+      "Issues": "https://github.com/Fredthedoggy/BoxedEyes/issues",
+      "Description": "This plugin allows for custom Ender-Eye Point Locations to be defined per-island for gamemodes like Boxed.\nThis does not add End Portals, just sets the eye point location.",
+      "Tags": [
+        "plugin",
+        "verified"
+      ]
     }
   },
   "tags": {
