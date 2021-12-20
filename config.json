@@ -233,8 +233,8 @@
       "ci": "BentoBoxWorld/Level",
       "description": "**Level** creates a competitive atmosphere by making your players try to **have the highest island level**.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "versions": {
-        "1.16": "2.6.4",
-        "1.16-Java16": "2.6.4",
+        "1.16": "2.6.5",
+        "1.16-Java16": "2.8.1",
         "1.15": "2.3.3"
       }
     },
