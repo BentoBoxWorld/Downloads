@@ -59,6 +59,17 @@
         "plugin",
         "verified"
       ]
+    },
+    "Holographic Displays": {
+     "Author": "filoghost",
+      "AuthorLink": "https://github.com/filoghost",
+      "Releases": "https://dev.bukkit.org/projects/holographic-displays",
+      "Github": "https://github.com/filoghost/HolographicDisplays",
+      "Issues": "https://github.com/filoghost/HolographicDisplays/issues",
+      "Description": "This plugin allows do display holograms over AOneBlock block.",
+      "Tags": [
+        "plugin"
+      ]
     }
   },
   "tags": {
