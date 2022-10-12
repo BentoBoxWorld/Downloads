@@ -70,6 +70,17 @@
       "Tags": [
         "plugin"
       ]
+    },
+    "BentoBoxFAWEHandler": {
+      "Author": "HSGamer",
+      "AuthorLink": "https://github.com/HSGamer",
+      "Releases": "https://github.com/HSGamer/BentoBoxFAWEHandler/releases",
+      "Github": "https://github.com/HSGamer/BentoBoxFAWEHandler",
+      "Issues": "https://github.com/HSGamer/BentoBoxFAWEHandler/issues",
+      "Description": "This BentoBox addon integrates FAWE to chunk & block processors.",
+      "Tags": [
+        "addon"
+      ]
     }
   },
   "tags": {
