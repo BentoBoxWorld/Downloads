@@ -63,6 +63,7 @@
       "ci": "BentoBoxWorld/CaveBlock",
       "description": "**CaveBlock** is a **survival game** where players try to survive **underground**.\n\n*An ode to the dwarf's heart in the depths of each person.*\n\nBased on an original idea by the **StoneBlock modpack**.\n\nCreated and maintained by BONNe.",
       "versions": {
+        "1.19": "1.17.0",
         "1.18": "1.16.0",
         "1.17": "1.14.5",
         "1.16": "1.14.5",
@@ -106,7 +107,7 @@
       "ci": "BentoBoxWorld/Biomes",
       "description": "**Biomes** lets your players **change the biome** on their island.\n\nCreated and maintained by [BONNe](https://github.com/bonne).",
       "versions": {
-        "1.19": "2.0.0",
+        "1.19": "2.1.0",
         "1.18": "2.0.0",
         "1.17": "1.14.0",
         "1.16": "1.14.0",
@@ -136,7 +137,7 @@
       "ci": "BentoBoxWorld/CauldronWitchery",
       "description": "**CauldronWitchery** gives your players the opportunity to get their hands on **black magic**.\nLet them **spawn monsters** using a cauldron!\n\n*What does the Witch do with her cauldron?*\n*Black Magic, of course!*\n\n*We are just not sure what could happen afterward...*\n\nBased on an original idea by the **Ex Nihilo mod**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "versions": {
-        "1.19": "1.6.0",
+        "1.19": "2.0.0",
         "1.18": "1.6.0",
         "1.17": "1.6.0",
         "1.16": "1.5.0",
@@ -151,7 +152,7 @@
       "ci": "BentoBoxWorld/Challenges",
       "description": "**Challenges** lets you create Challenges for your **players to complete!**\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "versions": {
-        "1.19": "1.0.0",
+        "1.19": "1.1.0",
         "1.18": "1.0.0",
         "1.17": "1.0.0",
         "1.16": "0.8.4",
@@ -241,7 +242,7 @@
       "ci": "BentoBoxWorld/Greenhouses",
       "description": "**Greenhouses** lets your players **create biome greenhouses** on their islands.\n\nInteresting variation to the Biomes addon.\n\nAdapted from tastybento's Greenhouses plugin.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "versions": {
-        "1.19": "1.7.0",
+        "1.19": "1.7.2",
         "1.18": "1.7.0",
         "1.17": "1.7.0",
         "1.16": "1.5.3",
@@ -361,7 +362,7 @@
       "ci": "BentoBoxWorld/Visit",
       "description": "**Visit** let your players visit other islands.\n\nThe main idea of the addon is to allow faster ways how to visit any island. The main difference from warps addon is that unlike warps, signs are not necessary, and users can travel to any island.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "versions": {
-        "1.19": "1.4.0",
+        "1.19": "1.5.0",
         "1.18": "1.4.0",
         "1.17": "1.4.0",
         "1.16": "1.3.0",
@@ -406,8 +407,8 @@
       "gamemode": false,
       "description": "BentoBox",
       "versions": {
-        "1.19": "1.21.0",
-        "1.18": "1.21.0",
+        "1.19": "1.21.1",
+        "1.18": "1.21.1",
         "1.17": "1.20.1",
         "1.16": "1.16.2",
         "1.16-Java16": "1.16.6",
