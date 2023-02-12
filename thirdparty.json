@@ -14,7 +14,7 @@
     },
     "RoseStacker Hook": {
       "Author": "BONNe",
-      "AuthorLink": "https://github.com/BONNePlayground",
+      "AuthorLink": "https://github.com/BONNe",
       "Releases": "https://github.com/BONNePlayground/RoseStackerHook/releases",
       "Github": "https://github.com/BONNePlayground/RoseStackerHook",
       "Issues": "https://github.com/BONNePlayground/RoseStackerHook/issues",
@@ -24,9 +24,21 @@
         "verified"
       ]
     },
+    "Nova Hook": {
+      "Author": "BONNe",
+      "AuthorLink": "https://github.com/BONNe",
+      "Releases": "https://github.com/BONNePlayground/NovaHook/releases",
+      "Github": "https://github.com/BONNePlayground/NovaHook",
+      "Issues": "https://github.com/BONNePlayground/NovaHook/issues",
+      "Description": "This addon integrates Nova plugin in BentoBox protection system.",
+      "Tags": [
+        "addon",
+        "verified"
+      ]
+    },
     "WildStacker Hook": {
       "Author": "BONNe",
-      "AuthorLink": "https://github.com/BONNePlayground",
+      "AuthorLink": "https://github.com/BONNe",
       "Releases": "https://github.com/BONNePlayground/WildStackerHook/releases",
       "Github": "https://github.com/BONNePlayground/WildStackerHook",
       "Issues": "https://github.com/BONNePlayground/WildStackerHook/issues",
@@ -38,7 +50,7 @@
     },
     "DragonFight": {
       "Author": "BONNe",
-      "AuthorLink": "https://www.spigotmc.org/resources/authors/bonne_lv.640448/",
+      "AuthorLink": "https://github.com/BONNe",
       "Releases": "https://www.spigotmc.org/resources/dragonfight.94048/",
       "Github": "https://github.com/BONNePlayground/DragonFights",
       "Issues": "https://github.com/BONNePlayground/DragonFights/issues",
