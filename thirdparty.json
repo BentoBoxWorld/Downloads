@@ -93,6 +93,17 @@
       "Tags": [
         "addon"
       ]
+    },
+	"BBAdvancementTeamSync": {
+      "Author": "EscanorTargaryen",
+      "AuthorLink": "https://github.com/EscanorTargaryen",
+      "Releases": "https://www.spigotmc.org/resources/bbadvancementteamsync.108238/",
+      "Github": "https://github.com/EscanorTargaryen/BBAdvancementTeamSync",
+      "Issues": "https://github.com/EscanorTargaryen/BBAdvancementTeamSync/issues",
+      "Description": "Addon to sync teams between UltimateAdvancementAPI and BentoBox.",
+      "Tags": [
+        "addon"
+      ]
     }
   },
   "tags": {
