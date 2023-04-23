@@ -36,7 +36,7 @@
       "ci": "BentoBoxWorld/Boxed",
       "description": "**Boxed** is a semi-vanilla **survival game**\n\nA game mode where you are boxed into a tiny space that only expands by completing advancements.\n\n\n\nCreated and maintained by tastybento.",
       "versions": {
-        "1.19": "2.0.3"
+        "1.19": "2.0.3",
         "1.17": "1.2.1",
         "1.16": "1.1.5",
         "1.16-Java16": "1.1.5"
