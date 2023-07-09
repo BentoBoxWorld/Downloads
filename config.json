@@ -342,6 +342,16 @@
       }
     },
     {
+      "name": "Parkour",
+      "gamemode": true,
+      "github": "BentoBoxWorld/Parkour",
+      "ci": "BentoBoxWorld/Parkour",
+      "description": "**Parkour** is a game where players create parkour courses and play them.\n\nCreated and maintained by tastybento.",
+      "versions": {
+        "1.20.1": "1.0.0"
+      }
+    },
+    {
       "name": "TwerkingForTrees",
       "gamemode": false,
       "github": "BentoBoxWorld/TwerkingForTrees",
