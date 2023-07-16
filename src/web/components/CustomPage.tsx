@@ -14,7 +14,7 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
     const [versionTypes, setVersionTypes] = useState<Record<string, string[]>>({});
     const [versions, updateVersions] = useState<string[]>([]);
     const [popupText, setPopupText] = useState(
-        '**[BentoBox](https://bentobox.world/)** is a powerful plugin that transforms your Minecraft server into an extraordinary playground. BentoBox provides the platform for Gamemodes and Addons. By combining these components, you unlock a realm of endless possibilities and unparalleled customization. Craft your own BentoBox and embark on a thrilling journey filled with an array of captivating games and limitless fun. Immerse your players in a world where creativity knows no bounds and every adventure is unique. Unleash the full potential of your server with BentoBox and create an unforgettable experience that will leave your community in awe.',
+        '**[BentoBox](https://bentobox.world/)** is a plugin that does nothing on its own, but once you add Gamemodes and Addons to it, it becomes an incredible playground for your players, with countless possible combinations that will allow you to highly customize your server.\n\nCrafting your own BentoBox is the first step to join a world of never-ending possibilities of games and fun.',
     );
     const [copied, setCopied] = useState('Copy URL To Setup');
     const { register, getValues, setValue, watch } = useForm();
