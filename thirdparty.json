@@ -94,7 +94,7 @@
         "addon"
       ]
     },
-	"BBAdvancementTeamSync": {
+    "BBAdvancementTeamSync": {
       "Author": "EscanorTargaryen",
       "AuthorLink": "https://github.com/EscanorTargaryen",
       "Releases": "https://www.spigotmc.org/resources/bbadvancementteamsync.108238/",
@@ -104,6 +104,17 @@
       "Tags": [
         "addon"
       ]
+    },
+    "MoreFlags": {
+       "Author": "lijinhong11",
+       "AuthorLink": "https://github.com/lijinhong11",
+       "Releases": "https://github.com/lijinhong11/MoreFlags/releases",
+       "Github": "https://github.com/lijinhong11/MoreFlags",
+       "Issues": "https://github.com/lijinhong11/MoreFlags/issues",
+       "Description": "Add more flags for islands",
+       "Tags": [
+	"addon"
+       ]
     }
   },
   "tags": {
