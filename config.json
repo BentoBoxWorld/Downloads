@@ -425,7 +425,7 @@
       "ci": "BentoBoxWorld/VoidPortals",
       "description": "**VoidPortals** let your players teleport to other dimensions by jumping into the Void!\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "versions": {
-        "1.20.6": "1.5.0.1"
+        "1.20.6": "1.5.0.1",
         "1.19": "1.5.0.0",
         "1.18": "1.5.0.0",
         "1.17": "1.5.0.0",
