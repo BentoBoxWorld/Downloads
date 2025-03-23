@@ -1,28 +1,6 @@
 {
   "addons": [
     {
-      "name": "Poseidon",
-      "gamemode": true,
-      "github": "BentoBoxWorld/podeidon",
-      "ci": "BentoBoxWorld/Poseidon",
-      "description": "**Poseidon** Welcome to Poseidon, an underwater adventure where\n\the ocean is both your playground and your challenge..\n\nCreated and maintained by tastybento.",
-      "versions": {
-        "1.21.4": "1.0.0"
-      }
-    },
-    {
-      "name": "Parkour",
-      "gamemode": true,
-      "github": "BentoBoxWorld/Parkour",
-      "ci": "BentoBoxWorld/Parkour",
-      "description": "**Parkour** is a game where players create parkour courses and play them.\n\nCreated and maintained by tastybento.",
-      "versions": {
-        "1.21.3": "1.4.0",
-        "1.20.6": "1.3.0",
-        "1.20.1": "1.1.0"
-      }
-    },
-    {
       "name": "AcidIsland",
       "gamemode": true,
       "github": "BentoBoxWorld/AcidIsland",
@@ -119,6 +97,28 @@
         "1.16": "1.16.0",
         "1.16-Java16": "1.16.0",
         "1.15": "1.14.1"
+      }
+    },
+    {
+      "name": "Poseidon",
+      "gamemode": true,
+      "github": "BentoBoxWorld/podeidon",
+      "ci": "BentoBoxWorld/Poseidon",
+      "description": "**Poseidon** Welcome to Poseidon, an underwater adventure where\n\the ocean is both your playground and your challenge..\n\nCreated and maintained by tastybento.",
+      "versions": {
+        "1.21.4": "1.0.0"
+      }
+    },
+    {
+      "name": "Parkour",
+      "gamemode": true,
+      "github": "BentoBoxWorld/Parkour",
+      "ci": "BentoBoxWorld/Parkour",
+      "description": "**Parkour** is a game where players create parkour courses and play them.\n\nCreated and maintained by tastybento.",
+      "versions": {
+        "1.21.3": "1.4.0",
+        "1.20.6": "1.3.0",
+        "1.20.1": "1.1.0"
       }
     },
     {
