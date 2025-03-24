@@ -583,8 +583,7 @@
       {
         "name": "Poseidon",
         "description": "Welcome to an underwater adventure!"
-        "subtext": "Where the ocean is both your playground and your challenge. Stranded in a shipwreck, you awaken with the ability to breathe underwater, but there’s a catch—you must keep moving, like a shark, to survive. Armed with a few essentials salvaged from a chest, your journey begins in the depths of the vast and mysterious sea. ",
-\n\nIncludes the following addons:",
+        "subtext": "Where the ocean is both your playground and your challenge. Stranded in a shipwreck, you awaken with the ability to breathe underwater, but there’s a catch—you must keep moving, like a shark, to survive. Armed with a few essentials salvaged from a chest, your journey begins in the depths of the vast and mysterious sea.\n\nIncludes the following addons:",
         "addons": [
           "Poseidon",
           "Challenges",
