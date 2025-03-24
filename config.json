@@ -102,7 +102,7 @@
     {
       "name": "Poseidon",
       "gamemode": true,
-      "github": "BentoBoxWorld/podeidon",
+      "github": "BentoBoxWorld/poseidon",
       "ci": "BentoBoxWorld/Poseidon",
       "description": "**Poseidon** Welcome to Poseidon, an underwater adventure where the ocean is both your playground and your challenge!\n\nCreated and maintained by tastybento.",
       "versions": {
