@@ -588,7 +588,8 @@
           "Poseidon",
           "Challenges",
           "Level",
-          "Warps"
+          "Warps",
+          "InvSwitcher"
         ],
         "color": "#ffdd57"
       }
