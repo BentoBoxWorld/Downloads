@@ -447,7 +447,7 @@
       "ci": "BentoBoxWorld/Visit",
       "description": "**Visit** let your players visit other islands.\n\nThe main idea of the addon is to allow faster ways how to visit any island. The main difference from warps addon is that unlike warps, signs are not necessary, and users can travel to any island.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "versions": {
-        "1.20.6": "1.7.0",
+        "1.20.6": "1.6.0",
         "1.19": "1.6.0",
         "1.18": "1.4.0",
         "1.17": "1.4.0",
