@@ -415,7 +415,7 @@
       "description": "**MagicCobblestoneGenerator** provide players a simple and effective way to generate resources on their islands.\n\nSome specifications about this add-on:\n\n- Offline Generation - ability to disable addon processing on islands where none of members are online.\n- Disabled GameModes - specify Game Modes where MagicCobblestoneGenerator will not work.\n- Generator Tiers - ability to specify default generator tiers\n- GameMode Tiers - ability to specify generator tiers for specific game mode.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "versions": {
         "1.21.3": "2.6.0",
-        "1.20.6": "2.5.2",
+        "1.20.6": "2.5.1",
         "1.19": "2.5.1",
         "1.18": "2.4.0",
         "1.17": "2.3.0",
