@@ -81,7 +81,6 @@ export default function ContentBox() {
                 Site By&nbsp;<a href={'https://github.com/Fredthedoggy'}>Fredthedoggy</a>
                 ,&nbsp;BentoBox&nbsp;&amp;&nbsp;BentoBoxWorld by&nbsp;
                 <a href={'https://github.com/tastybento'}>tastybento</a>&nbsp;and&nbsp;
-                <a href={'https://github.com/poslovitch'}>Poslovitch</a>&nbsp;
             </div>
             <div css={tw`w-max ml-auto flex flex-row space-x-1.5`}>
                 <a href={'https://discord.gg/KwjFBUaNSt'} css={tw`text-blue-600`} target={'noopener'}>
