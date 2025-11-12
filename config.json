@@ -7,10 +7,11 @@
       "ci": "BentoBoxWorld/AcidIsland",
       "description": "**AcidIsland** is a **survival game** where players try to survive and expand their island, surrounded by a **sea of acid**.\n\nAcid is everywhere. Acid burns everything.\n\nOh, and rain is acid too.\n\nCreated and maintained by tastybento.",
       "versions": {
-        "1.21.6": "1.20.0",
-        "1.21.5": "1.20.0",
-        "1.21.4": "1.20.0",
-        "1.21.3": "1.20.0",
+        "1.21.10": "1.20.1",
+        "1.21.6": "1.20.1",
+        "1.21.5": "1.20.1",
+        "1.21.4": "1.20.1",
+        "1.21.3": "1.20.1",
         "1.20.6": "1.19.0",
         "1.19": "1.17.2",
         "1.18": "1.15.2",
@@ -27,10 +28,11 @@
       "ci": "BentoBoxWorld/AOneBlock",
       "description": "**AOneBlock** is a OneBlock **survival game**\n\nYou spawn on a block. Just *one* block. What do you do?\n\nCreated and maintained by tastybento.",
       "versions": {
-        "1.21.6": "1.18.2",
-        "1.21.5": "1.18.2",
-        "1.21.4": "1.18.2",
-        "1.21.3": "1.18.2",
+        "1.21.10": "1.21.1",
+        "1.21.6": "1.21.1",
+        "1.21.5": "1.21.1",
+        "1.21.4": "1.21.1",
+        "1.21.3": "1.21.1",
         "1.20.6": "1.17.0",
         "1.19": "1.13.0",
         "1.18": "1.10.1",
@@ -46,8 +48,9 @@
       "ci": "BentoBoxWorld/Boxed",
       "description": "**Boxed** is a semi-vanilla **survival game**\n\nA game mode where you are boxed into a tiny space that only expands by completing advancements.\n\n\n\nCreated and maintained by tastybento.",
       "versions": {
-        "1.21.6": "3.0.0",
-        "1.21.5": "3.0.0",
+        "1.21.10": "3.3.0",
+        "1.21.6": "3.3.0",
+        "1.21.5": "3.3.0",
         "1.21.4": "2.8.1",
         "1.21.3": "2.8.0",
         "1.20.6": "2.7.2",
@@ -64,10 +67,11 @@
       "ci": "BentoBoxWorld/BSkyBlock",
       "description": "**BSkyBlock** is a **survival game** where players try to survive on an **island in the sky**.\n\nCreated and maintained by tastybento.",
       "versions": {
-        "1.21.6": "1.19.0",
-        "1.21.5": "1.19.0",
-        "1.21.4": "1.19.0",
-        "1.21.3": "1.19.0",
+        "1.21.10": "1.19.1",
+        "1.21.6": "1.19.1",
+        "1.21.5": "1.19.1",
+        "1.21.4": "1.19.1",
+        "1.21.3": "1.19.1",
         "1.20.6": "1.18.1",
         "1.19": "1.16.1",
         "1.18": "1.15.2",
@@ -84,10 +88,11 @@
       "ci": "BentoBoxWorld/CaveBlock",
       "description": "**CaveBlock** is a **survival game** where players try to survive **underground**.\n\n*An ode to the dwarf's heart in the depths of each person.*\n\nBased on an original idea by the **StoneBlock modpack**.\n\nCreated and maintained by BONNe.",
       "versions": {
-        "1.21.6": "1.20.0",
-        "1.21.5": "1.20.0",
-        "1.21.4": "1.20.0",
-        "1.21.3": "1.20.0",
+        "1.21.8": "1.20.1",
+        "1.21.6": "1.20.1",
+        "1.21.5": "1.20.1",
+        "1.21.4": "1.20.1",
+        "1.21.3": "1.20.1",
         "1.20.6": "1.19.0",
         "1.19": "1.18.0",
         "1.18": "1.16.0",
@@ -104,11 +109,12 @@
       "ci": "BentoBoxWorld/SkyGrid",
       "description": "**SkyGrid** is a **survival game** where players try to survive in a world **made up of scattered blocks**.\n\nCreated and maintained by tastybento.",
       "versions": {
-        "1.21.6": "2.2.1",
-        "1.21.5": "2.2.1",
-        "1.21.4": "2.2.1",
-        "1.21.3": "2.2.0",
-        "1.21.1": "2.1.0",
+        "1.21.10": "2.2.2",
+        "1.21.6": "2.2.2",
+        "1.21.5": "2.2.2",
+        "1.21.4": "2.2.2",
+        "1.21.3": "2.2.2",
+        "1.21.1": "2.2.2",
         "1.20.6": "1.19.0",
         "1.19": "1.19.0",
         "1.17": "1.17.0",
@@ -124,6 +130,7 @@
       "ci": "BentoBoxWorld/Poseidon",
       "description": "**Poseidon** Welcome to Poseidon, an underwater adventure where the ocean is both your playground and your challenge!\n\nCreated and maintained by tastybento.",
       "versions": {
+        "1.21.10": "1.1.0",
         "1.21.6": "1.1.0",
         "1.21.5": "1.1.0",
         "1.21.4": "1.0.0"
@@ -136,6 +143,7 @@
       "ci": "BentoBoxWorld/Parkour",
       "description": "**Parkour** is a game where players create parkour courses and play them.\n\nCreated and maintained by tastybento.",
       "versions": {
+        "1.21.10": "1.4.0",
         "1.21.6": "1.4.0",
         "1.21.5": "1.4.0",
         "1.21.4": "1.4.0",
@@ -507,6 +515,16 @@
       }
     },
     {
+      "name": "Stranger Realms",
+      "gamemode": true,
+      "github": "BentoBoxWorld/StrangerRealms",
+      "ci": "BentoBoxWorld/StrangerRealms",
+      "description": "**StrangerRealms** The familiar world is shadowed by a terrifying, inverted dimension — the Upside Down.",
+      "versions": {
+        "1.21.10": "1.0.0"
+      }
+    },
+    {
       "name": "TwerkingForTrees",
       "gamemode": false,
       "github": "BentoBoxWorld/TwerkingForTrees",
@@ -589,8 +607,8 @@
       "gamemode": false,
       "description": "BentoBox",
       "versions": {
-        "1.21.6": "3.5.0",
-        "1.21.5": "3.5.0",
+        "1.21.6": "3.10.0",
+        "1.21.5": "3.10.0",
         "1.21.4": "3.5.0",
         "1.21.3": "3.3.0",
         "1.21.1": "2.7.0",
@@ -688,6 +706,17 @@
           "InvSwitcher"
         ],
         "color": "#ffdd57"
+      },
+      {
+        "name": "Stranger Realms",
+        "description": "The familiar world is shadowed by a terrifying, inverted dimension — the Upside Down.",
+        "subtext": "A chilling new survival experience where the familiar world is shadowed by a terrifying, inverted dimension. Stranger Realms is a custom BentoBox game mode that replaces the Nether with a dark, distressed copy of the Overworld — the Upside Down.",
+        "addons": [
+          "StrangerThings",
+          "Warps",
+          "InvSwitcher"
+        ],
+        "color": "#cf1b21"
       }
   ]
 }

@@ -8,3 +8,4 @@ env.json
 jarcache.sqlite
 downloads.sqlite
 *.old*
+/.project

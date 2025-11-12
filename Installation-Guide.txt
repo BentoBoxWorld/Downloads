@@ -1,6 +1,6 @@
 # Useful Links
 BentoBox Repo: https://bentobox.world/
-Spigot: https://www.spigotmc.org/resources/bentobox-bskyblock-acidisland-skygrid-caveblock-aoneblock-boxed.73261/
+Modrinth: https://modrinth.com/organization/bentobox/
 Docs: https://docs.bentobox.world/en/latest/
 Discord: https://discord.gg/KwjFBUaNSt
 
