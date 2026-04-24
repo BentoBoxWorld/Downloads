@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import tw from 'twin.macro';
 import Navigation from './Navigation';
-import { GetAddons, GetPresets, GetThirdParty } from '../ApiRequestManager';
+import { GetAddons, GetBlueprints, GetPresets, GetThirdParty } from '../ApiRequestManager';
 import { Async } from 'react-async';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
@@ -11,6 +11,7 @@ import { faQuestion } from '@fortawesome/free-solid-svg-icons';
 const PresetsPage = React.lazy(() => import('./PresetsPage'));
 const CustomPage = React.lazy(() => import('./CustomPage'));
 const ThirdPartyPage = React.lazy(() => import('./ThirdParty'));
+const BlueprintsPage = React.lazy(() => import('./Blueprints'));
 
 export default function ContentBox() {
     function CustomElement() {
@@ -55,6 +56,20 @@ export default function ContentBox() {
         );
     }
 
+    function BlueprintsElement() {
+        const data = () => GetBlueprints();
+        return (
+            <Suspense fallback={<div />}>
+                <Async promiseFn={data}>
+                    {({ data, isLoading }) => {
+                        if (isLoading) return <></>;
+                        if (data) return <BlueprintsPage data={data} />;
+                    }}
+                </Async>
+            </Suspense>
+        );
+    }
+
     return (
         <div css={tw`m-0 md:mx-auto md:my-12 bg-yellow-50 bg-opacity-75 md:w-3/4 max-w-screen-lg p-12 min-h-screen`}>
             <Router>
@@ -65,6 +80,9 @@ export default function ContentBox() {
                     </Route>
                     <Route path={'/thirdparty'}>
                         <ThirdPartyElement />
+                    </Route>
+                    <Route path={'/blueprints'}>
+                        <BlueprintsElement />
                     </Route>
                     <Route exact path={'/'}>
                         <PresetsElement />

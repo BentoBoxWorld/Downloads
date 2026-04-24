@@ -13,7 +13,15 @@ import { Sequelize } from 'sequelize';
 import { JenkinsAPI } from 'jenkins';
 import axios from 'axios';
 import * as fs from 'fs';
+import * as path from 'path';
 import Archiver = require('archiver');
+import { WeblinkSync } from './weblink';
+import {
+    BlueprintCatalog,
+    buildCatalog,
+    parseBlueprintId,
+    resolveBlueprintFile,
+} from './blueprintCatalog';
 
 const { throttling } = require('@octokit/plugin-throttling');
 
@@ -24,6 +32,15 @@ export default class ApiManager {
     jenkins: JenkinsAPI = require('jenkins')({ baseUrl: 'https://ci.codemc.io' });
     tutorial = fs.readFileSync('../Installation-Guide.txt');
     thirdParty: ThirdParty = JSON.parse(fs.readFileSync('./../thirdparty.json').toString());
+
+    weblink: WeblinkSync = this.createWeblinkSync();
+    blueprintCatalog: BlueprintCatalog = {
+        blueprints: [],
+        bundles: [],
+        tags: {},
+        gameModes: {},
+        generatedAt: 0,
+    };
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
         host: 'localhost',
@@ -100,6 +117,7 @@ export default class ApiManager {
             }
             cron.schedule('*/6 * * * *', () => {
                 this.generateDownloads();
+                this.refreshBlueprints();
                 if (undefinedAddons.length > 0) {
                     for (let i = 0; i < (undefinedAddons.length > repeats ? repeats : undefinedAddons.length); i++) {
                         this.updateAsset(undefinedAddons[0]).then();
@@ -157,6 +175,26 @@ export default class ApiManager {
         };
 
         setAddons();
+
+        this.refreshBlueprints();
+    }
+
+    private createWeblinkSync(): WeblinkSync {
+        let overrides: Partial<{ url: string; path: string; branch: string }> = {};
+        try {
+            const env = require('./../../env.json');
+            if (env && env.weblink) overrides = env.weblink;
+        } catch (e) {}
+        return new WeblinkSync(overrides);
+    }
+
+    async refreshBlueprints() {
+        try {
+            await this.weblink.sync();
+            this.blueprintCatalog = buildCatalog(this.weblink.blueprintsDir);
+        } catch (err) {
+            console.error('[blueprints] refresh failed:', (err as Error).message);
+        }
     }
 
     async updateJenkins(addon: AddonsEntity) {
@@ -310,6 +348,17 @@ export default class ApiManager {
                 res.setHeader('Content-Type', 'application/json');
                 res.send(this.thirdParty);
                 res.end();
+                break;
+            case 'blueprints':
+                res.setHeader('Content-Type', 'application/json');
+                res.send(this.blueprintCatalog);
+                res.end();
+                break;
+            case 'blueprints/download':
+                this.downloadBlueprintFile(req, res);
+                break;
+            case 'blueprints/zip':
+                this.downloadBlueprintZip(req, res).then();
                 break;
             case 'generate':
                 this.generateZIP(req, res).then();
@@ -465,6 +514,113 @@ export default class ApiManager {
         for (const addon of addons) {
             await this.updateDownloadCount(addon.name);
         }
+    }
+
+    downloadBlueprintFile(req: Request, res: Response) {
+        const id = typeof req.query.id === 'string' ? req.query.id : '';
+        const type = req.query.type === 'bundle' ? 'bundle' : 'blueprint';
+        const ext = type === 'bundle' ? '.json' : '.blueprint';
+        const abs = resolveBlueprintFile(this.weblink.blueprintsDir, id, ext);
+        if (!abs) {
+            res.setHeader('Content-Type', 'application/json');
+            res.statusCode = 404;
+            res.send({ Error: 404, Reason: 'Unknown blueprint' });
+            res.end();
+            return;
+        }
+        const filename = path.basename(abs);
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        fs.createReadStream(abs).pipe(res);
+    }
+
+    async downloadBlueprintZip(req: Request, res: Response) {
+        const idsParam = typeof req.query.ids === 'string' ? req.query.ids : '';
+        const gameMode = typeof req.query.gameMode === 'string' ? req.query.gameMode : '';
+        const entries: Array<{ abs: string; name: string }> = [];
+
+        if (gameMode) {
+            const parsed = parseBlueprintId(`${gameMode}/stub`);
+            if (!parsed) {
+                res.setHeader('Content-Type', 'application/json');
+                res.statusCode = 400;
+                res.send({ Error: 400, Reason: 'Invalid gameMode' });
+                res.end();
+                return;
+            }
+            for (const bp of this.blueprintCatalog.blueprints) {
+                if (bp.gameMode === gameMode) {
+                    const abs = path.resolve(this.weblink.blueprintsDir, bp.file);
+                    entries.push({ abs, name: bp.file });
+                }
+            }
+            for (const bd of this.blueprintCatalog.bundles) {
+                if (bd.gameMode === gameMode) {
+                    const abs = path.resolve(this.weblink.blueprintsDir, bd.file);
+                    entries.push({ abs, name: bd.file });
+                }
+            }
+        } else if (idsParam) {
+            let ids: unknown;
+            try {
+                ids = JSON.parse(decodeURIComponent(idsParam));
+            } catch {
+                res.setHeader('Content-Type', 'application/json');
+                res.statusCode = 400;
+                res.send({ Error: 400, Reason: 'Not Valid Json' });
+                res.end();
+                return;
+            }
+            if (!Array.isArray(ids) || ids.length === 0) {
+                res.setHeader('Content-Type', 'application/json');
+                res.statusCode = 400;
+                res.send({ Error: 400, Reason: 'No Blueprints Selected' });
+                res.end();
+                return;
+            }
+            for (const id of ids) {
+                if (typeof id !== 'string') continue;
+                const abs = resolveBlueprintFile(this.weblink.blueprintsDir, id, '.blueprint');
+                if (abs) {
+                    const parsed = parseBlueprintId(id);
+                    if (parsed) entries.push({ abs, name: `${parsed.gameMode}/${parsed.name}.blueprint` });
+                    continue;
+                }
+                const absBundle = resolveBlueprintFile(this.weblink.blueprintsDir, id, '.json');
+                if (absBundle) {
+                    const parsed = parseBlueprintId(id);
+                    if (parsed) entries.push({ abs: absBundle, name: `${parsed.gameMode}/${parsed.name}.json` });
+                }
+            }
+        } else {
+            res.setHeader('Content-Type', 'application/json');
+            res.statusCode = 400;
+            res.send({ Error: 400, Reason: 'Provide ids or gameMode' });
+            res.end();
+            return;
+        }
+
+        if (entries.length === 0) {
+            res.setHeader('Content-Type', 'application/json');
+            res.statusCode = 404;
+            res.send({ Error: 404, Reason: 'No matching blueprints' });
+            res.end();
+            return;
+        }
+
+        const archive = Archiver('zip');
+        archive.on('error', (err) => {
+            res.status(500).send({ error: err.message });
+        });
+        archive.on('end', () => res.end());
+
+        const zipName = gameMode ? `blueprints-${gameMode}.zip` : 'blueprints.zip';
+        res.attachment(zipName);
+        archive.pipe(res);
+        for (const e of entries) {
+            archive.file(e.abs, { name: e.name });
+        }
+        await archive.finalize();
     }
 
     async updateDownloadCount(addon: string) {

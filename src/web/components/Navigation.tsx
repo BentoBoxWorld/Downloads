@@ -2,7 +2,7 @@ import { useLocation } from 'react-router';
 import tw from 'twin.macro';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faImage, faPuzzlePiece, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faImage, faLayerGroup, faPuzzlePiece, faWrench } from '@fortawesome/free-solid-svg-icons';
 import React, { useEffect } from 'react';
 import { faDiscord } from '@fortawesome/free-brands-svg-icons';
 
@@ -53,6 +53,20 @@ export default function Navigation() {
                         <NavLink to={'/thirdparty'}>
                             <FontAwesomeIcon icon={faPuzzlePiece} />
                             &nbsp;Third-Party
+                        </NavLink>
+                    </div>
+                </li>
+                <li>
+                    <div
+                        css={`
+                            ${tw`m-2 min-w-26 h-10 hover:text-blue-500 focus:outline-none focus:border-none text-center`}
+                            ${window.location.pathname === '/blueprints' &&
+                            tw`text-blue-700 border-0 border-b border-solid border-blue-700`}
+                        `}
+                    >
+                        <NavLink to={'/blueprints'}>
+                            <FontAwesomeIcon icon={faLayerGroup} />
+                            &nbsp;Blueprints
                         </NavLink>
                     </div>
                 </li>
