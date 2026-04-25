@@ -30,7 +30,7 @@ yarn site               # Frontend-only dev rebuild + start server
 
 **Frontend** (`src/web/`):
 - React 17 SPA with React Router, styled with Tailwind CSS + twin.macro/styled-components
-- Four pages: Presets (`/`), Custom builder (`/custom`), Third-party catalog (`/thirdparty`), Blueprints (`/blueprints`)
+- Pages: Presets (`/`), Custom builder (`/custom`), Third-party catalog (`/thirdparty`), Blueprints (`/blueprints`), Submit (`/submit`), Account (`/account`), Terms (`/terms`), Privacy (`/privacy`)
 - Components in `src/web/components/`, API calls via `src/web/ApiRequestManager.ts` using SWR
 
 **Configuration files** (project root, read at runtime from `../` relative to `dist/`):
@@ -43,8 +43,16 @@ yarn site               # Frontend-only dev rebuild + start server
 - `WeblinkSync` shallow-clones `BentoBoxWorld/weblink` into `data/weblink/` on startup and `git pull --ff-only`s it on the same 6-minute cron used for addon refresh. Default branch is `master`.
 - `buildCatalog()` scans `weblink/blueprints/<gameMode>/`, parses `.blueprint` files and bundle `.json` files (per BentoBox's `blueprint.schema.json` / `blueprint-bundle.schema.json`), and derives stats: dimensions, block-type counts, entity-type counts, air count, biome list, sinking flag.
 - The optional `blueprints/catalog.json` overlay in weblink supplies curation fields (`displayName`, `description`, `author`, `authorLink`, `tags`, `license`, `image`) plus tag colours and game-mode display names; overlay fields take precedence over what is in the `.blueprint` file.
+- Images live at `weblink/blueprints/images/<gameMode>/<name>.png` (recommended 800×450, with optional `<name>.thumb.png` at 400×225). The catalog auto-detects them at sync time when the overlay does not specify `image`. The Express handler at `src/index.ts` serves them under `/blueprints/images/...` with a path-traversal guard and PNG-only whitelist.
 - Endpoints: `GET /api/blueprints` (full catalog), `GET /api/blueprints/download?id=<gameMode>/<name>&type=blueprint|bundle` (single file), `GET /api/blueprints/zip?ids=[...]|gameMode=<gm>` (multi-select or whole-game-mode zip). IDs are validated against a strict regex and resolved paths are checked against the blueprints root before any read.
-- Phase-2 submission sanitisers live next to the catalog code: `sanitizeBundleSubmission` strips `BlueprintBundle.commands` (console-command injection vector) and `validateBlueprintSubmission` rejects command-block materials and any block carrying an opaque `inventory` payload. They are not called by Phase-1 read-only flows; wire them in when the upload endpoint lands.
+
+**Auth + submissions** (`src/api/auth.ts`, `src/api/submissions.ts`, `src/api/models/auth.ts`):
+- Discord OAuth (server-side authorization-code flow, `identify` scope only). Sessions stored in `data/Auth.sqlite` via Sequelize (`User`, `Session`, `Submission` tables). Session cookie is HttpOnly, signed via `cookie-parser`, `SameSite=Lax`, `Secure` in production. 30-day TTL, max 5 concurrent sessions per user, daily prune cron.
+- CSRF: per-session token returned by `GET /api/me`, required as `X-Csrf-Token` on every POST.
+- Rate limits: 30 OAuth callbacks/min/IP; 3 submissions/hour, 10/day per Discord user.
+- `POST /api/blueprints/submit` accepts a multipart upload (max 5 MB), JSON-parses, ajv-validates against `src/api/schemas/blueprint.schema.json` (vendored from `bentobox/`), runs `validateBlueprintSubmission` (rejects command-block materials and opaque `inventory` payloads), checks slug collision against the local clone, then opens a PR on `BentoBoxWorld/weblink` via Octokit using `env.weblink_github_token` — branch `submit/<discordId>/<slug>-<ts>` with two file commits (the `.blueprint` and the patched `catalog.json`).
+- Helmet config in `src/index.ts` is the canonical CSP — Discord OAuth navigation works without an explicit allowlist because helmet's CSP does not constrain top-level navigation.
+- `env.json` keys: `discord_client_id`, `discord_client_secret`, `discord_redirect_uri`, `weblink_github_token` (fine-grained PAT scoped to `BentoBoxWorld/weblink` with `contents: write` + `pull-requests: write`).
 
 ## Key Patterns
 

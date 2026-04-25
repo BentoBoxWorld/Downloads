@@ -229,8 +229,21 @@ function listGameModeDirs(blueprintsDir: string): string[] {
     if (!fs.existsSync(blueprintsDir)) return [];
     return fs
         .readdirSync(blueprintsDir, { withFileTypes: true })
-        .filter((d) => d.isDirectory())
+        .filter((d) => d.isDirectory() && d.name !== 'images')
         .map((d) => d.name);
+}
+
+// Path convention: images live at blueprints/images/<gameMode>/<name>.png.
+// If a sibling <name>.thumb.png exists, prefer it for catalog cards;
+// otherwise use the full image. Returns the path relative to
+// blueprints/images/, or undefined if no image exists for this blueprint.
+function detectImage(blueprintsDir: string, gameMode: string, name: string): string | undefined {
+    const imagesRoot = path.join(blueprintsDir, 'images', gameMode);
+    const thumb = path.join(imagesRoot, `${name}.thumb.png`);
+    if (fs.existsSync(thumb)) return path.posix.join(gameMode, `${name}.thumb.png`);
+    const full = path.join(imagesRoot, `${name}.png`);
+    if (fs.existsSync(full)) return path.posix.join(gameMode, `${name}.png`);
+    return undefined;
 }
 
 export function buildCatalog(blueprintsDir: string): BlueprintCatalog {
@@ -266,7 +279,7 @@ export function buildCatalog(blueprintsDir: string): BlueprintCatalog {
                         authorLink: o.authorLink,
                         tags: o.tags,
                         license: o.license,
-                        image: o.image,
+                        image: o.image ?? detectImage(blueprintsDir, gameMode, name),
                     });
                 } catch (err) {
                     console.error(`[blueprints] failed to parse ${abs}:`, (err as Error).message);

@@ -68,7 +68,7 @@ function BlueprintCard({
 
             {bp.image ? (
                 <img
-                    src={`/weblink/blueprints/${bp.image}`}
+                    src={`/blueprints/images/${bp.image}`}
                     alt={bp.displayName}
                     css={tw`w-full h-32 object-cover rounded-md`}
                 />
@@ -244,8 +244,10 @@ export default function BlueprintsPage({ data }: { data: BlueprintCatalog }) {
                 </p>
                 <p css={tw`text-sm`}>
                     Served from&nbsp;
-                    <a href={'https://github.com/BentoBoxWorld/weblink'}>BentoBoxWorld/weblink</a>. Submissions and
-                    user accounts are coming soon.
+                    <a href={'https://github.com/BentoBoxWorld/weblink'}>BentoBoxWorld/weblink</a>.&nbsp;
+                    <a href="/submit" css={tw`underline font-semibold`}>
+                        Submit a blueprint
+                    </a>
                 </p>
             </div>
 

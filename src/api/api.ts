@@ -22,8 +22,15 @@ import {
     parseBlueprintId,
     resolveBlueprintFile,
 } from './blueprintCatalog';
+import { AuthConfig, AuthManager } from './auth';
+import { SubmissionManager } from './submissions';
 
 const { throttling } = require('@octokit/plugin-throttling');
+
+// Ensure the data/ directory exists for Auth.sqlite + weblink clone.
+try {
+    fs.mkdirSync('./../data', { recursive: true });
+} catch (e) {}
 
 export default class ApiManager {
     config: ConfigObject;
@@ -41,6 +48,15 @@ export default class ApiManager {
         gameModes: {},
         generatedAt: 0,
     };
+
+    authSequelize = new Sequelize('auth', 'user', 'password', {
+        host: 'localhost',
+        dialect: 'sqlite',
+        logging: false,
+        storage: './../data/Auth.sqlite',
+    });
+    auth: AuthManager = new AuthManager(this.loadAuthConfig(), this.authSequelize);
+    submissions: SubmissionManager = new SubmissionManager(this.auth, this.weblink, this.loadSubmissionsConfig());
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
         host: 'localhost',
@@ -186,6 +202,36 @@ export default class ApiManager {
             if (env && env.weblink) overrides = env.weblink;
         } catch (e) {}
         return new WeblinkSync(overrides);
+    }
+
+    private loadSubmissionsConfig() {
+        try {
+            const env = require('./../../env.json');
+            if (env && env.weblink_github_token) {
+                return {
+                    weblinkRepo: { owner: 'BentoBoxWorld', repo: 'weblink' },
+                    weblinkToken: env.weblink_github_token as string,
+                    weblinkBranch: (env.weblink && env.weblink.branch) || 'master',
+                };
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    private loadAuthConfig(): AuthConfig | null {
+        try {
+            const env = require('./../../env.json');
+            const inProd = process.env.NODE_ENV === 'production';
+            if (env && env.discord_client_id && env.discord_client_secret && env.discord_redirect_uri) {
+                return {
+                    clientId: env.discord_client_id,
+                    clientSecret: env.discord_client_secret,
+                    redirectUri: env.discord_redirect_uri,
+                    cookieSecure: inProd,
+                };
+            }
+        } catch (e) {}
+        return null;
     }
 
     async refreshBlueprints() {

@@ -12,6 +12,10 @@ const PresetsPage = React.lazy(() => import('./PresetsPage'));
 const CustomPage = React.lazy(() => import('./CustomPage'));
 const ThirdPartyPage = React.lazy(() => import('./ThirdParty'));
 const BlueprintsPage = React.lazy(() => import('./Blueprints'));
+const SubmitPage = React.lazy(() => import('./Submit'));
+const TermsPage = React.lazy(() => import('./Terms'));
+const PrivacyPage = React.lazy(() => import('./Privacy'));
+const AccountPage = React.lazy(() => import('./Account'));
 
 export default function ContentBox() {
     function CustomElement() {
@@ -83,6 +87,26 @@ export default function ContentBox() {
                     </Route>
                     <Route path={'/blueprints'}>
                         <BlueprintsElement />
+                    </Route>
+                    <Route path={'/submit'}>
+                        <Suspense fallback={<div />}>
+                            <SubmitPage />
+                        </Suspense>
+                    </Route>
+                    <Route path={'/account'}>
+                        <Suspense fallback={<div />}>
+                            <AccountPage />
+                        </Suspense>
+                    </Route>
+                    <Route path={'/terms'}>
+                        <Suspense fallback={<div />}>
+                            <TermsPage />
+                        </Suspense>
+                    </Route>
+                    <Route path={'/privacy'}>
+                        <Suspense fallback={<div />}>
+                            <PrivacyPage />
+                        </Suspense>
                     </Route>
                     <Route exact path={'/'}>
                         <PresetsElement />
