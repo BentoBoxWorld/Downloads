@@ -64,7 +64,7 @@ yarn site               # Frontend-only dev rebuild + start server
 
 ## CI
 
-GitHub Actions (`.github/workflows/build.yml`) runs on push/PR to `develop`: tests Node.js 12.x/14.x/16.x with `yarn && yarn add sqlite3 && yarn build`.
+GitHub Actions (`.github/workflows/build.yml`) runs on push/PR to `develop`: tests Node.js 20.x/22.x with `yarn && yarn add sqlite3 && yarn build`.
 
 ## Dependency Source Lookup
 
