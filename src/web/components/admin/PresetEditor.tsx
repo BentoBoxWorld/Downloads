@@ -158,7 +158,7 @@ function ChipPicker({
     selected: string[];
     onToggle: (name: string) => void;
 }) {
-    const sorted = [...addons].sort((a, b) => {
+    const sorted = [...addons].filter((a) => a.name.toLowerCase() !== 'bentobox').sort((a, b) => {
         if (a.gamemode !== b.gamemode) return a.gamemode ? -1 : 1;
         return a.name.localeCompare(b.name);
     });

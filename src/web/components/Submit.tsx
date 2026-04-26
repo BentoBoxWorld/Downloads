@@ -763,6 +763,18 @@ function SubmitForm({
         }
     }
 
+    const summary: ParsedSummary | null = useMemo(
+        () => (dropped ? summarizeBlueprint(dropped.json) : null),
+        [dropped],
+    );
+
+    /* Real voxels for the live card preview. Computed once per file
+     * so re-renders from typing don't re-walk the parsed JSON. */
+    const voxels: RealVoxel[] = useMemo(
+        () => (dropped ? deriveVoxels(dropped.json.blocks) : []),
+        [dropped],
+    );
+
     if (success) {
         return (
             <SuccessState
@@ -780,18 +792,6 @@ function SubmitForm({
             />
         );
     }
-
-    const summary: ParsedSummary | null = useMemo(
-        () => (dropped ? summarizeBlueprint(dropped.json) : null),
-        [dropped],
-    );
-
-    /* Real voxels for the live card preview. Computed once per file
-     * so re-renders from typing don't re-walk the parsed JSON. */
-    const voxels: RealVoxel[] = useMemo(
-        () => (dropped ? deriveVoxels(dropped.json.blocks) : []),
-        [dropped],
-    );
 
     const gameModeLower = gameMode ? gameMode.toLowerCase() : 'gamemode';
     const slugForPath = name || 'slug';
