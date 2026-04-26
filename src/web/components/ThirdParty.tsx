@@ -80,7 +80,7 @@ function ThirdPartyCard({
                         {addon.AuthorLink ? (
                             <a
                                 href={addon.AuthorLink}
-                                target="noopener"
+                                target="_blank" rel="noopener noreferrer"
                                 style={{
                                     color: 'var(--bb-ink)',
                                     textDecoration: 'underline',
@@ -125,7 +125,7 @@ function ThirdPartyCard({
                 {addon.Releases && (
                     <a
                         href={addon.Releases}
-                        target="noopener"
+                        target="_blank" rel="noopener noreferrer"
                         className="bb-btn bb-btn-primary"
                         style={{
                             flex: 1,
@@ -140,7 +140,7 @@ function ThirdPartyCard({
                 {addon.Github && (
                     <a
                         href={addon.Github}
-                        target="noopener"
+                        target="_blank" rel="noopener noreferrer"
                         className="bb-btn bb-btn-ghost"
                         title="Source on GitHub"
                         style={{ padding: '8px 12px', fontSize: 13 }}
@@ -151,7 +151,7 @@ function ThirdPartyCard({
                 {addon.Issues && (
                     <a
                         href={addon.Issues}
-                        target="noopener"
+                        target="_blank" rel="noopener noreferrer"
                         className="bb-btn bb-btn-ghost"
                         title="Report an issue"
                         style={{ padding: '8px 12px', fontSize: 13 }}
@@ -411,7 +411,7 @@ export default function ThirdPartyPage({ data }: { data: ThirdParty }) {
                             Want yours listed?{' '}
                             <a
                                 href="https://github.com/BentoBoxWorld/Downloads"
-                                target="noopener"
+                                target="_blank" rel="noopener noreferrer"
                                 style={{
                                     color: 'var(--bb-ink)',
                                     textDecoration: 'underline',

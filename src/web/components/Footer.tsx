@@ -24,7 +24,7 @@ const COLUMNS: { title: string; links: ColumnLink[] }[] = [
     {
         title: 'Downloads',
         links: [
-            { label: 'Presets', to: '/presets', icon: faCube },
+            { label: 'Presets', to: '/#presets-anchor', icon: faCube },
             { label: 'Custom build', to: '/custom', icon: faWrench },
             { label: 'Third-party addons', to: '/thirdparty', icon: faPuzzlePiece },
             { label: 'Blueprints', to: '/blueprints', icon: faLayerGroup },

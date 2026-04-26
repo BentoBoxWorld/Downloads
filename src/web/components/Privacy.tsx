@@ -16,7 +16,7 @@ export default function PrivacyPage() {
                         the Terms you accepted, and the URL of the resulting pull request on{' '}
                         <a
                             href="https://github.com/BentoBoxWorld/weblink"
-                            target="noopener"
+                            target="_blank" rel="noopener noreferrer"
                             css={tw`text-blue-700 underline`}
                         >
                             BentoBoxWorld/weblink

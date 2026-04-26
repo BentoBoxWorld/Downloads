@@ -20,7 +20,7 @@ export default function TermsPage() {
                     necessary to redistribute it under an open-source license. You grant the BentoBoxWorld project a
                     perpetual, worldwide, irrevocable, royalty-free license to host, copy, modify, redistribute, and
                     sublicense the Content under the terms of the&nbsp;
-                    <a href="https://www.eclipse.org/legal/epl-2.0/" target="noopener" css={tw`text-blue-700 underline`}>
+                    <a href="https://www.eclipse.org/legal/epl-2.0/" target="_blank" rel="noopener noreferrer" css={tw`text-blue-700 underline`}>
                         Eclipse Public License 2.0
                     </a>
                     &nbsp;(or any later version of that license at our discretion).
@@ -68,7 +68,7 @@ export default function TermsPage() {
 
             <p css={tw`text-sm text-gray-500 mt-8`}>
                 Questions? Contact us on the&nbsp;
-                <a href="https://discord.gg/KwjFBUaNSt" target="noopener" css={tw`text-blue-700 underline`}>
+                <a href="https://discord.gg/KwjFBUaNSt" target="_blank" rel="noopener noreferrer" css={tw`text-blue-700 underline`}>
                     BentoBox Discord
                 </a>
                 .

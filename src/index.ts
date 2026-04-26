@@ -62,7 +62,9 @@ app.set('X-Powered-By', 'BentoBox');
 // Auth: load session for every /api request, then expose discrete routes.
 const wrap = (fn: (...a: unknown[]) => unknown) =>
     (req: express.Request, res: express.Response, next: express.NextFunction) =>
-        fn(req, res, next);
+        Promise.resolve()
+            .then(() => fn(req, res, next))
+            .catch(next);
 
 app.use('/api', wrap(apiManager.auth.loadSession as (...a: unknown[]) => unknown));
 app.get('/api/auth/discord/login', wrap(apiManager.auth.handleLogin as (...a: unknown[]) => unknown));
