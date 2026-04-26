@@ -131,6 +131,31 @@ app.put(
     wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
     wrap(apiManager.admin.handleUpdatePresets as (...a: unknown[]) => unknown),
 );
+app.get(
+    '/api/admin/addons',
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleListAddons as (...a: unknown[]) => unknown),
+);
+app.post(
+    '/api/admin/addons',
+    express.json({ limit: '256kb' }),
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleCreateAddon as (...a: unknown[]) => unknown),
+);
+app.put(
+    '/api/admin/addons/:name',
+    express.json({ limit: '256kb' }),
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleUpdateAddon as (...a: unknown[]) => unknown),
+);
+app.delete(
+    '/api/admin/addons/:name',
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleDeleteAddon as (...a: unknown[]) => unknown),
+);
 
 app.get('/api/*', function (req, res) {
     apiManager.manageRequest(req, res);

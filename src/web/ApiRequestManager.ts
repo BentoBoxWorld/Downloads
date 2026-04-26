@@ -1,4 +1,4 @@
-import { AddonType, BlueprintCatalog, PresetsEntity, ThirdParty } from '../config';
+import { AddonsEntity, AddonType, BlueprintCatalog, PresetsEntity, ThirdParty } from '../config';
 import axios from 'axios';
 
 export async function GetPresets(): Promise<PresetsEntity[]> {
@@ -116,6 +116,35 @@ export async function PutAdminPresets(
     presets: PresetsEntity[],
 ): Promise<void> {
     await axios.put('/api/admin/presets', presets, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+}
+
+export async function GetAdminAddons(): Promise<AddonsEntity[]> {
+    return (await axios.get('/api/admin/addons')).data;
+}
+
+export async function PostAdminAddon(
+    csrfToken: string,
+    addon: AddonsEntity,
+): Promise<void> {
+    await axios.post('/api/admin/addons', addon, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+}
+
+export async function PutAdminAddon(
+    csrfToken: string,
+    name: string,
+    addon: AddonsEntity,
+): Promise<void> {
+    await axios.put(`/api/admin/addons/${encodeURIComponent(name)}`, addon, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+}
+
+export async function DeleteAdminAddon(csrfToken: string, name: string): Promise<void> {
+    await axios.delete(`/api/admin/addons/${encodeURIComponent(name)}`, {
         headers: { 'X-Csrf-Token': csrfToken },
     });
 }
