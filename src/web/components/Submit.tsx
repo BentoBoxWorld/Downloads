@@ -686,6 +686,13 @@ function SubmitForm({
     function clearFile() {
         setDropped(null);
         setDropError(null);
+        /* Reset only the file-derived fields so the next drop's
+         * `cur || …` prefill in acceptFile() actually takes effect.
+         * User-entered fields (gameMode, tags, license, credit-as,
+         * terms checkbox) are preserved. */
+        setName('');
+        setDisplayName('');
+        setDescription('');
     }
 
     async function handleLogout() {
