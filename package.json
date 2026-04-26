@@ -9,7 +9,8 @@
         "build": "tsc --project tsconfig.compile.json && webpack --config webpack.config.cjs --env env=production",
         "start": "cd dist && node index.js",
         "dev": "yarn clean && tsc --project tsconfig.compile.json && webpack --config webpack.config.cjs --env env=development && yarn start",
-        "site": "webpack --config webpack.config.cjs --env env=development && yarn start"
+        "site": "webpack --config webpack.config.cjs --env env=development && yarn start",
+        "prime-cache": "cd dist && node scripts/prime-cache.js"
     },
     "keywords": [],
     "author": "Fredthedoggy",
