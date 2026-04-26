@@ -171,7 +171,6 @@
         "1.17": "1.4.0",
         "1.16": "1.3.0",
         "1.16-Java16": "1.4.0"
-
       }
     },
     {
@@ -364,7 +363,6 @@
         "1.21.6": "1.2.2",
         "1.21.5": "1.2.2",
         "1.21.4": "1.2.2",
-        "1.21.4": "1.2.2",
         "1.21.1": "1.2.0",
         "1.20.6": "1.0.0",
         "1.19": "1.0.0"
@@ -397,11 +395,11 @@
       "ci": "BentoBoxWorld/InvSwitcher",
       "description": "**InvSwitcher** is per-world switcher.\n\nWorld inventory switcher add-on for BentoBox. This add-on will work for any game modes.\n\nThe following can be switched per-world:\n\n* Inventory & armor\n* Advancements\n* Food level\n* Experience\n* Health\n* Enderchest contents\n\nUse the config to set what you want to be switched.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "versions": {
-        "1.21.6": "1.15.1", 
-        "1.21.5": "1.15.1", 
-        "1.21.4": "1.15.1", 
-        "1.21.3": "1.15.1", 
-        "1.21.1": "1.15.1", 
+        "1.21.6": "1.15.1",
+        "1.21.5": "1.15.1",
+        "1.21.4": "1.15.1",
+        "1.21.3": "1.15.1",
+        "1.21.1": "1.15.1",
         "1.20.6": "1.14.0",
         "1.19": "1.11.0",
         "1.18": "1.11.0",
@@ -605,11 +603,12 @@
       "name": "BentoBox",
       "github": "BentoBoxWorld/BentoBox",
       "ci": "BentoBoxWorld/BentoBox",
-      "gamemode": false,
       "description": "BentoBox",
+      "gamemode": false,
       "versions": {
-        "1.21.6": "3.10.0",
-        "1.21.5": "3.10.0",
+        "2.26.1": "3.14.2",
+        "1.21.6": "3.14.2",
+        "1.21.5": "3.14.2",
         "1.21.4": "3.5.0",
         "1.21.3": "3.3.0",
         "1.21.1": "2.7.0",
@@ -624,22 +623,6 @@
     }
   ],
   "presets": [
-    {
-      "name": "Classic Skyblock",
-      "description": "The Original ASkyBlock experience!",
-      "subtext": "Includes the following addons:",
-      "addons": [
-        "BSkyBlock",
-        "Challenges",
-        "Level",
-        "Warps",
-        "ControlPanel",
-        "DimensionalTrees",
-        "Biomes",
-        "Bank"
-      ],
-      "color": "#ffdd57"
-    },
     {
       "name": "AOneBlock",
       "description": "tastybento's version of OneBlock!",
@@ -669,6 +652,23 @@
       "color": "#ffdd57"
     },
     {
+      "name": "Classic Skyblock",
+      "description": "The Original ASkyBlock experience!",
+      "subtext": "Includes the following addons:",
+      "addons": [
+        "BSkyBlock",
+        "Challenges",
+        "Level",
+        "Warps",
+        "ControlPanel",
+        "DimensionalTrees",
+        "Biomes",
+        "Bank",
+        "InvSwitcher"
+      ],
+      "color": "#eb57ff"
+    },
+    {
       "name": "CaveBlock",
       "description": "Unique variation to Skyblock!",
       "subtext": "Survive underground.\n\nIncludes the following addons:",
@@ -695,29 +695,29 @@
       ],
       "color": "#48c774"
     },
-      {
-        "name": "Poseidon",
-        "description": "Welcome to an underwater adventure!",
-        "subtext": "Where the ocean is both your playground and your challenge. Stranded in a shipwreck, you awaken with the ability to breathe underwater, but there’s a catch—you must keep moving, like a shark, to survive. Armed with a few essentials salvaged from a chest, your journey begins in the depths of the vast and mysterious sea.\n\nIncludes the following addons:",
-        "addons": [
-          "Poseidon",
-          "Challenges",
-          "Level",
-          "Warps",
-          "InvSwitcher"
-        ],
-        "color": "#ffdd57"
-      },
-      {
-        "name": "Stranger Realms",
-        "description": "The familiar world is shadowed by a terrifying, inverted dimension — the Upside Down.",
-        "subtext": "A chilling new survival experience where the familiar world is shadowed by a terrifying, inverted dimension. Stranger Realms is a custom BentoBox game mode that replaces the Nether with a dark, distressed copy of the Overworld — the Upside Down.",
-        "addons": [
-          "Stranger Realms",
-          "Warps",
-          "InvSwitcher"
-        ],
-        "color": "#cf1b21"
-      }
+    {
+      "name": "Poseidon",
+      "description": "Welcome to an underwater adventure!",
+      "subtext": "Where the ocean is both your playground and your challenge. Stranded in a shipwreck, you awaken with the ability to breathe underwater, but there’s a catch—you must keep moving, like a shark, to survive. Armed with a few essentials salvaged from a chest, your journey begins in the depths of the vast and mysterious sea.\n\nIncludes the following addons:",
+      "addons": [
+        "Poseidon",
+        "Challenges",
+        "Level",
+        "Warps",
+        "InvSwitcher"
+      ],
+      "color": "#ffdd57"
+    },
+    {
+      "name": "Stranger Realms",
+      "description": "The familiar world is shadowed by a terrifying, inverted dimension — the Upside Down.",
+      "subtext": "A chilling new survival experience where the familiar world is shadowed by a terrifying, inverted dimension. Stranger Realms is a custom BentoBox game mode that replaces the Nether with a dark, distressed copy of the Overworld — the Upside Down.",
+      "addons": [
+        "Stranger Realms",
+        "Warps",
+        "InvSwitcher"
+      ],
+      "color": "#cf1b21"
+    }
   ]
 }
