@@ -1,0 +1,291 @@
+/* BentoBox Downloads — Design Tokens
+ *
+ * Single source of truth for the front-end refresh.
+ * Imported once via src/web/styles/GlobalStyles.tsx (webpack already has a CSS loader).
+ * Coexists with Tailwind + twin.macro — these tokens layer on with the bb-* prefix.
+ */
+
+:root {
+  /* ── Surfaces ─────────────────────────────────────────────────── */
+  --bb-paper:        #f5f1e8;
+  --bb-paper-2:      #ede7d8;
+  --bb-paper-edge:   #d9d2bf;
+  --bb-paper-rgb:    245, 241, 232;
+  --bb-ink:          #1a1d24;
+  --bb-ink-2:        #2a2f3a;
+  --bb-mute:         #6b6f7a;
+  --bb-mute-2:       #9a9ea8;
+  --bb-line:         rgba(26, 29, 36, 0.08);
+  --bb-line-strong:  rgba(26, 29, 36, 0.16);
+
+  /* ── Brand accent ─────────────────────────────────────────────── */
+  --bb-green:        oklch(0.66 0.14 145);
+  --bb-green-ink:    oklch(0.32 0.08 145);
+  --bb-green-soft:   oklch(0.94 0.04 145);
+
+  /* ── Status / utility ─────────────────────────────────────────── */
+  --bb-amber:        oklch(0.82 0.14 80);
+  --bb-amber-ink:    oklch(0.42 0.10 80);
+  --bb-rose:         oklch(0.65 0.16 25);
+  --bb-discord:      #5865f2;
+
+  /* ── Type ─────────────────────────────────────────────────────── */
+  --bb-display: 'Space Grotesk', 'Inter Tight', system-ui, sans-serif;
+  --bb-sans:    'Inter Tight', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bb-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* ── Radii ────────────────────────────────────────────────────── */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 22px;
+
+  /* Aliases for components authored against the patch's --bb-r-* names */
+  --bb-r-sm: var(--r-sm);
+  --bb-r-md: var(--r-md);
+  --bb-r-lg: var(--r-lg);
+  --bb-r-xl: var(--r-xl);
+
+  /* ── Shadows ──────────────────────────────────────────────────── */
+  --sh-1: 0 1px 0 var(--bb-line), 0 1px 2px rgba(26, 29, 36, 0.04);
+  --sh-2: 0 1px 0 var(--bb-line), 0 6px 18px -8px rgba(26, 29, 36, 0.18);
+  --sh-3: 0 1px 0 var(--bb-line), 0 18px 40px -16px rgba(26, 29, 36, 0.28);
+
+  /* Aliases for components authored against the patch's shadow names */
+  --bb-shadow-card: var(--sh-1);
+  --bb-shadow-elev: var(--sh-2);
+
+  /* The patch authors `background: var(--bb-card)` for the lifted-card
+     surface. Our paper palette uses --bb-paper as the canonical card fill. */
+  --bb-card: var(--bb-paper);
+
+  /* ── Blueprint sub-brand — cyan-on-navy paper ─────────────────── */
+  --bp-paper:        #0e2742;
+  --bp-paper-2:      #0a1d33;
+  --bp-ink:          #cfe7f2;
+  --bp-ink-soft:     #7fb3cc;
+  --bp-line:         rgba(207, 231, 242, 0.18);
+  --bp-line-strong:  rgba(207, 231, 242, 0.32);
+  --bp-accent:       oklch(0.78 0.13 220);
+}
+
+/* ── Body baseline (overrides the existing tw`md:bg-background` rule
+ *    from the legacy GlobalStyles for routes that aren't /).
+ *    On the landing page (`body[data-route="/"]`), neutralize the cover image
+ *    entirely — the hero supplies its own backdrop. ───────────────────────── */
+html, body {
+  background-color: var(--bb-paper);
+  color: var(--bb-ink);
+  font-family: var(--bb-sans);
+}
+body[data-route="/"] {
+  background-image: none !important;
+  background-color: var(--bb-paper);
+}
+
+/* ── Hero backdrop ──────────────────────────────────────────────
+ *    The image URL is set inline via the --bb-hero-image custom property
+ *    (see Landing.tsx). This keeps css-loader from trying to resolve
+ *    the asset path at build time — webpack's copy-plugin serves it at
+ *    runtime from /static/root/.
+ */
+.bb-mc-bg {
+  /* Pull up under the sticky header so the dark hero image is what's
+   * behind the transparent nav at scroll-top (not the beige body). */
+  margin-top: -68px;
+  padding-top: 68px;
+  background-color: #0a0f18; /* fallback so white nav text never lands on beige */
+  background-image:
+    linear-gradient(180deg, rgba(10,15,24,0.55), rgba(10,15,24,0.55)),
+    var(--bb-hero-image, none);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* ── Paper card ───────────────────────────────────────────────── */
+.bb-card {
+  background: var(--bb-paper);
+  border: 1px solid var(--bb-paper-edge);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+}
+.bb-card-elev  { box-shadow: var(--sh-2); }
+.bb-card-hover { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.bb-card-hover:hover { transform: translateY(-2px); box-shadow: var(--sh-2); }
+
+/* ── Pills ────────────────────────────────────────────────────── */
+.bb-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.01em;
+  background: rgba(26, 29, 36, 0.06);
+  color: var(--bb-ink);
+  border: 1px solid var(--bb-line);
+}
+.bb-pill.green { background: var(--bb-green-soft); color: var(--bb-green-ink); border-color: transparent; }
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.bb-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 16px; border-radius: var(--r-md);
+  font-weight: 600; font-size: 14px; line-height: 1;
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.06s ease, background 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+  font-family: inherit;
+}
+.bb-btn:active { transform: translateY(1px); }
+.bb-btn-primary,
+.bb-btn-ink      { background: var(--bb-ink); color: var(--bb-paper); }
+.bb-btn-primary:hover,
+.bb-btn-ink:hover      { background: var(--bb-ink-2); }
+.bb-btn-accent   { background: var(--bb-green); color: #0d2417; }
+.bb-btn-accent:hover   { filter: brightness(1.05); }
+.bb-btn-ghost    { background: transparent; color: var(--bb-ink); border-color: var(--bb-line-strong); }
+.bb-btn-ghost:hover    { background: rgba(26, 29, 36, 0.04); }
+.bb-btn-paper    { background: rgba(var(--bb-paper-rgb), 0.95); color: var(--bb-ink); }
+.bb-btn-paper:hover    { background: rgba(var(--bb-paper-rgb), 1); }
+.bb-btn-discord  { background: var(--bb-discord); color: #fff; }
+.bb-btn-discord:hover  { background: #4752c4; }
+
+/* ── Section labels ───────────────────────────────────────────── */
+.bb-eyebrow {
+  text-transform: uppercase; letter-spacing: 0.12em;
+  font-size: 11px; font-weight: 600; color: var(--bb-mute);
+}
+
+/* ── Display heading ──────────────────────────────────────────── */
+.bb-display {
+  font-family: var(--bb-display);
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+/* ── Focus ring ───────────────────────────────────────────────── */
+.bb-focus:focus-visible,
+.bb-btn:focus-visible,
+.bb-pill:focus-visible {
+  outline: 2px solid var(--bb-green);
+  outline-offset: 2px;
+}
+
+/* ── Hatched placeholder surface ──────────────────────────────── */
+.bb-placeholder {
+  position: relative;
+  background:
+    repeating-linear-gradient(135deg, rgba(26, 29, 36, 0.04) 0 8px, transparent 8px 16px),
+    var(--bb-paper-2);
+  border: 1px dashed var(--bb-line-strong);
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  color: var(--bb-mute);
+  font-family: var(--bb-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Custom checkbox (used on the Custom-page addon picker) ──── */
+.bb-check {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border-radius: 4px;
+  border: 1.5px solid var(--bb-line-strong);
+  background: transparent;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  flex-shrink: 0;
+}
+.bb-check:checked {
+  background: var(--bb-ink);
+  border-color: var(--bb-ink);
+}
+.bb-check:checked::after {
+  content: '';
+  width: 5px;
+  height: 9px;
+  border: solid var(--bb-paper);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+.bb-check:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* ── Blueprint sub-brand surfaces ─────────────────────────────── */
+.bp-paper {
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(127, 179, 204, 0.10), transparent 60%),
+    var(--bp-paper);
+  color: var(--bp-ink);
+  position: relative;
+}
+.bp-paper.with-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--bp-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-line) 1px, transparent 1px);
+  background-size: 28px 28px, 28px 28px;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2));
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2));
+}
+
+/* Mono cyan stat chips used inside blueprint cards. */
+.bp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: var(--bb-mono);
+  background: rgba(207, 231, 242, 0.10);
+  border: 1px solid var(--bp-line);
+  color: var(--bp-ink);
+}
+.bp-chip.solid {
+  background: var(--bp-ink);
+  color: var(--bp-paper);
+  border-color: transparent;
+}
+
+@keyframes bpFade {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Blueprints + Submit live on the navy sub-brand surface — they supply
+   their own backdrop, so suppress the legacy back.jpg cover. */
+body[data-route="/blueprints"],
+body[data-route="/submit"] {
+  background-image: none !important;
+  background-color: var(--bp-paper-2);
+}
+
+/* ── Mobile baseline ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .bb-hero-stack    { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .bb-hero-title    { font-size: 44px !important; }
+  .bb-hero-padding  { padding: 40px 20px !important; }
+  .bb-section-pad   { padding: 48px 20px !important; }
+  .bb-grid-3        { grid-template-columns: 1fr !important; }
+  .bb-grid-2        { grid-template-columns: 1fr !important; }
+  .bb-grid-stats    { grid-template-columns: 1fr 1fr !important; }
+  .bb-grid-stats > * { border-right: none !important; border-bottom: 1px solid var(--bb-line); }
+  .bb-flex-stack    { flex-direction: column !important; align-items: stretch !important; }
+  .bb-hide-sm       { display: none !important; }
+}
