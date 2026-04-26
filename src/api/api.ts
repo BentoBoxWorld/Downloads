@@ -218,6 +218,7 @@ export default class ApiManager {
     async reload(): Promise<void> {
         this.config = this.configStore.getEffectiveConfig();
         await this.rebuildAddons();
+        await this.generateDownloads();
     }
 
     private createWeblinkSync(): WeblinkSync {
