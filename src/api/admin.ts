@@ -1,7 +1,15 @@
 import { RequestHandler } from 'express';
-import { AddonsEntity, PresetsEntity } from '../config';
+import { Octokit } from 'octokit';
+import { AddonsEntity, ConfigObject, PresetsEntity } from '../config';
 import { AuthedRequest, AuthManager } from './auth';
-import { ConfigStore } from './configStore';
+import { ConfigScope, ConfigStore } from './configStore';
+
+export interface AdminGithubConfig {
+    owner: string;
+    repo: string;
+    branch: string;
+    token: string;
+}
 
 const DISCORD_ID_RE = /^[0-9]{15,25}$/;
 const COLOR_RE = /^#[0-9a-fA-F]{3,8}$/;
@@ -19,12 +27,19 @@ const MAX_VERSION_VALUE_LEN = 50;
 const MAX_VERSIONS_PER_ADDON = 50;
 const PROTECTED_ADDON_NAMES = new Set(['BentoBox']);
 
+const VALID_SCOPES: ConfigScope[] = ['addons', 'presets'];
+
 export class AdminManager {
+    private readonly octokit: Octokit | null;
+
     constructor(
         private readonly auth: AuthManager,
         private readonly configStore: ConfigStore,
         private readonly reload: () => Promise<void>,
-    ) {}
+        private readonly github: AdminGithubConfig | null,
+    ) {
+        this.octokit = github ? new Octokit({ auth: github.token }) : null;
+    }
 
     handleListAdmins: RequestHandler = async (_req, res) => {
         const admins = await this.auth.listAdmins();
@@ -160,6 +175,158 @@ export class AdminManager {
         await this.configStore.setOverride('addons', next, actor?.id ?? '', summary);
         await this.reload();
     }
+
+    handleListAudits: RequestHandler = async (_req, res) => {
+        const rows = await this.configStore.getAuditLog(50);
+        const userIds = Array.from(new Set(rows.map((r) => r.userId).filter(Boolean)));
+        const userMap = new Map<string, { username: string; globalName: string | null }>();
+        for (const id of userIds) {
+            const u = await this.auth.findUser(id);
+            if (u) userMap.set(id, { username: u.username, globalName: u.globalName });
+        }
+        res.json(
+            rows.map((r) => ({
+                id: r.id,
+                scope: r.scope,
+                userId: r.userId,
+                username: userMap.get(r.userId)?.globalName ?? userMap.get(r.userId)?.username ?? null,
+                at: r.at,
+                summary: r.summary,
+            })),
+        );
+    };
+
+    handleListOverrides: RequestHandler = async (_req, res) => {
+        const rows = await this.configStore.listOverrides();
+        const userIds = Array.from(new Set(rows.map((r) => r.updatedBy).filter(Boolean)));
+        const userMap = new Map<string, { username: string; globalName: string | null }>();
+        for (const id of userIds) {
+            const u = await this.auth.findUser(id);
+            if (u) userMap.set(id, { username: u.username, globalName: u.globalName });
+        }
+        res.json(
+            rows.map((r) => ({
+                scope: r.scope,
+                updatedBy: r.updatedBy,
+                updatedByName:
+                    userMap.get(r.updatedBy)?.globalName ?? userMap.get(r.updatedBy)?.username ?? null,
+                updatedAt: r.updatedAt,
+            })),
+        );
+    };
+
+    handleResetOverride: RequestHandler = async (req, res) => {
+        const scope = String((req.params as Record<string, string>).scope ?? '');
+        if (!(VALID_SCOPES as string[]).includes(scope)) {
+            res.status(400).json({ error: 'invalid_scope' });
+            return;
+        }
+        const actor = (req as AuthedRequest).user;
+        await this.configStore.clearOverride(scope as ConfigScope, actor?.id ?? '');
+        await this.reload();
+        res.json({ ok: true });
+    };
+
+    handleOpenPr: RequestHandler = async (req, res) => {
+        if (!this.octokit || !this.github) {
+            res.status(503).json({ error: 'pr_not_configured' });
+            return;
+        }
+        const overrides = await this.configStore.listOverrides();
+        if (overrides.length === 0) {
+            res.status(400).json({ error: 'no_overrides' });
+            return;
+        }
+        const effective = this.configStore.getEffectiveConfig();
+        const newContent = renderConfigJson(effective);
+
+        const { owner, repo, branch: baseBranch } = this.github;
+        const actor = (req as AuthedRequest).user;
+        const ts = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+        const head = `admin/config-sync-${ts}`;
+
+        try {
+            // Read the file currently on the base branch — needed both for the
+            // "no diff" check and to pick up the file's git SHA for the update.
+            const existing = await this.octokit.rest.repos.getContent({
+                owner,
+                repo,
+                ref: baseBranch,
+                path: 'config.json',
+            });
+            const existingFile = existing.data as {
+                sha: string;
+                content?: string;
+                encoding?: string;
+            };
+            const existingContent =
+                existingFile.encoding === 'base64' && existingFile.content
+                    ? Buffer.from(existingFile.content, 'base64').toString('utf8')
+                    : '';
+            if (existingContent.trim() === newContent.trim()) {
+                res.status(400).json({ error: 'no_diff' });
+                return;
+            }
+
+            const baseRef = await this.octokit.rest.git.getRef({
+                owner,
+                repo,
+                ref: `heads/${baseBranch}`,
+            });
+            await this.octokit.rest.git.createRef({
+                owner,
+                repo,
+                ref: `refs/heads/${head}`,
+                sha: baseRef.data.object.sha,
+            });
+
+            const scopeList = overrides.map((o) => o.scope).join(', ');
+            await this.octokit.rest.repos.createOrUpdateFileContents({
+                owner,
+                repo,
+                branch: head,
+                path: 'config.json',
+                message: `Admin sync: ${scopeList}`,
+                content: Buffer.from(newContent).toString('base64'),
+                sha: existingFile.sha,
+            });
+
+            const recent = await this.configStore.getAuditLog(20);
+            const body = [
+                `This PR syncs the live admin overrides back to \`config.json\`.`,
+                ``,
+                `**Active overrides:** ${overrides.map((o) => `\`${o.scope}\``).join(', ')}`,
+                actor ? `**Opened by:** Discord \`${actor.id}\`` : '',
+                ``,
+                `### Recent audit entries`,
+                ...recent.map(
+                    (r) =>
+                        `- \`${new Date(r.at).toISOString()}\` · ${r.scope} · ${r.userId} — ${r.summary}`,
+                ),
+            ]
+                .filter(Boolean)
+                .join('\n');
+
+            const pr = await this.octokit.rest.pulls.create({
+                owner,
+                repo,
+                head,
+                base: baseBranch,
+                title: `Admin sync: ${scopeList}`,
+                body,
+            });
+
+            res.json({ ok: true, prUrl: pr.data.html_url });
+        } catch (err) {
+            const e = err as { status?: number; message?: string };
+            console.error('[admin] open PR failed:', e.status, e.message);
+            res.status(502).json({ error: 'github_error', detail: e.message ?? 'unknown' });
+        }
+    };
+}
+
+function renderConfigJson(cfg: ConfigObject): string {
+    return JSON.stringify(cfg, null, 2) + '\n';
 }
 
 function validatePresets(

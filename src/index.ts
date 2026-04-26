@@ -156,6 +156,29 @@ app.delete(
     wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
     wrap(apiManager.admin.handleDeleteAddon as (...a: unknown[]) => unknown),
 );
+app.get(
+    '/api/admin/audits',
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleListAudits as (...a: unknown[]) => unknown),
+);
+app.get(
+    '/api/admin/overrides',
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleListOverrides as (...a: unknown[]) => unknown),
+);
+app.delete(
+    '/api/admin/overrides/:scope',
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleResetOverride as (...a: unknown[]) => unknown),
+);
+app.post(
+    '/api/admin/pr',
+    express.json(),
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleOpenPr as (...a: unknown[]) => unknown),
+);
 
 app.get('/api/*', function (req, res) {
     apiManager.manageRequest(req, res);

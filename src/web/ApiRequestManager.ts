@@ -149,6 +149,48 @@ export async function DeleteAdminAddon(csrfToken: string, name: string): Promise
     });
 }
 
+export type AdminScope = 'addons' | 'presets';
+
+export interface AdminOverride {
+    scope: AdminScope;
+    updatedBy: string;
+    updatedByName: string | null;
+    updatedAt: number;
+}
+
+export interface AdminAudit {
+    id: number;
+    scope: string;
+    userId: string;
+    username: string | null;
+    at: number;
+    summary: string;
+}
+
+export async function GetAdminOverrides(): Promise<AdminOverride[]> {
+    return (await axios.get('/api/admin/overrides')).data;
+}
+
+export async function GetAdminAudits(): Promise<AdminAudit[]> {
+    return (await axios.get('/api/admin/audits')).data;
+}
+
+export async function DeleteAdminOverride(
+    csrfToken: string,
+    scope: AdminScope,
+): Promise<void> {
+    await axios.delete(`/api/admin/overrides/${encodeURIComponent(scope)}`, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+}
+
+export async function PostAdminPr(csrfToken: string): Promise<{ ok: true; prUrl: string }> {
+    const r = await axios.post('/api/admin/pr', null, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+    return r.data;
+}
+
 export async function PostSubmitBlueprint(
     csrfToken: string,
     fields: { gameMode: string; name: string; displayName: string; description: string; tags: string },

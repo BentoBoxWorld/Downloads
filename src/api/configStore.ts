@@ -78,8 +78,24 @@ export class ConfigStore {
         } as never);
     }
 
-    async getAuditLog(limit = 20): Promise<ConfigAuditModel[]> {
+    async getAuditLog(limit = 50): Promise<ConfigAuditModel[]> {
         return this.auditModel.findAll({ order: [['at', 'DESC']], limit });
+    }
+
+    async listOverrides(): Promise<
+        Array<{ scope: ConfigScope; updatedBy: string; updatedAt: number }>
+    > {
+        const rows = await this.overrideModel.findAll();
+        const out: Array<{ scope: ConfigScope; updatedBy: string; updatedAt: number }> = [];
+        for (const r of rows) {
+            if (!isScope(r.scope)) continue;
+            out.push({
+                scope: r.scope,
+                updatedBy: r.updatedBy,
+                updatedAt: r.updatedAt,
+            });
+        }
+        return out;
     }
 }
 

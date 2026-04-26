@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import tw from 'twin.macro';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShieldAlt, faUsers, faCube, faPuzzlePiece } from '@fortawesome/free-solid-svg-icons';
+import {
+    faShieldAlt,
+    faUsers,
+    faCube,
+    faPuzzlePiece,
+    faHistory,
+} from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { GetMe, PostLogout, SessionUser } from '../../ApiRequestManager';
+import RecentTab from './RecentTab';
 import AdminsTab from './AdminsTab';
 import PresetsTab from './PresetsTab';
 import AddonsTab from './AddonsTab';
 
-type TabId = 'admins' | 'presets' | 'addons';
+type TabId = 'recent' | 'admins' | 'presets' | 'addons';
 
 interface TabDef {
     id: TabId;
@@ -17,6 +24,7 @@ interface TabDef {
 }
 
 const TABS: TabDef[] = [
+    { id: 'recent', label: 'Recent', icon: faHistory },
     { id: 'admins', label: 'Admins', icon: faUsers },
     { id: 'presets', label: 'Presets', icon: faCube },
     { id: 'addons', label: 'Addons', icon: faPuzzlePiece },
@@ -24,7 +32,7 @@ const TABS: TabDef[] = [
 
 export default function AdminPage() {
     const [user, setUser] = useState<SessionUser | null | undefined>(undefined);
-    const [tab, setTab] = useState<TabId>('admins');
+    const [tab, setTab] = useState<TabId>('recent');
 
     useEffect(() => {
         GetMe()
@@ -114,6 +122,7 @@ export default function AdminPage() {
 
                 {/* Body */}
                 <div css={tw`flex-1 bg-white rounded-md shadow-sm p-5`} style={{ minWidth: 0 }}>
+                    {tab === 'recent' && <RecentTab user={user} />}
                     {tab === 'admins' && <AdminsTab user={user} />}
                     {tab === 'presets' && <PresetsTab user={user} />}
                     {tab === 'addons' && <AddonsTab user={user} />}

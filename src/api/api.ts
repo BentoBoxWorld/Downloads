@@ -22,7 +22,7 @@ import {
     parseBlueprintId,
     resolveBlueprintFile,
 } from './blueprintCatalog';
-import { AdminManager } from './admin';
+import { AdminGithubConfig, AdminManager } from './admin';
 import { AuthConfig, AuthManager } from './auth';
 import { ConfigStore } from './configStore';
 import { SubmissionManager } from './submissions';
@@ -176,7 +176,12 @@ export default class ApiManager {
             auth: env && env.github_token ? env.github_token : '',
         });
         this.configStore = new ConfigStore(configConstructor, this.authSequelize);
-        this.admin = new AdminManager(this.auth, this.configStore, () => this.reload());
+        this.admin = new AdminManager(
+            this.auth,
+            this.configStore,
+            () => this.reload(),
+            this.loadAdminGithubConfig(),
+        );
         this.config = configConstructor;
 
         // Once the override layer has loaded from disk, swap in the effective
@@ -232,6 +237,29 @@ export default class ApiManager {
                     weblinkRepo: { owner: 'BentoBoxWorld', repo: 'weblink' },
                     weblinkToken: env.weblink_github_token as string,
                     weblinkBranch: (env.weblink && env.weblink.branch) || 'master',
+                };
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    private loadAdminGithubConfig(): AdminGithubConfig | null {
+        try {
+            const env = require('./../../env.json');
+            const cfg = env?.admin_github;
+            if (
+                cfg &&
+                typeof cfg.token === 'string' &&
+                cfg.token.trim() &&
+                typeof cfg.owner === 'string' &&
+                typeof cfg.repo === 'string' &&
+                typeof cfg.branch === 'string'
+            ) {
+                return {
+                    owner: cfg.owner,
+                    repo: cfg.repo,
+                    branch: cfg.branch,
+                    token: cfg.token,
                 };
             }
         } catch (e) {}
