@@ -3,6 +3,7 @@
 .vscode
 yarn-error.log
 .idea
+*.iml
 .env
 env.json
 *.sqlite
