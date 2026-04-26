@@ -107,6 +107,19 @@ export async function PostSetAdmin(
     );
 }
 
+export async function GetAdminPresets(): Promise<PresetsEntity[]> {
+    return (await axios.get('/api/admin/presets')).data;
+}
+
+export async function PutAdminPresets(
+    csrfToken: string,
+    presets: PresetsEntity[],
+): Promise<void> {
+    await axios.put('/api/admin/presets', presets, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+}
+
 export async function PostSubmitBlueprint(
     csrfToken: string,
     fields: { gameMode: string; name: string; displayName: string; description: string; tags: string },

@@ -119,6 +119,18 @@ app.post(
     wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
     wrap(apiManager.admin.handleSetAdmin as (...a: unknown[]) => unknown),
 );
+app.get(
+    '/api/admin/presets',
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleListPresets as (...a: unknown[]) => unknown),
+);
+app.put(
+    '/api/admin/presets',
+    express.json({ limit: '512kb' }),
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleUpdatePresets as (...a: unknown[]) => unknown),
+);
 
 app.get('/api/*', function (req, res) {
     apiManager.manageRequest(req, res);

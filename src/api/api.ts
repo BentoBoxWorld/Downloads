@@ -59,7 +59,7 @@ export default class ApiManager {
     });
     auth: AuthManager = new AuthManager(this.loadAuthConfig(), this.authSequelize);
     configStore: ConfigStore;
-    admin: AdminManager = new AdminManager(this.auth);
+    admin: AdminManager;
     submissions: SubmissionManager = new SubmissionManager(this.auth, this.weblink, this.loadSubmissionsConfig());
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
@@ -176,6 +176,7 @@ export default class ApiManager {
             auth: env && env.github_token ? env.github_token : '',
         });
         this.configStore = new ConfigStore(configConstructor, this.authSequelize);
+        this.admin = new AdminManager(this.auth, this.configStore, () => this.reload());
         this.config = configConstructor;
 
         // Once the override layer has loaded from disk, swap in the effective
