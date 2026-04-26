@@ -60,8 +60,8 @@ export default function PrivacyPage() {
 
             <Section title="Cookies">
                 <p>
-                    We set one essential, HttpOnly, signed session cookie when you log in, plus a short-lived cookie
-                    holding the OAuth state for the duration of the Discord login redirect. We do not use analytics or
+                    We set one essential, HttpOnly session cookie when you log in, plus a short-lived cookie holding
+                    the OAuth state for the duration of the Discord login redirect. We do not use analytics or
                     tracking cookies.
                 </p>
             </Section>
