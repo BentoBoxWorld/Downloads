@@ -5,7 +5,16 @@ yarn-error.log
 .idea
 .env
 env.json
-jarcache.sqlite
-downloads.sqlite
+*.sqlite
 *.old*
 /.project
+
+# macOS Finder metadata
+.DS_Store
+
+# Runtime data (Auth DB, the auto-cloned weblink mirror, etc.)
+/data/
+
+# Design hand-off bundles dropped at the repo root
+/design_handoff_*/
+/BentoBox Download Site*.zip
