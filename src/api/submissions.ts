@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Octokit } from 'octokit';
 import multer = require('multer');
-import Ajv, { ValidateFunction } from 'ajv';
+import Ajv2020 from 'ajv/dist/2020';
+import { ValidateFunction } from 'ajv';
 import addFormats from 'ajv-formats';
 import { AuthedRequest, AuthManager, TERMS_VERSION } from './auth';
 import { CatalogOverlay, computeStats, parseBlueprintId } from './blueprintCatalog';
@@ -34,7 +35,7 @@ export class SubmissionManager {
         private readonly weblink: WeblinkSync,
         private readonly cfg: SubmissionsConfig | null,
     ) {
-        const ajv = new Ajv({ allErrors: false, strict: false });
+        const ajv = new Ajv2020({ allErrors: false, strict: false });
         addFormats(ajv);
         // The full schema accepts either Blueprint or BlueprintBundle; for
         // submissions we restrict to Blueprint. Register the full schema so
@@ -112,11 +113,28 @@ export class SubmissionManager {
             return;
         }
 
+        // 4a. Gson serializes empty Map<Vector, X> as `{}` rather than `[]`,
+        // even when complex-map-key serialization is enabled. The schema
+        // declares those fields as arrays, so coerce the empty-object form
+        // before validation. The PR keeps the user's original bytes.
+        const normalized = normalizeForValidation(parsed);
+
         // 5. Schema validation.
-        if (!this.validate(parsed)) {
-            const errors = (this.validate.errors ?? []).slice(0, 3).map(
-                (e) => `${e.instancePath || '/'}: ${e.message ?? 'invalid'}`,
-            );
+        if (!this.validate(normalized)) {
+            const errors = (this.validate.errors ?? []).slice(0, 5).map((e) => {
+                const path = e.instancePath || '/';
+                const params = e.params as Record<string, unknown> | undefined;
+                if (e.keyword === 'additionalProperties' && params && 'additionalProperty' in params) {
+                    return `${path}: unknown field "${params.additionalProperty}"`;
+                }
+                if (e.keyword === 'required' && params && 'missingProperty' in params) {
+                    return `${path}: missing required field "${params.missingProperty}"`;
+                }
+                if (e.keyword === 'enum' && params && 'allowedValues' in params) {
+                    return `${path}: must be one of ${(params.allowedValues as unknown[]).join(', ')}`;
+                }
+                return `${path}: ${e.message ?? 'invalid'}`;
+            });
             res.status(400).json({ error: 'schema_failed', issues: errors });
             return;
         }
@@ -180,8 +198,24 @@ export class SubmissionManager {
 
             res.json({ ok: true, prUrl });
         } catch (err) {
-            console.error('[submission] PR creation failed:', (err as Error).message);
-            res.status(502).json({ error: 'pr_failed', reason: 'Could not open pull request on weblink.' });
+            const e = err as Error & {
+                status?: number;
+                response?: { data?: { message?: string; errors?: unknown } };
+            };
+            const detail =
+                e.response?.data?.message ||
+                e.message ||
+                'unknown error';
+            console.error('[submission] PR creation failed.', {
+                status: e.status,
+                message: e.message,
+                githubMessage: e.response?.data?.message,
+                githubErrors: e.response?.data?.errors,
+            });
+            res.status(502).json({
+                error: 'pr_failed',
+                reason: `Could not open pull request on weblink: ${detail}`,
+            });
         }
     };
 
@@ -321,6 +355,23 @@ export class SubmissionManager {
 }
 
 // ----- helpers -----
+
+function normalizeForValidation(input: unknown): unknown {
+    if (typeof input !== 'object' || input === null) return input;
+    const out: Record<string, unknown> = { ...(input as Record<string, unknown>) };
+    for (const key of ['blocks', 'attached', 'entities']) {
+        const v = out[key];
+        if (
+            v &&
+            typeof v === 'object' &&
+            !Array.isArray(v) &&
+            Object.keys(v as Record<string, unknown>).length === 0
+        ) {
+            out[key] = [];
+        }
+    }
+    return out;
+}
 
 function parseDescription(raw: string | undefined): string[] {
     if (!raw) return [];

@@ -34,6 +34,10 @@ try {
 
 const port = env.port || 8080;
 
+// In development, webpack's source-map devtool wraps each module in
+// eval() — so a strict scriptSrc breaks the page. Allow 'unsafe-eval'
+// outside production only.
+const isProd = process.env.NODE_ENV === 'production';
 app.use(
     helmet({
         contentSecurityPolicy: {
@@ -42,7 +46,7 @@ app.use(
                 styleSrc: ["'self'", "'unsafe-inline'"],
                 imgSrc: ["'self'", 'https://cdn.discordapp.com', 'data:'],
                 connectSrc: ["'self'"],
-                scriptSrc: ["'self'"],
+                scriptSrc: isProd ? ["'self'"] : ["'self'", "'unsafe-eval'"],
                 // Discord OAuth uses top-level navigation; helmet's CSP does
                 // not constrain navigation, so no entry for discord.com is
                 // needed here.

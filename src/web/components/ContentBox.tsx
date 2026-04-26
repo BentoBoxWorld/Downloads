@@ -1,14 +1,11 @@
-import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import tw from 'twin.macro';
+import React, { Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Switch, useLocation } from 'react-router-dom';
 import Navigation from './Navigation';
+import Footer from './Footer';
 import { GetAddons, GetBlueprints, GetPresets, GetThirdParty } from '../ApiRequestManager';
 import { Async } from 'react-async';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
-import { faQuestion } from '@fortawesome/free-solid-svg-icons';
 
-const PresetsPage = React.lazy(() => import('./PresetsPage'));
+const Landing = React.lazy(() => import('./Landing'));
 const CustomPage = React.lazy(() => import('./CustomPage'));
 const ThirdPartyPage = React.lazy(() => import('./ThirdParty'));
 const BlueprintsPage = React.lazy(() => import('./Blueprints'));
@@ -16,6 +13,36 @@ const SubmitPage = React.lazy(() => import('./Submit'));
 const TermsPage = React.lazy(() => import('./Terms'));
 const PrivacyPage = React.lazy(() => import('./Privacy'));
 const AccountPage = React.lazy(() => import('./Account'));
+
+/** Sets `body[data-route="..."]` so design-tokens.css can disable
+ *  the legacy `md:bg-background` cover image on the landing page. */
+function RouteAwareBody() {
+    const location = useLocation();
+    useEffect(() => {
+        document.body.setAttribute('data-route', location.pathname);
+    }, [location.pathname]);
+    return null;
+}
+
+/** Paper-card wrapper used for every interior route (everything except `/`).
+ *  Retains the original "soft surface" feel without the yellow tint. */
+function InteriorWrap({ children }: { children: React.ReactNode }) {
+    return (
+        <div
+            style={{
+                maxWidth: 1180,
+                margin: '32px auto',
+                padding: '32px 24px',
+                background: 'var(--bb-paper)',
+                borderRadius: 'var(--r-lg)',
+                boxShadow: 'var(--sh-1)',
+                minHeight: '60vh',
+            }}
+        >
+            {children}
+        </div>
+    );
+}
 
 export default function ContentBox() {
     function CustomElement() {
@@ -32,14 +59,14 @@ export default function ContentBox() {
         );
     }
 
-    function PresetsElement() {
+    function LandingElement() {
         const presets = () => GetPresets();
         return (
             <Suspense fallback={<div />}>
                 <Async promiseFn={presets}>
                     {({ data, isLoading }) => {
                         if (isLoading) return <></>;
-                        if (data) return <PresetsPage presets={data.filter((a) => a)} />;
+                        if (data) return <Landing presets={data.filter((a) => a)} />;
                     }}
                 </Async>
             </Suspense>
@@ -75,66 +102,80 @@ export default function ContentBox() {
     }
 
     return (
-        <div css={tw`m-0 md:mx-auto md:my-12 bg-yellow-50 bg-opacity-75 md:w-3/4 max-w-screen-lg p-12 min-h-screen`}>
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Router>
+                <RouteAwareBody />
                 <Navigation />
-                <Switch>
-                    <Route path={'/custom'}>
-                        <CustomElement />
-                    </Route>
-                    <Route path={'/thirdparty'}>
-                        <ThirdPartyElement />
-                    </Route>
-                    <Route path={'/blueprints'}>
-                        <BlueprintsElement />
-                    </Route>
-                    <Route path={'/submit'}>
-                        <Suspense fallback={<div />}>
-                            <SubmitPage />
-                        </Suspense>
-                    </Route>
-                    <Route path={'/account'}>
-                        <Suspense fallback={<div />}>
-                            <AccountPage />
-                        </Suspense>
-                    </Route>
-                    <Route path={'/terms'}>
-                        <Suspense fallback={<div />}>
-                            <TermsPage />
-                        </Suspense>
-                    </Route>
-                    <Route path={'/privacy'}>
-                        <Suspense fallback={<div />}>
-                            <PrivacyPage />
-                        </Suspense>
-                    </Route>
-                    <Route exact path={'/'}>
-                        <PresetsElement />
-                    </Route>
-                    <Route path="*">
-                        <div css={tw`mx-auto my-2 pt-10 text-center\t`}>
-                            <p css={tw`text-3xl font-semibold`}>404</p>
-                            <p css={tw`text-lg`}>Page Not Found</p>
-                        </div>
-                    </Route>
-                </Switch>
+                <main style={{ flex: 1 }}>
+                    <Switch>
+                        {/* Landing — full-bleed, no interior wrapper */}
+                        <Route exact path="/">
+                            <LandingElement />
+                        </Route>
+
+                        {/* /presets used to be a standalone page; the
+                            presets section now lives inside Landing under
+                            #presets-anchor. The Presets nav item links there. */}
+                        {/* /custom and /thirdparty render their own dark hero
+                            band edge-to-edge — they manage their own surfaces. */}
+                        <Route path="/custom">
+                            <CustomElement />
+                        </Route>
+                        <Route path="/thirdparty">
+                            <ThirdPartyElement />
+                        </Route>
+                        {/* Blueprints renders its own navy sub-brand surface
+                            edge-to-edge — skip the warm-paper InteriorWrap. */}
+                        <Route path="/blueprints">
+                            <BlueprintsElement />
+                        </Route>
+                        <Route path="/submit">
+                            <InteriorWrap>
+                                <Suspense fallback={<div />}>
+                                    <SubmitPage />
+                                </Suspense>
+                            </InteriorWrap>
+                        </Route>
+                        <Route path="/account">
+                            <InteriorWrap>
+                                <Suspense fallback={<div />}>
+                                    <AccountPage />
+                                </Suspense>
+                            </InteriorWrap>
+                        </Route>
+                        <Route path="/terms">
+                            <InteriorWrap>
+                                <Suspense fallback={<div />}>
+                                    <TermsPage />
+                                </Suspense>
+                            </InteriorWrap>
+                        </Route>
+                        <Route path="/privacy">
+                            <InteriorWrap>
+                                <Suspense fallback={<div />}>
+                                    <PrivacyPage />
+                                </Suspense>
+                            </InteriorWrap>
+                        </Route>
+                        <Route path="*">
+                            <InteriorWrap>
+                                <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                                    <p
+                                        className="bb-display"
+                                        style={{ fontSize: 48, margin: 0 }}
+                                    >
+                                        404
+                                    </p>
+                                    <p style={{ fontSize: 18, color: 'var(--bb-mute)', marginTop: 8 }}>
+                                        Page Not Found
+                                    </p>
+                                </div>
+                            </InteriorWrap>
+                        </Route>
+                    </Switch>
+                </main>
+                <Footer />
             </Router>
-            <div css={tw`h-12 mx-auto mt-auto text-center`}>
-                Site By&nbsp;<a href={'https://github.com/Fredthedoggy'}>Fredthedoggy</a>
-                ,&nbsp;BentoBox&nbsp;&amp;&nbsp;BentoBoxWorld by&nbsp;
-                <a href={'https://github.com/tastybento'}>tastybento</a>&nbsp;and&nbsp;
-            </div>
-            <div css={tw`w-max ml-auto flex flex-row space-x-1.5`}>
-                <a href={'https://discord.gg/KwjFBUaNSt'} css={tw`text-blue-600`} target={'noopener'}>
-                    <FontAwesomeIcon icon={faDiscord} size={'lg'} />
-                </a>
-                <a href={'https://docs.bentobox.world/'} target={'noopener'}>
-                    <FontAwesomeIcon icon={faQuestion} size={'lg'} />
-                </a>
-                <a href={'https://github.com/BentoBoxWorld'} target={'noopener'}>
-                    <FontAwesomeIcon icon={faGithub} size={'lg'} />
-                </a>
-            </div>
         </div>
     );
 }

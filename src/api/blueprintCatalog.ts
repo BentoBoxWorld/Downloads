@@ -363,7 +363,7 @@ export function validateBlueprintSubmission(raw: unknown): { ok: boolean; issues
     const attached = Array.isArray(bp.attached) ? bp.attached : [];
     for (const list of [blocks, attached]) {
         for (const pair of list) {
-            const block = pair?.[1] as BlueprintBlock & { inventory?: unknown } | undefined;
+            const block = pair?.[1] as BlueprintBlock & { inventory?: Record<string, unknown> } | undefined;
             if (!block) continue;
             if (typeof block.blockData === 'string') {
                 const mat = materialOf(block.blockData);
@@ -371,11 +371,25 @@ export function validateBlueprintSubmission(raw: unknown): { ok: boolean; issues
                     issues.push({ field: 'blocks', reason: `Disallowed material: ${mat}` });
                 }
             }
-            if ('inventory' in block && block.inventory) {
-                issues.push({
-                    field: 'blocks.inventory',
-                    reason: 'Container contents are not permitted in submissions (opaque YAML payload).',
-                });
+            // Inventories are common (chests/barrels of starter loot). Allow
+            // them, but substring-scan the YAML payloads for the same
+            // disallowed materials a hostile submitter might tuck inside an
+            // ItemStack rather than the blockData.
+            if (block.inventory && typeof block.inventory === 'object') {
+                for (const slotKey of Object.keys(block.inventory)) {
+                    const yaml = block.inventory[slotKey];
+                    if (typeof yaml !== 'string') continue;
+                    const lc = yaml.toLowerCase();
+                    for (const banned of Array.from(COMMAND_BLOCK_MATERIALS)) {
+                        if (lc.includes(banned)) {
+                            issues.push({
+                                field: `blocks.inventory[${slotKey}]`,
+                                reason: `Disallowed material in stored ItemStack: ${banned}`,
+                            });
+                            break;
+                        }
+                    }
+                }
             }
         }
     }

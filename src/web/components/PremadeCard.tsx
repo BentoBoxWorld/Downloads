@@ -1,71 +1,162 @@
 import React from 'react';
 import tw from 'twin.macro';
 import ReactMarkdown from 'react-markdown';
-import { PremadeCardType } from '../web';
 import remarkBreaks from 'remark-breaks';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { PremadeCardType } from '../web';
 
 export default function PremadeCard(props: PremadeCardType) {
     const { addons, color, description, name, subtext, dependencies, dependencyText } = props;
-
     if (!addons) return <></>;
 
-    const addonsList = addons.map((addon) => {
-        return <li key={addon}>{addon}</li>;
-    });
-
-    let pluginsList: JSX.Element[] | null = null;
-
-    if (dependencies) {
-        pluginsList = dependencies.map((addon) => {
-            return <li key={addon}>{addon}</li>;
-        });
-    }
+    const downloadHref = `/api/generate?downloads=${encodeURI(
+        '[' + addons.map((a) => '"' + a + '"').join(',') + ']',
+    )}`;
+    const customizeHref = `/custom#${encodeURI(
+        '[' + addons.map((a) => '"' + a + '"').join(',') + ']',
+    )}`;
 
     return (
-        <div
-            css={`
-                background-color: ${color};
-                ${tw`m-3 inline-flex flex-col items-center justify-start flex-1 h-auto w-full p-4 rounded-lg min-w-card text-gray-700`};
-            `}
+        <article
+            css={tw`flex flex-col overflow-hidden`}
+            style={{
+                background: 'var(--bb-card)',
+                border: '1px solid var(--bb-paper-edge)',
+                borderRadius: 'var(--bb-r-lg)',
+                boxShadow: 'var(--bb-shadow-card)',
+            }}
         >
-            <p css={tw`w-full text-2xl font-semibold`}>{name}</p>
-            <div css={tw`w-full pb-5 text-lg tracking-wide leading-tight`}>
-                <ReactMarkdown remarkPlugins={[remarkBreaks]}>{description}</ReactMarkdown>
-            </div>
-            <div css={tw`w-full pb-2 text-sm tracking-wide leading-tight`}>
-                <ReactMarkdown remarkPlugins={[remarkBreaks]}>{subtext}</ReactMarkdown>
-            </div>
-            <ul css={tw`w-full pb-6 text-sm tracking-wide leading-tight list-inside list-disc`}>{addonsList}</ul>
-            {pluginsList && dependencyText && (
-                <>
-                    <div css={tw`w-full pb-2 text-sm tracking-wide leading-tight`}>
-                        <ReactMarkdown remarkPlugins={[remarkBreaks]}>{dependencyText}</ReactMarkdown>
-                    </div>
-                    <ul css={tw`w-full pb-6 text-sm tracking-wide leading-tight list-inside list-disc`}>
-                        {pluginsList}
-                    </ul>
-                </>
-            )}
-            <div css={tw`rounded mr-auto mt-auto flex flex-row`}>
-                <div css={tw`opacity-95 border rounded-lg border-gray-700 px-4`}>
-                    <a
-                        css={tw`m-auto inset-0 text-sm font-medium leading-normal text-center py-2`}
-                        href={`/api/generate?downloads=${encodeURI(
-                            '[' + addons.map((a) => '"' + a + '"').join(',') + ']',
-                        )}`}
+            {/* Color accent stripe */}
+            <div style={{ height: 6, background: color }} />
+
+            <div css={tw`flex flex-col flex-grow p-5`}>
+                <header css={tw`mb-3`}>
+                    <h3
+                        style={{
+                            fontFamily: 'var(--bb-display)',
+                            fontWeight: 700,
+                            fontSize: 22,
+                            color: 'var(--bb-ink)',
+                            letterSpacing: '-0.01em',
+                            margin: 0,
+                        }}
                     >
+                        {name}
+                    </h3>
+                </header>
+
+                <div
+                    css={tw`mb-3`}
+                    style={{
+                        fontSize: 15,
+                        lineHeight: 1.5,
+                        color: 'var(--bb-ink-2)',
+                    }}
+                >
+                    <ReactMarkdown remarkPlugins={[remarkBreaks]}>{description}</ReactMarkdown>
+                </div>
+
+                {subtext && (
+                    <div
+                        css={tw`mb-3`}
+                        style={{
+                            fontSize: 13,
+                            lineHeight: 1.55,
+                            color: 'var(--bb-mute)',
+                        }}
+                    >
+                        <ReactMarkdown remarkPlugins={[remarkBreaks]}>{subtext}</ReactMarkdown>
+                    </div>
+                )}
+
+                <ul
+                    css={tw`m-0 p-0 mb-4 flex flex-row flex-wrap`}
+                    style={{ listStyle: 'none', gap: 6 }}
+                >
+                    {addons.map((addon) => (
+                        <li
+                            key={addon}
+                            style={{
+                                fontFamily: 'var(--bb-mono)',
+                                fontSize: 11,
+                                padding: '3px 8px',
+                                borderRadius: 4,
+                                background: 'var(--bb-paper-2)',
+                                color: 'var(--bb-ink-2)',
+                                border: '1px solid var(--bb-paper-edge)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
+                            }}
+                        >
+                            <span
+                                style={{
+                                    width: 6,
+                                    height: 6,
+                                    borderRadius: '50%',
+                                    background: color,
+                                    flexShrink: 0,
+                                }}
+                            />
+                            {addon}
+                        </li>
+                    ))}
+                </ul>
+
+                {dependencies && dependencyText && (
+                    <>
+                        <div css={tw`mb-2`} style={{ fontSize: 12, color: 'var(--bb-mute)' }}>
+                            <ReactMarkdown remarkPlugins={[remarkBreaks]}>
+                                {dependencyText}
+                            </ReactMarkdown>
+                        </div>
+                        <ul
+                            css={tw`m-0 p-0 mb-4 flex flex-row flex-wrap`}
+                            style={{ listStyle: 'none', gap: 6 }}
+                        >
+                            {dependencies.map((dep) => (
+                                <li
+                                    key={dep}
+                                    style={{
+                                        fontFamily: 'var(--bb-mono)',
+                                        fontSize: 11,
+                                        padding: '3px 8px',
+                                        borderRadius: 4,
+                                        background: 'transparent',
+                                        color: 'var(--bb-mute)',
+                                        border: '1px dashed var(--bb-paper-edge)',
+                                    }}
+                                >
+                                    {dep}
+                                </li>
+                            ))}
+                        </ul>
+                    </>
+                )}
+
+                <div
+                    css={tw`mt-auto flex flex-row flex-wrap`}
+                    style={{ gap: 8, paddingTop: 8 }}
+                >
+                    <a
+                        href={downloadHref}
+                        className="bb-btn bb-btn-primary"
+                        style={{ flex: '1 1 auto' }}
+                    >
+                        <FontAwesomeIcon icon={faDownload} />
                         Download
                     </a>
-                </div>
-                <div css={tw`opacity-95 border rounded-lg border-gray-700 px-4 ml-3`}>
                     <a
-                        css={tw`m-auto inset-0 text-sm font-medium leading-normal text-center py-2`}
-                        href={`/custom#${encodeURI('[' + addons.map((a) => '"' + a + '"').join(',') + ']')}`}
+                        href={customizeHref}
+                        className="bb-btn bb-btn-ghost"
+                        style={{ flex: '1 1 auto' }}
                     >
+                        <FontAwesomeIcon icon={faWrench} />
                         Customize
                     </a>
                 </div>
             </div>
-        </div>
+        </article>
     );
 }
