@@ -269,7 +269,7 @@ function LoginGate(): JSX.Element {
                         .
                     </p>
                     <a
-                        href="/api/auth/discord/login"
+                        href="/api/auth/discord/login?return=/submit"
                         className="bb-btn bb-btn-discord"
                         style={{ padding: '12px 20px', fontSize: 14 }}
                     >

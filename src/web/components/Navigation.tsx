@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,9 +10,14 @@ import {
     faHome,
     faBars,
     faTimes,
+    faShieldAlt,
+    faCaretDown,
+    faSignOutAlt,
+    faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { GetMe, PostLogout, SessionUser } from '../ApiRequestManager';
 
 interface Tab {
     to: string;
@@ -46,7 +51,7 @@ function handleAnchorClick(
     }
 }
 
-const TABS: Tab[] = [
+const BASE_TABS: Tab[] = [
     { to: '/', label: 'Home', icon: faHome, exact: true },
     { to: '/', label: 'Presets', icon: faCube, landingAnchor: 'presets-anchor' },
     { to: '/custom', label: 'Custom', icon: faWrench },
@@ -54,10 +59,54 @@ const TABS: Tab[] = [
     { to: '/blueprints', label: 'Blueprints', icon: faLayerGroup },
 ];
 
+const ADMIN_TAB: Tab = { to: '/admin', label: 'Admin', icon: faShieldAlt };
+
 export default function Navigation() {
     const location = useLocation();
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [user, setUser] = useState<SessionUser | null | undefined>(undefined);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        GetMe()
+            .then((u) => {
+                if (!cancelled) setUser(u);
+            })
+            .catch(() => {
+                if (!cancelled) setUser(null);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+        const onDocClick = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', onDocClick);
+        return () => document.removeEventListener('mousedown', onDocClick);
+    }, [menuOpen]);
+
+    async function handleLogout() {
+        if (!user) return;
+        try {
+            await PostLogout(user.csrfToken);
+        } finally {
+            // Hard reload so every component (admin link, account page, etc.)
+            // re-fetches /api/me and re-renders without a session.
+            window.location.href = '/';
+        }
+    }
+
+    const isAdmin = !!user && user.isAdmin;
+    const TABS: Tab[] = isAdmin ? [...BASE_TABS, ADMIN_TAB] : BASE_TABS;
 
     // The header sits on top of the dark hero on `/` and stays transparent
     // until the user scrolls past it. On every other route it's solid paper.
@@ -247,6 +296,115 @@ export default function Navigation() {
                         <FontAwesomeIcon icon={faDiscord} />
                         Discord
                     </a>
+                    {user && (
+                        <div ref={menuRef} style={{ position: 'relative' }}>
+                            <button
+                                type="button"
+                                onClick={() => setMenuOpen((o) => !o)}
+                                aria-haspopup="menu"
+                                aria-expanded={menuOpen}
+                                className="bb-btn bb-btn-discord"
+                                style={{
+                                    padding: '6px 10px',
+                                    fontSize: 13,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                }}
+                            >
+                                {user.avatarUrl ? (
+                                    <img
+                                        src={user.avatarUrl}
+                                        alt=""
+                                        style={{ width: 22, height: 22, borderRadius: '50%' }}
+                                    />
+                                ) : (
+                                    <FontAwesomeIcon icon={faUser} />
+                                )}
+                                <span>{user.globalName || user.username}</span>
+                                <FontAwesomeIcon icon={faCaretDown} />
+                            </button>
+                            {menuOpen && (
+                                <div
+                                    role="menu"
+                                    style={{
+                                        position: 'absolute',
+                                        top: 'calc(100% + 6px)',
+                                        right: 0,
+                                        minWidth: 180,
+                                        background: 'var(--bb-paper)',
+                                        border: '1px solid var(--bb-line)',
+                                        borderRadius: 8,
+                                        boxShadow: 'var(--sh-1)',
+                                        padding: 4,
+                                        zIndex: 100,
+                                        color: 'var(--bb-ink)',
+                                    }}
+                                >
+                                    <NavLink
+                                        to="/account"
+                                        onClick={() => setMenuOpen(false)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 10,
+                                            padding: '8px 10px',
+                                            borderRadius: 6,
+                                            textDecoration: 'none',
+                                            color: 'inherit',
+                                            fontSize: 14,
+                                        }}
+                                    >
+                                        <FontAwesomeIcon icon={faUser} style={{ width: 14 }} />
+                                        Account
+                                    </NavLink>
+                                    {isAdmin && (
+                                        <NavLink
+                                            to="/admin"
+                                            onClick={() => setMenuOpen(false)}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 10,
+                                                padding: '8px 10px',
+                                                borderRadius: 6,
+                                                textDecoration: 'none',
+                                                color: 'inherit',
+                                                fontSize: 14,
+                                            }}
+                                        >
+                                            <FontAwesomeIcon icon={faShieldAlt} style={{ width: 14 }} />
+                                            Admin
+                                        </NavLink>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setMenuOpen(false);
+                                            handleLogout();
+                                        }}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 10,
+                                            width: '100%',
+                                            padding: '8px 10px',
+                                            borderRadius: 6,
+                                            background: 'transparent',
+                                            border: 'none',
+                                            color: 'inherit',
+                                            fontSize: 14,
+                                            textAlign: 'left',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        <FontAwesomeIcon icon={faSignOutAlt} style={{ width: 14 }} />
+                                        Log out
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Mobile hamburger */}
@@ -361,6 +519,49 @@ export default function Navigation() {
                             Discord
                         </a>
                     </div>
+                    {user && (
+                        <div
+                            style={{
+                                marginTop: 16,
+                                paddingTop: 16,
+                                borderTop: '1px solid var(--bb-line)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                            }}
+                        >
+                            {user.avatarUrl ? (
+                                <img
+                                    src={user.avatarUrl}
+                                    alt=""
+                                    style={{ width: 28, height: 28, borderRadius: '50%' }}
+                                />
+                            ) : (
+                                <FontAwesomeIcon icon={faUser} />
+                            )}
+                            <span style={{ fontSize: 14, color: 'var(--bb-ink)' }}>
+                                {user.globalName || user.username}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                className="bb-btn bb-btn-discord"
+                                style={{
+                                    marginLeft: 'auto',
+                                    padding: '6px 10px',
+                                    fontSize: 13,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                <FontAwesomeIcon icon={faSignOutAlt} />
+                                Log out
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 

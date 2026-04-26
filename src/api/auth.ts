@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Response } from 'express';
 import * as crypto from 'crypto';
 import * as cron from 'node-cron';
-import { Op, Sequelize } from 'sequelize';
+import { BOOLEAN, Op, Sequelize } from 'sequelize';
 import axios from 'axios';
 import {
     SessionFactory,
@@ -18,13 +18,26 @@ export interface AuthConfig {
     clientSecret: string;
     redirectUri: string;
     cookieSecure: boolean; // true in prod, false on localhost dev
+    adminDiscordIds?: string[];
 }
 
 const SESSION_COOKIE = 'bb_session';
 const STATE_COOKIE = 'bb_oauth_state';
+const RETURN_COOKIE = 'bb_oauth_return';
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const STATE_TTL_MS = 10 * 60 * 1000;
 const MAX_SESSIONS_PER_USER = 5;
+const DEFAULT_POST_LOGIN_PATH = '/submit';
+
+/** Same-origin relative path. Rejects schemes, protocol-relative `//host`,
+ *  traversal, and anything that isn't a sane in-app path. */
+function safeReturnPath(p: unknown): string | null {
+    if (typeof p !== 'string') return null;
+    if (p.length === 0 || p.length > 128) return null;
+    if (!/^\/[A-Za-z0-9_\-./~]*$/.test(p)) return null;
+    if (p.startsWith('//') || p.includes('..')) return null;
+    return p;
+}
 
 export const TERMS_VERSION = '2026-04-24';
 
@@ -42,12 +55,48 @@ export class AuthManager {
         this.users = UserFactory(sequelize);
         this.sessions = SessionFactory(sequelize);
         this.submissions = SubmissionFactory(sequelize);
-        this.users.sync();
-        this.sessions.sync();
-        this.submissions.sync();
+        this.bootstrap(sequelize).catch((err) => console.error('[auth] bootstrap failed:', err));
 
         // Daily prune of expired sessions.
         cron.schedule('0 4 * * *', () => this.pruneExpiredSessions());
+    }
+
+    private async bootstrap(sequelize: Sequelize): Promise<void> {
+        await this.users.sync();
+        // Older Auth.sqlite databases predate the isAdmin column. Add it
+        // idempotently — addColumn throws if it already exists, which we ignore.
+        try {
+            await sequelize.getQueryInterface().addColumn('users', 'isAdmin', {
+                type: BOOLEAN,
+                defaultValue: false,
+                allowNull: false,
+            });
+        } catch (e) {
+            // Column already present.
+        }
+        await this.sessions.sync();
+        await this.submissions.sync();
+
+        const adminIds = this.config?.adminDiscordIds ?? [];
+        for (const id of adminIds) {
+            const existing = await this.users.findByPk(id);
+            if (existing) {
+                if (!existing.isAdmin) await existing.update({ isAdmin: true });
+            } else {
+                // Stub user — actual profile fields populate on first login.
+                const now = Date.now();
+                await this.users.create({
+                    id,
+                    username: '',
+                    globalName: null,
+                    avatarHash: null,
+                    createdAt: now,
+                    lastLoginAt: 0,
+                    acceptedTermsVersion: null,
+                    isAdmin: true,
+                });
+            }
+        }
     }
 
     isConfigured(): boolean {
@@ -56,7 +105,7 @@ export class AuthManager {
 
     // -------- OAuth flow --------
 
-    handleLogin: RequestHandler = (_req, res) => {
+    handleLogin: RequestHandler = (req, res) => {
         if (!this.isConfigured() || !this.config) {
             res.status(503).send('Discord login is not configured on this server.');
             return;
@@ -69,6 +118,19 @@ export class AuthManager {
             maxAge: STATE_TTL_MS,
             path: '/',
         });
+        const returnTo = safeReturnPath(req.query.return);
+        if (returnTo) {
+            res.cookie(RETURN_COOKIE, returnTo, {
+                httpOnly: true,
+                secure: this.config.cookieSecure,
+                sameSite: 'lax',
+                maxAge: STATE_TTL_MS,
+                path: '/',
+            });
+        } else {
+            // Stale cookie from a prior aborted flow could otherwise win.
+            res.clearCookie(RETURN_COOKIE, { path: '/' });
+        }
         const params = new URLSearchParams({
             client_id: this.config.clientId,
             response_type: 'code',
@@ -87,12 +149,15 @@ export class AuthManager {
         }
         const code = typeof req.query.code === 'string' ? req.query.code : '';
         const state = typeof req.query.state === 'string' ? req.query.state : '';
-        const cookieState = (req as Request & { cookies?: Record<string, string> }).cookies?.[STATE_COOKIE];
+        const cookies = (req as Request & { cookies?: Record<string, string> }).cookies;
+        const cookieState = cookies?.[STATE_COOKIE];
         if (!code || !state || !cookieState || !timingSafeEqualStr(state, cookieState)) {
             res.status(400).send('OAuth state mismatch. Please try again.');
             return;
         }
         res.clearCookie(STATE_COOKIE, { path: '/' });
+        const returnTo = safeReturnPath(cookies?.[RETURN_COOKIE]) ?? DEFAULT_POST_LOGIN_PATH;
+        res.clearCookie(RETURN_COOKIE, { path: '/' });
 
         let identity: { id: string; username: string; global_name: string | null; avatar: string | null };
         try {
@@ -138,6 +203,7 @@ export class AuthManager {
                 createdAt: now,
                 lastLoginAt: now,
                 acceptedTermsVersion: null,
+                isAdmin: false,
             });
         }
 
@@ -168,7 +234,7 @@ export class AuthManager {
             maxAge: SESSION_TTL_MS,
             path: '/',
         });
-        res.redirect('/submit');
+        res.redirect(returnTo);
     };
 
     handleLogout: RequestHandler = async (req, res) => {
@@ -201,6 +267,7 @@ export class AuthManager {
             acceptedTermsVersion: user.acceptedTermsVersion,
             csrfToken: session.csrfToken,
             currentTermsVersion: TERMS_VERSION,
+            isAdmin: !!user.isAdmin,
         });
     };
 
@@ -255,6 +322,20 @@ export class AuthManager {
         const provided = req.header('x-csrf-token');
         if (!provided || !timingSafeEqualStr(provided, session.csrfToken)) {
             res.status(403).json({ error: 'csrf' });
+            return;
+        }
+        next();
+    };
+
+    requireAdmin: RequestHandler = async (req, res, next) => {
+        const session = (req as AuthedRequest).session;
+        if (!session) {
+            res.status(401).json({ error: 'unauthenticated' });
+            return;
+        }
+        const user = await this.users.findByPk(session.userId);
+        if (!user || !user.isAdmin) {
+            res.status(403).json({ error: 'forbidden' });
             return;
         }
         next();

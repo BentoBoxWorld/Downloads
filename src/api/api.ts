@@ -23,6 +23,7 @@ import {
     resolveBlueprintFile,
 } from './blueprintCatalog';
 import { AuthConfig, AuthManager } from './auth';
+import { ConfigStore } from './configStore';
 import { SubmissionManager } from './submissions';
 
 const { throttling } = require('@octokit/plugin-throttling');
@@ -56,6 +57,7 @@ export default class ApiManager {
         storage: './../data/Auth.sqlite',
     });
     auth: AuthManager = new AuthManager(this.loadAuthConfig(), this.authSequelize);
+    configStore: ConfigStore;
     submissions: SubmissionManager = new SubmissionManager(this.auth, this.weblink, this.loadSubmissionsConfig());
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
@@ -171,28 +173,43 @@ export default class ApiManager {
         this.octokit = new CustomOctokit({
             auth: env && env.github_token ? env.github_token : '',
         });
+        this.configStore = new ConfigStore(configConstructor, this.authSequelize);
         this.config = configConstructor;
 
-        const setAddons = async () => {
-            for await (const addon1 of configConstructor.addons) {
-                const versions = {
-                    latest: (await this.jarCache.findOne({ where: { name: addon1.name } }))?.version || '0',
-                    beta: (await this.jarCache.findOne({ where: { name: addon1.name } }))?.ciId?.toString() || '0',
-                    ...addon1.versions,
-                };
-                this.addons.push({
-                    name: addon1.name,
-                    description: addon1.description,
-                    gamemode: addon1.gamemode,
-                    github: addon1.github,
-                    versions: versions,
-                });
-            }
-        };
-
-        setAddons();
+        // Once the override layer has loaded from disk, swap in the effective
+        // config and (re)build the derived addons array off it.
+        this.configStore.ready
+            .then(() => this.reload())
+            .catch((err) => console.error('[api] initial configStore load failed:', err));
 
         this.refreshBlueprints();
+    }
+
+    private async rebuildAddons(): Promise<void> {
+        const next: AddonType[] = [];
+        for await (const addon1 of this.config.addons) {
+            const cached = await this.jarCache.findOne({ where: { name: addon1.name } });
+            const versions = {
+                latest: cached?.version || '0',
+                beta: cached?.ciId?.toString() || '0',
+                ...addon1.versions,
+            };
+            next.push({
+                name: addon1.name,
+                description: addon1.description,
+                gamemode: addon1.gamemode,
+                github: addon1.github,
+                versions: versions,
+            });
+        }
+        // Replace contents in-place so any captured references stay valid.
+        this.addons.length = 0;
+        this.addons.push(...next);
+    }
+
+    async reload(): Promise<void> {
+        this.config = this.configStore.getEffectiveConfig();
+        await this.rebuildAddons();
     }
 
     private createWeblinkSync(): WeblinkSync {
@@ -223,11 +240,15 @@ export default class ApiManager {
             const env = require('./../../env.json');
             const inProd = process.env.NODE_ENV === 'production';
             if (env && env.discord_client_id && env.discord_client_secret && env.discord_redirect_uri) {
+                const adminDiscordIds = Array.isArray(env.admin_discord_ids)
+                    ? (env.admin_discord_ids as unknown[]).filter((x): x is string => typeof x === 'string')
+                    : [];
                 return {
                     clientId: env.discord_client_id,
                     clientSecret: env.discord_client_secret,
                     redirectUri: env.discord_redirect_uri,
                     cookieSecure: inProd,
+                    adminDiscordIds,
                 };
             }
         } catch (e) {}

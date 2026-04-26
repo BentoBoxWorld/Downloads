@@ -13,6 +13,7 @@ const SubmitPage = React.lazy(() => import('./Submit'));
 const TermsPage = React.lazy(() => import('./Terms'));
 const PrivacyPage = React.lazy(() => import('./Privacy'));
 const AccountPage = React.lazy(() => import('./Account'));
+const AdminPage = React.lazy(() => import('./admin/AdminPage'));
 
 /** Sets `body[data-route="..."]` so design-tokens.css can disable
  *  the legacy `md:bg-background` cover image on the landing page. */
@@ -140,6 +141,13 @@ export default function ContentBox() {
                             <InteriorWrap>
                                 <Suspense fallback={<div />}>
                                     <AccountPage />
+                                </Suspense>
+                            </InteriorWrap>
+                        </Route>
+                        <Route path="/admin">
+                            <InteriorWrap>
+                                <Suspense fallback={<div />}>
+                                    <AdminPage />
                                 </Suspense>
                             </InteriorWrap>
                         </Route>

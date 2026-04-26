@@ -41,7 +41,7 @@ export default function AccountPage() {
         return (
             <div css={tw`text-center my-12`}>
                 <p css={tw`text-xl mb-2`}>You are not logged in.</p>
-                <a href="/api/auth/discord/login" css={tw`text-blue-700 underline`}>
+                <a href="/api/auth/discord/login?return=/account" css={tw`text-blue-700 underline`}>
                     Login with Discord
                 </a>
             </div>

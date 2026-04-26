@@ -37,6 +37,7 @@ export interface SessionUser {
     acceptedTermsVersion: string | null;
     csrfToken: string;
     currentTermsVersion: string;
+    isAdmin: boolean;
 }
 
 export async function GetMe(): Promise<SessionUser | null> {

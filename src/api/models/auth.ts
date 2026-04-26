@@ -1,4 +1,4 @@
-import { BuildOptions, Model, Sequelize, STRING, INTEGER } from 'sequelize';
+import { BuildOptions, Model, Sequelize, STRING, INTEGER, BOOLEAN } from 'sequelize';
 
 // ----- User -----
 
@@ -10,6 +10,7 @@ export interface UserAttributes {
     createdAt: number;                // ms epoch
     lastLoginAt: number;              // ms epoch
     acceptedTermsVersion: string | null;
+    isAdmin: boolean;
 }
 
 export interface UserModel extends Model<UserAttributes>, UserAttributes {}
@@ -29,6 +30,7 @@ export function UserFactory(sequelize: Sequelize): UserStatic {
             createdAt: INTEGER,
             lastLoginAt: INTEGER,
             acceptedTermsVersion: STRING,
+            isAdmin: { type: BOOLEAN, defaultValue: false, allowNull: false },
         },
         { timestamps: false },
     );
