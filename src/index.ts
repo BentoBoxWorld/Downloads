@@ -43,7 +43,8 @@ app.use(
         contentSecurityPolicy: {
             directives: {
                 defaultSrc: ["'self'"],
-                styleSrc: ["'self'", "'unsafe-inline'"],
+                styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+                fontSrc: ["'self'", 'https://fonts.gstatic.com'],
                 imgSrc: ["'self'", 'https://cdn.discordapp.com', 'data:'],
                 connectSrc: ["'self'"],
                 scriptSrc: isProd ? ["'self'"] : ["'self'", "'unsafe-eval'"],
