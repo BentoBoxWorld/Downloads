@@ -19,7 +19,13 @@ import {
 } from '../ApiRequestManager';
 import { BlueprintCatalog } from '../../config';
 import { takePendingBlueprint } from '../pendingBlueprint';
-import VoxelStack, { variantFor, Variant } from './VoxelStack';
+import VoxelStack, {
+    BlueprintVoxels,
+    deriveVoxels,
+    RealVoxel,
+    variantFor,
+    Variant,
+} from './VoxelStack';
 
 const NAME_REGEX = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -768,9 +774,17 @@ function SubmitForm({
         );
     }
 
-    const summary: ParsedSummary | null = dropped
-        ? summarizeBlueprint(dropped.json)
-        : null;
+    const summary: ParsedSummary | null = useMemo(
+        () => (dropped ? summarizeBlueprint(dropped.json) : null),
+        [dropped],
+    );
+
+    /* Real voxels for the live card preview. Computed once per file
+     * so re-renders from typing don't re-walk the parsed JSON. */
+    const voxels: RealVoxel[] = useMemo(
+        () => (dropped ? deriveVoxels(dropped.json.blocks) : []),
+        [dropped],
+    );
 
     const gameModeLower = gameMode ? gameMode.toLowerCase() : 'gamemode';
     const slugForPath = name || 'slug';
@@ -1100,6 +1114,7 @@ function SubmitForm({
                             license={license}
                             file={dropped?.file}
                             summary={summary}
+                            voxels={voxels}
                             tagColors={tagColors}
                         />
                         <Checklist done={checklistDone} items={checklist} />
@@ -1958,6 +1973,7 @@ function PreviewBlueprintCard({
     license,
     file,
     summary,
+    voxels,
     tagColors,
 }: {
     displayName: string;
@@ -1968,6 +1984,7 @@ function PreviewBlueprintCard({
     license: string;
     file?: File;
     summary: ParsedSummary | null;
+    voxels: RealVoxel[];
     tagColors: Record<string, string>;
 }): JSX.Element {
     const dim = summary?.dim || { x: 0, y: 0, z: 0 };
@@ -2065,7 +2082,13 @@ function PreviewBlueprintCard({
                         zIndex: 1,
                     }}
                 >
-                    {summary ? (
+                    {voxels.length > 0 ? (
+                        <BlueprintVoxels
+                            voxels={voxels}
+                            width={260}
+                            height={150}
+                        />
+                    ) : summary ? (
                         <VoxelStack
                             topBlocks={summary.topBlocks}
                             variant={variant}
