@@ -129,12 +129,12 @@ export default function ContentBox() {
                         <Route path="/blueprints">
                             <BlueprintsElement />
                         </Route>
+                        {/* /submit lives in the navy-paper sub-brand and
+                            renders its own hero band edge-to-edge. */}
                         <Route path="/submit">
-                            <InteriorWrap>
-                                <Suspense fallback={<div />}>
-                                    <SubmitPage />
-                                </Suspense>
-                            </InteriorWrap>
+                            <Suspense fallback={<div />}>
+                                <SubmitPage />
+                            </Suspense>
                         </Route>
                         <Route path="/account">
                             <InteriorWrap>

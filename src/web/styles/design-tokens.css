@@ -268,9 +268,10 @@ body[data-route="/"] {
   to   { opacity: 1; transform: none; }
 }
 
-/* Blueprints route shouldn't show the legacy back.jpg — the page
-   supplies its own dark sub-brand surface from edge to edge. */
-body[data-route="/blueprints"] {
+/* Blueprints + Submit live on the navy sub-brand surface — they supply
+   their own backdrop, so suppress the legacy back.jpg cover. */
+body[data-route="/blueprints"],
+body[data-route="/submit"] {
   background-image: none !important;
   background-color: var(--bp-paper-2);
 }
