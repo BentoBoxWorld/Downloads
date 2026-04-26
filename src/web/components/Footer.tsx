@@ -217,12 +217,12 @@ export default function Footer() {
                     <div style={{ fontSize: 12, color: 'rgba(245, 241, 232, 0.5)' }}>
                         © BentoBoxWorld &middot; Site by{' '}
                         <a
-                            href="https://github.com/Fredthedoggy"
+                            href="https://github.com/tastybento"
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ color: 'rgba(245, 241, 232, 0.7)' }}
+                            style={{ color: 'rgba(245, 241, 232, 0.7)', fontStyle: 'italic' }}
                         >
-                            Fredthedoggy
+                            tastybento
                         </a>{' '}
                         &middot; Not affiliated with Mojang or Microsoft
                     </div>
