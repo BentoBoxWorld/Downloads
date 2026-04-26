@@ -17,6 +17,7 @@ import {
     SubmitError,
 } from '../ApiRequestManager';
 import { BlueprintCatalog } from '../../config';
+import { takePendingBlueprint } from '../pendingBlueprint';
 
 const NAME_REGEX = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -178,6 +179,17 @@ function SubmitForm({
         setDropped(null);
         setDropError(null);
     }
+
+    /* If the user dropped a file on the Blueprints page, it's stashed in
+     * the pending-blueprint slot — pick it up on mount and run it through
+     * the same validation path as a local drop. */
+    useEffect(() => {
+        const incoming = takePendingBlueprint();
+        if (incoming) {
+            void acceptFile(incoming);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const nameValid = NAME_REGEX.test(name);
     const canSubmit = !busy && !!gameMode && nameValid && !!displayName && !!dropped && accepted;

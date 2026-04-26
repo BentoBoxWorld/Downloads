@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useMemo, useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { setPendingBlueprint } from '../pendingBlueprint';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faDownload,
@@ -643,9 +644,26 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function UploadCard(): JSX.Element {
     const [drag, setDrag] = useState(false);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const history = useHistory();
+
+    const handFile = (file: File | null | undefined) => {
+        if (!file) return;
+        setPendingBlueprint(file);
+        history.push('/submit');
+    };
+
     return (
-        <Link
-            to="/submit"
+        <div
+            role="button"
+            tabIndex={0}
+            onClick={() => inputRef.current?.click()}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    inputRef.current?.click();
+                }
+            }}
             onDragOver={(e) => {
                 e.preventDefault();
                 setDrag(true);
@@ -654,6 +672,7 @@ function UploadCard(): JSX.Element {
             onDrop={(e) => {
                 e.preventDefault();
                 setDrag(false);
+                handFile(e.dataTransfer.files?.[0]);
             }}
             style={{
                 position: 'relative',
@@ -668,10 +687,20 @@ function UploadCard(): JSX.Element {
                 textAlign: 'center',
                 minHeight: 380,
                 color: 'var(--bp-ink)',
-                textDecoration: 'none',
+                cursor: 'pointer',
                 transition: 'background 0.15s ease, border-color 0.15s ease',
             }}
         >
+            <input
+                ref={inputRef}
+                type="file"
+                accept=".blueprint"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                    handFile(e.target.files?.[0]);
+                    e.target.value = '';
+                }}
+            />
             <div
                 style={{
                     width: 56,
@@ -745,7 +774,7 @@ function UploadCard(): JSX.Element {
             >
                 max 5 MB · sign in with Discord
             </div>
-        </Link>
+        </div>
     );
 }
 
