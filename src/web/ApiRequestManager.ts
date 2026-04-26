@@ -82,6 +82,31 @@ export interface SubmitError {
     issues?: string[];
 }
 
+export interface AdminUser {
+    id: string;
+    username: string;
+    globalName: string | null;
+    avatarUrl: string | null;
+    createdAt: number;
+    lastLoginAt: number;
+}
+
+export async function GetAdminUsers(): Promise<AdminUser[]> {
+    return (await axios.get('/api/admin/users')).data;
+}
+
+export async function PostSetAdmin(
+    csrfToken: string,
+    discordId: string,
+    isAdmin: boolean,
+): Promise<void> {
+    await axios.post(
+        '/api/admin/users',
+        { discordId, isAdmin },
+        { headers: { 'X-Csrf-Token': csrfToken } },
+    );
+}
+
 export async function PostSubmitBlueprint(
     csrfToken: string,
     fields: { gameMode: string; name: string; displayName: string; description: string; tags: string },

@@ -105,6 +105,21 @@ app.get(
     wrap(apiManager.submissions.handleMySubmissions as (...a: unknown[]) => unknown),
 );
 
+// Admin routes — gated by requireAdmin (which checks requireSession internally).
+// Mutations also require requireCsrf.
+app.get(
+    '/api/admin/users',
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleListAdmins as (...a: unknown[]) => unknown),
+);
+app.post(
+    '/api/admin/users',
+    express.json(),
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleSetAdmin as (...a: unknown[]) => unknown),
+);
+
 app.get('/api/*', function (req, res) {
     apiManager.manageRequest(req, res);
 });

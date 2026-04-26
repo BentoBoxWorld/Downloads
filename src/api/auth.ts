@@ -79,24 +79,54 @@ export class AuthManager {
 
         const adminIds = this.config?.adminDiscordIds ?? [];
         for (const id of adminIds) {
-            const existing = await this.users.findByPk(id);
-            if (existing) {
-                if (!existing.isAdmin) await existing.update({ isAdmin: true });
-            } else {
-                // Stub user — actual profile fields populate on first login.
-                const now = Date.now();
-                await this.users.create({
-                    id,
-                    username: '',
-                    globalName: null,
-                    avatarHash: null,
-                    createdAt: now,
-                    lastLoginAt: 0,
-                    acceptedTermsVersion: null,
-                    isAdmin: true,
-                });
-            }
+            await this.setAdmin(id, true);
         }
+    }
+
+    /** Idempotent. Granting creates a stub user row when the Discord ID has
+     *  never logged in (so we can pre-grant). Revoking is a no-op when the
+     *  user does not exist. */
+    async setAdmin(discordId: string, isAdmin: boolean): Promise<void> {
+        const existing = await this.users.findByPk(discordId);
+        if (existing) {
+            if (existing.isAdmin !== isAdmin) await existing.update({ isAdmin });
+            return;
+        }
+        if (!isAdmin) return;
+        const now = Date.now();
+        await this.users.create({
+            id: discordId,
+            username: '',
+            globalName: null,
+            avatarHash: null,
+            createdAt: now,
+            lastLoginAt: 0,
+            acceptedTermsVersion: null,
+            isAdmin: true,
+        });
+    }
+
+    async listAdmins(): Promise<
+        Array<{
+            id: string;
+            username: string;
+            globalName: string | null;
+            avatarUrl: string | null;
+            createdAt: number;
+            lastLoginAt: number;
+        }>
+    > {
+        const rows = await this.users.findAll({ where: { isAdmin: true } });
+        return rows.map((u) => ({
+            id: u.id,
+            username: u.username,
+            globalName: u.globalName,
+            avatarUrl: u.avatarHash
+                ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatarHash}.png?size=64`
+                : null,
+            createdAt: u.createdAt,
+            lastLoginAt: u.lastLoginAt,
+        }));
     }
 
     isConfigured(): boolean {

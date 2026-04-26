@@ -22,6 +22,7 @@ import {
     parseBlueprintId,
     resolveBlueprintFile,
 } from './blueprintCatalog';
+import { AdminManager } from './admin';
 import { AuthConfig, AuthManager } from './auth';
 import { ConfigStore } from './configStore';
 import { SubmissionManager } from './submissions';
@@ -58,6 +59,7 @@ export default class ApiManager {
     });
     auth: AuthManager = new AuthManager(this.loadAuthConfig(), this.authSequelize);
     configStore: ConfigStore;
+    admin: AdminManager = new AdminManager(this.auth);
     submissions: SubmissionManager = new SubmissionManager(this.auth, this.weblink, this.loadSubmissionsConfig());
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
