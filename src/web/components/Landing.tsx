@@ -297,7 +297,7 @@ export default function Landing({ presets }: LandingProps) {
                                     },
                                     {
                                         t: 'Type /<gamemode>',
-                                        s: 'e.g. /bsb to start your first island. That’s it.',
+                                        s: 'e.g. /island to start your first island. That’s it.',
                                     },
                                 ].map((s, i) => (
                                     <li
