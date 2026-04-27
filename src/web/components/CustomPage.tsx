@@ -703,8 +703,15 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                                     <option value="beta">CI (Beta)</option>
                                     {versions
                                         .slice()
-                                        .sort()
-                                        .reverse()
+                                        .sort((a, b) => {
+                                            const pa = a.split('.').map(Number);
+                                            const pb = b.split('.').map(Number);
+                                            for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+                                                const d = (pb[i] || 0) - (pa[i] || 0);
+                                                if (d !== 0) return d;
+                                            }
+                                            return 0;
+                                        })
                                         .map((v) => (
                                             <option key={v} value={v}>
                                                 {v}
