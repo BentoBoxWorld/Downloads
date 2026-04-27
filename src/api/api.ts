@@ -138,25 +138,31 @@ export default class ApiManager {
             cron.schedule('*/6 * * * *', () => {
                 this.generateDownloads();
                 this.refreshBlueprints();
+                const logErr = (name: string) => (e: unknown) =>
+                    console.error(`[cron] ${name} failed:`, (e as Error)?.message ?? e);
                 if (undefinedAddons.length > 0) {
                     for (let i = 0; i < (undefinedAddons.length > repeats ? repeats : undefinedAddons.length); i++) {
-                        this.updateAsset(undefinedAddons[0]).then();
+                        this.updateAsset(undefinedAddons[0]).catch(logErr(undefinedAddons[0].name));
                         undefinedAddons.shift();
                     }
                 } else if (oldAddonList.length > 0) {
                     for (let i = 0; i < (oldAddonList.length > repeats ? repeats : oldAddonList.length); i++) {
-                        this.downloadOldVersion(oldAddonList[0]).then();
+                        this.downloadOldVersion(oldAddonList[0]).catch(logErr(oldAddonList[0].addon));
                         oldAddonList.shift();
                     }
                 } else {
                     for (let i = 0; i < repeats; i++) {
-                        this.updateAsset(configConstructor.addons[updateAddon]).then();
+                        this.updateAsset(configConstructor.addons[updateAddon]).catch(
+                            logErr(configConstructor.addons[updateAddon].name),
+                        );
                         updateAddon++;
                         if (updateAddon >= configConstructor.addons.length) updateAddon = 0;
                     }
                 }
                 for (let i = 0; i < 4; i++) {
-                    this.updateJenkins(configConstructor.addons[updateCiAddon]).then();
+                    this.updateJenkins(configConstructor.addons[updateCiAddon]).catch(
+                        logErr(configConstructor.addons[updateCiAddon].name),
+                    );
                     updateCiAddon++;
                     if (updateCiAddon >= configConstructor.addons.length) updateCiAddon = 0;
                 }
@@ -328,12 +334,13 @@ export default class ApiManager {
                     project.split('/')[1]
                 }/lastSuccessfulBuild/artifact/target/${assetURL}`,
             );
-            addonDatabase.update({
+            await addonDatabase.update({
                 ci: buffer,
                 ciId: latestJenkins,
                 ciJarFile: assetURL,
             });
-            this.addons.filter((a) => a.name === addon.name)[0].versions.beta = String(latestJenkins);
+            const liveAddon = this.addons.filter((a) => a.name === addon.name)[0];
+            if (liveAddon) liveAddon.versions.beta = String(latestJenkins);
         });
     }
 
@@ -372,7 +379,7 @@ export default class ApiManager {
 
         const addonDatabase: DatabaseModel | null = await this.jarCache.findOne({ where: { name: addon.name } });
 
-        if (addonDatabase && latestRelease.data.id === addonDatabase.releaseId) return;
+        if (addonDatabase && String(latestRelease.data.id) === String(addonDatabase.releaseId)) return;
 
         const releaseFiles = await this.octokit.rest.repos.listReleaseAssets({
             owner: addon.github.split('/')[0],
@@ -415,7 +422,7 @@ export default class ApiManager {
                 version: latestRelease.data.tag_name,
             });
         } else {
-            addonDatabase.update({
+            await addonDatabase.update({
                 release: Buffer.from(<ArrayBuffer>(<unknown>asset.data)),
                 releaseId: latestRelease.data.id,
                 releaseJarFile: assetURL.name,
