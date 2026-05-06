@@ -47,6 +47,13 @@ function InteriorWrap({ children }: { children: React.ReactNode }) {
     );
 }
 
+// True when the SPA is running under blog.bentobox.world (or any "blog."
+// subdomain). On that host the bare paths "/" and "/p/:slug" are the blog
+// list and post permalink instead of the downloads landing page.
+const onBlogHost =
+    typeof window !== 'undefined' &&
+    /^blog\./i.test(window.location.hostname);
+
 export default function ContentBox() {
     function CustomElement() {
         const addonTypes = () => GetAddons();
@@ -111,6 +118,24 @@ export default function ContentBox() {
                 <Navigation />
                 <main style={{ flex: 1 }}>
                     <Switch>
+                        {/* On the blog subdomain, "/" and "/p/:slug" map to
+                            the blog views; on download.* they fall through
+                            to the routes below. */}
+                        {onBlogHost && (
+                            <Route exact path="/">
+                                <Suspense fallback={<div />}>
+                                    <BlogList />
+                                </Suspense>
+                            </Route>
+                        )}
+                        {onBlogHost && (
+                            <Route path="/p/:slug">
+                                <Suspense fallback={<div />}>
+                                    <BlogPost />
+                                </Suspense>
+                            </Route>
+                        )}
+
                         {/* Landing — full-bleed, no interior wrapper */}
                         <Route exact path="/">
                             <LandingElement />
