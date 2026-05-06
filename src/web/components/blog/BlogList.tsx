@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRss, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faRss, faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
 import {
     BlogList as BlogListData,
     BlogPostSummary,
@@ -18,11 +18,19 @@ export default function BlogList() {
     const [data, setData] = useState<BlogListData | null>(null);
     const [tags, setTags] = useState<BlogTag[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [searchInput, setSearchInput] = useState('');
+    const [search, setSearch] = useState('');
 
-    // Reset to page 1 whenever the active tag changes.
+    // Reset to page 1 whenever the active tag or search changes.
     useEffect(() => {
         setPage(1);
-    }, [tagParam]);
+    }, [tagParam, search]);
+
+    // Debounce the search box → committed query (300ms).
+    useEffect(() => {
+        const id = setTimeout(() => setSearch(searchInput.trim()), 300);
+        return () => clearTimeout(id);
+    }, [searchInput]);
 
     useEffect(() => {
         let cancelled = false;
@@ -39,7 +47,7 @@ export default function BlogList() {
     useEffect(() => {
         let cancelled = false;
         setData(null);
-        GetBlogList(page, tagParam)
+        GetBlogList(page, tagParam, search || undefined)
             .then((d) => {
                 if (!cancelled) setData(d);
             })
@@ -49,7 +57,7 @@ export default function BlogList() {
         return () => {
             cancelled = true;
         };
-    }, [page, tagParam]);
+    }, [page, tagParam, search]);
 
     return (
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
@@ -71,6 +79,38 @@ export default function BlogList() {
                     </a>{' '}
                     to never miss an update.
                 </p>
+                <div
+                    style={{
+                        marginTop: 18,
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                    }}
+                >
+                    <FontAwesomeIcon
+                        icon={faSearch}
+                        style={{
+                            position: 'absolute',
+                            left: 14,
+                            color: 'var(--bb-mute)',
+                            fontSize: 13,
+                        }}
+                    />
+                    <input
+                        type="search"
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        placeholder="Search posts…"
+                        style={{
+                            width: '100%',
+                            padding: '10px 14px 10px 38px',
+                            border: '1px solid var(--bb-line-strong)',
+                            borderRadius: 8,
+                            background: 'var(--bb-paper-2)',
+                            fontSize: 14,
+                        }}
+                    />
+                </div>
                 {tagParam && (
                     <div
                         style={{
@@ -126,7 +166,11 @@ export default function BlogList() {
 
             {data && data.posts.length === 0 && (
                 <div style={{ color: 'var(--bb-mute)', textAlign: 'center', padding: 40 }}>
-                    No posts yet — check back soon.
+                    {search
+                        ? `No posts match “${search}”.`
+                        : tagParam
+                          ? `No posts tagged “${tagParam}”.`
+                          : 'No posts yet — check back soon.'}
                 </div>
             )}
 

@@ -312,16 +312,35 @@ export default class ApiManager {
     private loadBlogConfig(): BlogConfig {
         let baseUrl: string | undefined;
         let discordWebhookPath: string | undefined;
+        let giscus: BlogConfig['giscus'];
         try {
             const env = require('./../../env.json');
             if (typeof env?.blog_base_url === 'string') baseUrl = env.blog_base_url;
             if (typeof env?.discord_blog_webhook_url === 'string') {
                 discordWebhookPath = env.discord_blog_webhook_url;
             }
+            const g = env?.giscus;
+            if (
+                g &&
+                typeof g.repo === 'string' &&
+                typeof g.repoId === 'string' &&
+                typeof g.category === 'string' &&
+                typeof g.categoryId === 'string'
+            ) {
+                giscus = {
+                    repo: g.repo,
+                    repoId: g.repoId,
+                    category: g.category,
+                    categoryId: g.categoryId,
+                    mapping: typeof g.mapping === 'string' ? g.mapping : undefined,
+                    theme: typeof g.theme === 'string' ? g.theme : undefined,
+                };
+            }
         } catch (e) {}
         return {
             baseUrl,
             discordWebhookPath,
+            giscus,
             imageDir: './../data/blog/images',
         };
     }

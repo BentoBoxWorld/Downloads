@@ -108,6 +108,30 @@ export async function PostSetAdmin(
     );
 }
 
+export interface BlogAuthorRow {
+    id: string;
+    username: string;
+    globalName: string | null;
+    avatarUrl: string | null;
+    isAdmin: boolean;
+}
+
+export async function GetAdminAuthors(): Promise<BlogAuthorRow[]> {
+    return (await axios.get('/api/admin/authors')).data;
+}
+
+export async function PostSetAuthor(
+    csrfToken: string,
+    discordId: string,
+    canAuthorBlog: boolean,
+): Promise<void> {
+    await axios.post(
+        '/api/admin/authors',
+        { discordId, canAuthorBlog },
+        { headers: { 'X-Csrf-Token': csrfToken } },
+    );
+}
+
 export async function GetAdminPresets(): Promise<PresetsEntity[]> {
     return (await axios.get('/api/admin/presets')).data;
 }
@@ -231,6 +255,7 @@ export interface BlogList {
     total: number;
     hasMore: boolean;
     tag: string | null;
+    query: string | null;
 }
 
 export interface BlogTag {
@@ -238,9 +263,16 @@ export interface BlogTag {
     count: number;
 }
 
-export async function GetBlogList(page = 1, tag?: string): Promise<BlogList> {
-    const q = tag ? `?page=${page}&tag=${encodeURIComponent(tag)}` : `?page=${page}`;
-    return (await axios.get(`/api/blog/posts${q}`)).data;
+export async function GetBlogList(
+    page = 1,
+    tag?: string,
+    query?: string,
+): Promise<BlogList> {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    if (tag) params.set('tag', tag);
+    if (query) params.set('q', query);
+    return (await axios.get(`/api/blog/posts?${params.toString()}`)).data;
 }
 
 export async function GetBlogTags(): Promise<BlogTag[]> {

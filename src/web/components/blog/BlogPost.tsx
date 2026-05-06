@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { BlogPost as BlogPostData, GetBlogPost } from '../../ApiRequestManager';
+import Giscus from './Giscus';
 
 export default function BlogPost() {
     const { slug } = useParams<{ slug: string }>();
@@ -175,6 +176,8 @@ export default function BlogPost() {
                 </a>
                 .
             </p>
+
+            <Giscus slug={post.slug} />
 
             <style>{`
                 .blog-content {

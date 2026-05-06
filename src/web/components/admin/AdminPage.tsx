@@ -8,6 +8,7 @@ import {
     faPuzzlePiece,
     faHistory,
     faNewspaper,
+    faPenNib,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { GetMe, PostLogout, SessionUser } from '../../ApiRequestManager';
@@ -16,8 +17,9 @@ import AdminsTab from './AdminsTab';
 import PresetsTab from './PresetsTab';
 import AddonsTab from './AddonsTab';
 import BlogTab from './BlogTab';
+import AuthorsTab from './AuthorsTab';
 
-type TabId = 'recent' | 'admins' | 'presets' | 'addons' | 'blog';
+type TabId = 'recent' | 'admins' | 'authors' | 'presets' | 'addons' | 'blog';
 
 interface TabDef {
     id: TabId;
@@ -28,6 +30,7 @@ interface TabDef {
 const TABS: TabDef[] = [
     { id: 'recent', label: 'Recent', icon: faHistory },
     { id: 'admins', label: 'Admins', icon: faUsers },
+    { id: 'authors', label: 'Authors', icon: faPenNib },
     { id: 'presets', label: 'Presets', icon: faCube },
     { id: 'addons', label: 'Addons', icon: faPuzzlePiece },
     { id: 'blog', label: 'Blog', icon: faNewspaper },
@@ -132,6 +135,7 @@ export default function AdminPage() {
                 <div css={tw`flex-1 bg-white rounded-md shadow-sm p-5`} style={{ minWidth: 0 }}>
                     {activeTab === 'recent' && <RecentTab user={user} />}
                     {activeTab === 'admins' && <AdminsTab user={user} />}
+                    {activeTab === 'authors' && <AuthorsTab user={user} />}
                     {activeTab === 'presets' && <PresetsTab user={user} />}
                     {activeTab === 'addons' && <AddonsTab user={user} />}
                     {activeTab === 'blog' && <BlogTab user={user} />}

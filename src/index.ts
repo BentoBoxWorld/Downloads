@@ -47,11 +47,16 @@ app.use(
                 styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
                 fontSrc: ["'self'", 'https://fonts.gstatic.com'],
                 imgSrc: ["'self'", 'https://cdn.discordapp.com', 'data:'],
-                connectSrc: ["'self'"],
-                scriptSrc: isProd ? ["'self'"] : ["'self'", "'unsafe-eval'"],
+                connectSrc: ["'self'", 'https://giscus.app'],
+                scriptSrc: isProd
+                    ? ["'self'", 'https://giscus.app']
+                    : ["'self'", "'unsafe-eval'", 'https://giscus.app'],
+                frameSrc: ["'self'", 'https://giscus.app'],
                 // Discord OAuth uses top-level navigation; helmet's CSP does
                 // not constrain navigation, so no entry for discord.com is
-                // needed here.
+                // needed here. giscus.app is added unconditionally — it's a
+                // tiny allowlist entry that lets blog post pages embed the
+                // comment widget when configured via env.giscus.
             },
         },
     }),
@@ -112,6 +117,10 @@ app.get(
 );
 app.get('/api/blog/feed.xml', wrap(apiManager.blog.handleRss as (...a: unknown[]) => unknown));
 app.get('/api/blog/tags', wrap(apiManager.blog.handleListTags as (...a: unknown[]) => unknown));
+app.get(
+    '/api/blog/comments-config',
+    wrap(apiManager.blog.handleCommentsConfig as (...a: unknown[]) => unknown),
+);
 
 app.get(
     '/api/blog/admin/posts',
@@ -187,6 +196,18 @@ app.post(
     wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
     wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
     wrap(apiManager.admin.handleSetAdmin as (...a: unknown[]) => unknown),
+);
+app.get(
+    '/api/admin/authors',
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleListAuthors as (...a: unknown[]) => unknown),
+);
+app.post(
+    '/api/admin/authors',
+    express.json(),
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
+    wrap(apiManager.admin.handleSetAuthor as (...a: unknown[]) => unknown),
 );
 app.get(
     '/api/admin/presets',

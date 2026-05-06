@@ -46,6 +46,37 @@ export class AdminManager {
         res.json(admins);
     };
 
+    handleListAuthors: RequestHandler = async (_req, res) => {
+        const authors = await this.auth.listBlogAuthors();
+        res.json(authors);
+    };
+
+    handleSetAuthor: RequestHandler = async (req, res) => {
+        const body = (req.body ?? {}) as { discordId?: unknown; canAuthorBlog?: unknown };
+        const discordId = typeof body.discordId === 'string' ? body.discordId.trim() : '';
+        const canAuthorBlog = body.canAuthorBlog === true;
+
+        if (!DISCORD_ID_RE.test(discordId)) {
+            res.status(400).json({ error: 'invalid_discord_id' });
+            return;
+        }
+        if (typeof body.canAuthorBlog !== 'boolean') {
+            res.status(400).json({ error: 'invalid_can_author_blog' });
+            return;
+        }
+
+        // Don't strip the flag from someone who is also an admin — admins
+        // are already implicitly authors. The flag is only meaningful for
+        // non-admin authors.
+        const existing = await this.auth.findUser(discordId);
+        if (existing?.isAdmin && !canAuthorBlog) {
+            res.status(400).json({ error: 'cannot_revoke_admin_author' });
+            return;
+        }
+        await this.auth.setBlogAuthor(discordId, canAuthorBlog);
+        res.json({ ok: true });
+    };
+
     handleSetAdmin: RequestHandler = async (req, res) => {
         const body = (req.body ?? {}) as { discordId?: unknown; isAdmin?: unknown };
         const discordId = typeof body.discordId === 'string' ? body.discordId.trim() : '';

@@ -43,6 +43,17 @@ export interface BlogConfig {
     discordWebhookPath?: string;
     /** Where uploaded images are written. */
     imageDir: string;
+    /** Optional Giscus config; when set, comments render on each post page. */
+    giscus?: GiscusConfig;
+}
+
+export interface GiscusConfig {
+    repo: string;          // "owner/name"
+    repoId: string;        // R_kgDO… from giscus.app
+    category: string;      // discussion category name
+    categoryId: string;    // DIC_kwDO… from giscus.app
+    mapping?: string;      // "pathname" (default), "url", "title", …
+    theme?: string;        // "light" (default), "preferred_color_scheme", …
 }
 
 interface PublicPost {
@@ -139,11 +150,12 @@ export class BlogManager {
 
     // -------- Public API --------
 
-    /** GET /api/blog/posts?page=N&tag=X */
+    /** GET /api/blog/posts?page=N&tag=X&q=foo */
     handleListPosts: RequestHandler = async (req, res) => {
         const page = Math.max(1, parseInt(String(req.query.page ?? '1'), 10) || 1);
         const offset = (page - 1) * POSTS_PER_PAGE;
         const tagFilter = typeof req.query.tag === 'string' ? normalizeTag(req.query.tag) : '';
+        const q = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 80) : '';
 
         // No JSON_ARRAY operators in stock SQLite/Sequelize without the JSON1
         // ext, so for tag filtering we read+filter in JS. Total count is the
@@ -152,9 +164,18 @@ export class BlogManager {
             where: { status: 'published' },
             order: [['publishedAt', 'DESC']],
         });
-        const filtered = tagFilter
+        let filtered = tagFilter
             ? all.filter((p) => parseTags(p.tagsJson).includes(tagFilter))
             : all;
+        if (q) {
+            const needle = q.toLowerCase();
+            filtered = filtered.filter((p) => {
+                if (p.title.toLowerCase().includes(needle)) return true;
+                if (p.summary.toLowerCase().includes(needle)) return true;
+                if (p.bodyMd.toLowerCase().includes(needle)) return true;
+                return false;
+            });
+        }
         const slice = filtered.slice(offset, offset + POSTS_PER_PAGE);
         const summaries = await Promise.all(slice.map((p) => this.toPublicSummary(p)));
         res.json({
@@ -164,6 +185,24 @@ export class BlogManager {
             total: filtered.length,
             hasMore: offset + slice.length < filtered.length,
             tag: tagFilter || null,
+            query: q || null,
+        });
+    };
+
+    /** GET /api/blog/comments-config — public Giscus config (or null). */
+    handleCommentsConfig: RequestHandler = (_req, res) => {
+        if (!this.cfg.giscus) {
+            res.json(null);
+            return;
+        }
+        const g = this.cfg.giscus;
+        res.json({
+            repo: g.repo,
+            repoId: g.repoId,
+            category: g.category,
+            categoryId: g.categoryId,
+            mapping: g.mapping || 'pathname',
+            theme: g.theme || 'light',
         });
     };
 
