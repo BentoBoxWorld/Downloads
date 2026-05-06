@@ -114,7 +114,12 @@ export default function Navigation() {
 
     // The header sits on top of the dark hero on `/` and stays transparent
     // until the user scrolls past it. On every other route it's solid paper.
-    const isLanding = location.pathname === '/';
+    // The blog subdomain serves BlogList at `/` instead of Landing, so on
+    // blog.* hosts we always render the solid parchment header.
+    const onBlogHost =
+        typeof window !== 'undefined' &&
+        /^blog\./i.test(window.location.hostname);
+    const isLanding = !onBlogHost && location.pathname === '/';
 
     useEffect(() => {
         if (!isLanding) {
