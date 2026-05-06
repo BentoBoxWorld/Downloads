@@ -123,16 +123,20 @@ export default function ContentBox() {
                             to the routes below. */}
                         {onBlogHost && (
                             <Route exact path="/">
-                                <Suspense fallback={<div />}>
-                                    <BlogList />
-                                </Suspense>
+                                <InteriorWrap>
+                                    <Suspense fallback={<div />}>
+                                        <BlogList />
+                                    </Suspense>
+                                </InteriorWrap>
                             </Route>
                         )}
                         {onBlogHost && (
                             <Route path="/p/:slug">
-                                <Suspense fallback={<div />}>
-                                    <BlogPost />
-                                </Suspense>
+                                <InteriorWrap>
+                                    <Suspense fallback={<div />}>
+                                        <BlogPost />
+                                    </Suspense>
+                                </InteriorWrap>
                             </Route>
                         )}
 
@@ -184,14 +188,18 @@ export default function ContentBox() {
                             also server-rendered with OG metadata in
                             src/index.ts. */}
                         <Route path="/blog/p/:slug">
-                            <Suspense fallback={<div />}>
-                                <BlogPost />
-                            </Suspense>
+                            <InteriorWrap>
+                                <Suspense fallback={<div />}>
+                                    <BlogPost />
+                                </Suspense>
+                            </InteriorWrap>
                         </Route>
                         <Route path="/blog">
-                            <Suspense fallback={<div />}>
-                                <BlogList />
-                            </Suspense>
+                            <InteriorWrap>
+                                <Suspense fallback={<div />}>
+                                    <BlogList />
+                                </Suspense>
+                            </InteriorWrap>
                         </Route>
                         <Route path="/terms">
                             <InteriorWrap>

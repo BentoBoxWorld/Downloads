@@ -52,7 +52,7 @@ export default function BlogList() {
     }, [page, tagParam]);
 
     return (
-        <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 24px' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
             <header style={{ marginBottom: 32 }}>
                 <p className="bb-eyebrow" style={{ marginBottom: 8 }}>BentoBox Blog</p>
                 <h1

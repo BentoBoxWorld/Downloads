@@ -251,5 +251,4 @@ export default function BlogPost() {
 const containerStyle: React.CSSProperties = {
     maxWidth: 720,
     margin: '0 auto',
-    padding: '32px 24px',
 };
