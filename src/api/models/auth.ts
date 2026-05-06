@@ -11,6 +11,7 @@ export interface UserAttributes {
     lastLoginAt: number;              // ms epoch
     acceptedTermsVersion: string | null;
     isAdmin: boolean;
+    canAuthorBlog: boolean;
 }
 
 export interface UserModel extends Model<UserAttributes>, UserAttributes {}
@@ -31,6 +32,7 @@ export function UserFactory(sequelize: Sequelize): UserStatic {
             lastLoginAt: INTEGER,
             acceptedTermsVersion: STRING,
             isAdmin: { type: BOOLEAN, defaultValue: false, allowNull: false },
+            canAuthorBlog: { type: BOOLEAN, defaultValue: false, allowNull: false },
         },
         { timestamps: false },
     );

@@ -14,6 +14,7 @@ import {
     faCaretDown,
     faSignOutAlt,
     faUser,
+    faNewspaper,
 } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -57,6 +58,7 @@ const BASE_TABS: Tab[] = [
     { to: '/custom', label: 'Custom', icon: faWrench },
     { to: '/thirdparty', label: 'Third-Party', icon: faPuzzlePiece },
     { to: '/blueprints', label: 'Blueprints', icon: faLayerGroup },
+    { to: '/blog', label: 'Blog', icon: faNewspaper },
 ];
 
 const ADMIN_TAB: Tab = { to: '/admin', label: 'Admin', icon: faShieldAlt };
@@ -106,7 +108,9 @@ export default function Navigation() {
     }
 
     const isAdmin = !!user && user.isAdmin;
-    const TABS: Tab[] = isAdmin ? [...BASE_TABS, ADMIN_TAB] : BASE_TABS;
+    const canAuthorBlog = !!user && user.canAuthorBlog;
+    const showAdminTab = isAdmin || canAuthorBlog;
+    const TABS: Tab[] = showAdminTab ? [...BASE_TABS, ADMIN_TAB] : BASE_TABS;
 
     // The header sits on top of the dark hero on `/` and stays transparent
     // until the user scrolls past it. On every other route it's solid paper.
@@ -358,7 +362,7 @@ export default function Navigation() {
                                         <FontAwesomeIcon icon={faUser} style={{ width: 14 }} />
                                         Account
                                     </NavLink>
-                                    {isAdmin && (
+                                    {showAdminTab && (
                                         <NavLink
                                             to="/admin"
                                             onClick={() => setMenuOpen(false)}

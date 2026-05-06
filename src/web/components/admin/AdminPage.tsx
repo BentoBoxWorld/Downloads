@@ -7,6 +7,7 @@ import {
     faCube,
     faPuzzlePiece,
     faHistory,
+    faNewspaper,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { GetMe, PostLogout, SessionUser } from '../../ApiRequestManager';
@@ -14,8 +15,9 @@ import RecentTab from './RecentTab';
 import AdminsTab from './AdminsTab';
 import PresetsTab from './PresetsTab';
 import AddonsTab from './AddonsTab';
+import BlogTab from './BlogTab';
 
-type TabId = 'recent' | 'admins' | 'presets' | 'addons';
+type TabId = 'recent' | 'admins' | 'presets' | 'addons' | 'blog';
 
 interface TabDef {
     id: TabId;
@@ -28,6 +30,7 @@ const TABS: TabDef[] = [
     { id: 'admins', label: 'Admins', icon: faUsers },
     { id: 'presets', label: 'Presets', icon: faCube },
     { id: 'addons', label: 'Addons', icon: faPuzzlePiece },
+    { id: 'blog', label: 'Blog', icon: faNewspaper },
 ];
 
 export default function AdminPage() {
@@ -53,7 +56,10 @@ export default function AdminPage() {
             </div>
         );
     }
-    if (!user.isAdmin) {
+    // Blog authors who aren't full admins still see the page, but with the
+    // Blog tab as their only option.
+    const onlyBlog = !user.isAdmin && user.canAuthorBlog;
+    if (!user.isAdmin && !user.canAuthorBlog) {
         return (
             <div css={tw`text-center my-12`}>
                 <p css={tw`text-xl font-semibold mb-2`}>Admin access required</p>
@@ -64,6 +70,8 @@ export default function AdminPage() {
             </div>
         );
     }
+    const visibleTabs: TabDef[] = onlyBlog ? TABS.filter((t) => t.id === 'blog') : TABS;
+    const activeTab: TabId = onlyBlog ? 'blog' : tab;
 
     async function handleLogout() {
         try {
@@ -98,8 +106,8 @@ export default function AdminPage() {
                     css={tw`bg-white rounded-md shadow-sm p-2 flex-shrink-0`}
                     style={{ width: 200 }}
                 >
-                    {TABS.map((t) => {
-                        const active = tab === t.id;
+                    {visibleTabs.map((t) => {
+                        const active = activeTab === t.id;
                         return (
                             <button
                                 key={t.id}
@@ -122,10 +130,11 @@ export default function AdminPage() {
 
                 {/* Body */}
                 <div css={tw`flex-1 bg-white rounded-md shadow-sm p-5`} style={{ minWidth: 0 }}>
-                    {tab === 'recent' && <RecentTab user={user} />}
-                    {tab === 'admins' && <AdminsTab user={user} />}
-                    {tab === 'presets' && <PresetsTab user={user} />}
-                    {tab === 'addons' && <AddonsTab user={user} />}
+                    {activeTab === 'recent' && <RecentTab user={user} />}
+                    {activeTab === 'admins' && <AdminsTab user={user} />}
+                    {activeTab === 'presets' && <PresetsTab user={user} />}
+                    {activeTab === 'addons' && <AddonsTab user={user} />}
+                    {activeTab === 'blog' && <BlogTab user={user} />}
                 </div>
             </div>
         </div>

@@ -19,6 +19,11 @@ export interface AuthConfig {
     redirectUri: string;
     cookieSecure: boolean; // true in prod, false on localhost dev
     adminDiscordIds?: string[];
+    blogAuthorDiscordIds?: string[];
+    /** When set, session cookies are issued with Domain=<value> so a single
+     *  Discord login covers download.* and blog.* under the same eTLD+1.
+     *  Use ".bentobox.world" in production; leave undefined for localhost. */
+    cookieDomain?: string;
 }
 
 const SESSION_COOKIE = 'bb_session';
@@ -63,16 +68,18 @@ export class AuthManager {
 
     private async bootstrap(sequelize: Sequelize): Promise<void> {
         await this.users.sync();
-        // Older Auth.sqlite databases predate the isAdmin column. Add it
+        // Older Auth.sqlite databases predate these columns. Add them
         // idempotently — addColumn throws if it already exists, which we ignore.
-        try {
-            await sequelize.getQueryInterface().addColumn('users', 'isAdmin', {
-                type: BOOLEAN,
-                defaultValue: false,
-                allowNull: false,
-            });
-        } catch (e) {
-            // Column already present.
+        for (const col of ['isAdmin', 'canAuthorBlog']) {
+            try {
+                await sequelize.getQueryInterface().addColumn('users', col, {
+                    type: BOOLEAN,
+                    defaultValue: false,
+                    allowNull: false,
+                });
+            } catch (e) {
+                // Column already present.
+            }
         }
         await this.sessions.sync();
         await this.submissions.sync();
@@ -80,6 +87,10 @@ export class AuthManager {
         const adminIds = this.config?.adminDiscordIds ?? [];
         for (const id of adminIds) {
             await this.setAdmin(id, true);
+        }
+        const blogIds = this.config?.blogAuthorDiscordIds ?? [];
+        for (const id of blogIds) {
+            await this.setBlogAuthor(id, true);
         }
     }
 
@@ -103,7 +114,53 @@ export class AuthManager {
             lastLoginAt: 0,
             acceptedTermsVersion: null,
             isAdmin: true,
+            canAuthorBlog: false,
         });
+    }
+
+    /** Idempotent. Same pre-grant behavior as setAdmin. */
+    async setBlogAuthor(discordId: string, canAuthorBlog: boolean): Promise<void> {
+        const existing = await this.users.findByPk(discordId);
+        if (existing) {
+            if (existing.canAuthorBlog !== canAuthorBlog) await existing.update({ canAuthorBlog });
+            return;
+        }
+        if (!canAuthorBlog) return;
+        const now = Date.now();
+        await this.users.create({
+            id: discordId,
+            username: '',
+            globalName: null,
+            avatarHash: null,
+            createdAt: now,
+            lastLoginAt: 0,
+            acceptedTermsVersion: null,
+            isAdmin: false,
+            canAuthorBlog: true,
+        });
+    }
+
+    async listBlogAuthors(): Promise<
+        Array<{
+            id: string;
+            username: string;
+            globalName: string | null;
+            avatarUrl: string | null;
+            isAdmin: boolean;
+        }>
+    > {
+        const rows = await this.users.findAll({
+            where: { [Op.or]: [{ isAdmin: true }, { canAuthorBlog: true }] },
+        });
+        return rows.map((u) => ({
+            id: u.id,
+            username: u.username,
+            globalName: u.globalName,
+            avatarUrl: u.avatarHash
+                ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatarHash}.png?size=64`
+                : null,
+            isAdmin: !!u.isAdmin,
+        }));
     }
 
     async listAdmins(): Promise<
@@ -141,12 +198,14 @@ export class AuthManager {
             return;
         }
         const state = randomToken();
+        const cookieDomain = this.config.cookieDomain;
         res.cookie(STATE_COOKIE, state, {
             httpOnly: true,
             secure: this.config.cookieSecure,
             sameSite: 'lax',
             maxAge: STATE_TTL_MS,
             path: '/',
+            ...(cookieDomain ? { domain: cookieDomain } : {}),
         });
         const returnTo = safeReturnPath(req.query.return);
         if (returnTo) {
@@ -156,10 +215,11 @@ export class AuthManager {
                 sameSite: 'lax',
                 maxAge: STATE_TTL_MS,
                 path: '/',
+                ...(cookieDomain ? { domain: cookieDomain } : {}),
             });
         } else {
             // Stale cookie from a prior aborted flow could otherwise win.
-            res.clearCookie(RETURN_COOKIE, { path: '/' });
+            res.clearCookie(RETURN_COOKIE, { path: '/', ...(cookieDomain ? { domain: cookieDomain } : {}) });
         }
         const params = new URLSearchParams({
             client_id: this.config.clientId,
@@ -185,9 +245,11 @@ export class AuthManager {
             res.status(400).send('OAuth state mismatch. Please try again.');
             return;
         }
-        res.clearCookie(STATE_COOKIE, { path: '/' });
+        const cookieDomain = this.config.cookieDomain;
+        const domainOpt = cookieDomain ? { domain: cookieDomain } : {};
+        res.clearCookie(STATE_COOKIE, { path: '/', ...domainOpt });
         const returnTo = safeReturnPath(cookies?.[RETURN_COOKIE]) ?? DEFAULT_POST_LOGIN_PATH;
-        res.clearCookie(RETURN_COOKIE, { path: '/' });
+        res.clearCookie(RETURN_COOKIE, { path: '/', ...domainOpt });
 
         let identity: { id: string; username: string; global_name: string | null; avatar: string | null };
         try {
@@ -234,6 +296,7 @@ export class AuthManager {
                 lastLoginAt: now,
                 acceptedTermsVersion: null,
                 isAdmin: false,
+                canAuthorBlog: false,
             });
         }
 
@@ -263,6 +326,7 @@ export class AuthManager {
             sameSite: 'lax',
             maxAge: SESSION_TTL_MS,
             path: '/',
+            ...domainOpt,
         });
         res.redirect(returnTo);
     };
@@ -272,7 +336,8 @@ export class AuthManager {
         if (session) {
             await session.destroy();
         }
-        res.clearCookie(SESSION_COOKIE, { path: '/' });
+        const cookieDomain = this.config?.cookieDomain;
+        res.clearCookie(SESSION_COOKIE, { path: '/', ...(cookieDomain ? { domain: cookieDomain } : {}) });
         res.json({ ok: true });
     };
 
@@ -298,6 +363,7 @@ export class AuthManager {
             csrfToken: session.csrfToken,
             currentTermsVersion: TERMS_VERSION,
             isAdmin: !!user.isAdmin,
+            canAuthorBlog: !!user.isAdmin || !!user.canAuthorBlog,
         });
     };
 
@@ -310,7 +376,8 @@ export class AuthManager {
         const userId = session.userId;
         await this.sessions.destroy({ where: { userId } });
         await this.users.destroy({ where: { id: userId } });
-        res.clearCookie(SESSION_COOKIE, { path: '/' });
+        const cookieDomain = this.config?.cookieDomain;
+        res.clearCookie(SESSION_COOKIE, { path: '/', ...(cookieDomain ? { domain: cookieDomain } : {}) });
         res.json({ ok: true });
     };
 
@@ -365,6 +432,21 @@ export class AuthManager {
         }
         const user = await this.users.findByPk(session.userId);
         if (!user || !user.isAdmin) {
+            res.status(403).json({ error: 'forbidden' });
+            return;
+        }
+        next();
+    };
+
+    /** Admins always count as blog authors. */
+    requireBlogAuthor: RequestHandler = async (req, res, next) => {
+        const session = (req as AuthedRequest).session;
+        if (!session) {
+            res.status(401).json({ error: 'unauthenticated' });
+            return;
+        }
+        const user = await this.users.findByPk(session.userId);
+        if (!user || (!user.isAdmin && !user.canAuthorBlog)) {
             res.status(403).json({ error: 'forbidden' });
             return;
         }

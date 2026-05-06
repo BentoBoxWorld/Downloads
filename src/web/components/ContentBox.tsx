@@ -14,6 +14,8 @@ const TermsPage = React.lazy(() => import('./Terms'));
 const PrivacyPage = React.lazy(() => import('./Privacy'));
 const AccountPage = React.lazy(() => import('./Account'));
 const AdminPage = React.lazy(() => import('./admin/AdminPage'));
+const BlogList = React.lazy(() => import('./blog/BlogList'));
+const BlogPost = React.lazy(() => import('./blog/BlogPost'));
 
 /** Sets `body[data-route="..."]` so design-tokens.css can disable
  *  the legacy `md:bg-background` cover image on the landing page. */
@@ -150,6 +152,21 @@ export default function ContentBox() {
                                     <AdminPage />
                                 </Suspense>
                             </InteriorWrap>
+                        </Route>
+                        {/* Blog: works on download.bentobox.world/blog/* and
+                            on blog.bentobox.world/* (after the nginx host
+                            rewrite that prepends /blog). Permalink pages are
+                            also server-rendered with OG metadata in
+                            src/index.ts. */}
+                        <Route path="/blog/p/:slug">
+                            <Suspense fallback={<div />}>
+                                <BlogPost />
+                            </Suspense>
+                        </Route>
+                        <Route path="/blog">
+                            <Suspense fallback={<div />}>
+                                <BlogList />
+                            </Suspense>
                         </Route>
                         <Route path="/terms">
                             <InteriorWrap>

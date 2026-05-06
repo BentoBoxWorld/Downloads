@@ -24,6 +24,7 @@ import {
 } from './blueprintCatalog';
 import { AdminGithubConfig, AdminManager } from './admin';
 import { AuthConfig, AuthManager } from './auth';
+import { BlogConfig, BlogManager } from './blog';
 import { ConfigStore } from './configStore';
 import { SubmissionManager } from './submissions';
 
@@ -61,6 +62,14 @@ export default class ApiManager {
     configStore: ConfigStore;
     admin: AdminManager;
     submissions: SubmissionManager = new SubmissionManager(this.auth, this.weblink, this.loadSubmissionsConfig());
+
+    blogSequelize = new Sequelize('blog', 'user', 'password', {
+        host: 'localhost',
+        dialect: 'sqlite',
+        logging: false,
+        storage: './../data/Blog.sqlite',
+    });
+    blog: BlogManager = new BlogManager(this.auth, this.blogSequelize, this.loadBlogConfig());
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
         host: 'localhost',
@@ -281,16 +290,40 @@ export default class ApiManager {
                 const adminDiscordIds = Array.isArray(env.admin_discord_ids)
                     ? (env.admin_discord_ids as unknown[]).filter((x): x is string => typeof x === 'string')
                     : [];
+                const blogAuthorDiscordIds = Array.isArray(env.blog_author_discord_ids)
+                    ? (env.blog_author_discord_ids as unknown[]).filter(
+                          (x): x is string => typeof x === 'string',
+                      )
+                    : [];
                 return {
                     clientId: env.discord_client_id,
                     clientSecret: env.discord_client_secret,
                     redirectUri: env.discord_redirect_uri,
                     cookieSecure: inProd,
                     adminDiscordIds,
+                    blogAuthorDiscordIds,
+                    cookieDomain: typeof env.cookie_domain === 'string' ? env.cookie_domain : undefined,
                 };
             }
         } catch (e) {}
         return null;
+    }
+
+    private loadBlogConfig(): BlogConfig {
+        let baseUrl: string | undefined;
+        let discordWebhookPath: string | undefined;
+        try {
+            const env = require('./../../env.json');
+            if (typeof env?.blog_base_url === 'string') baseUrl = env.blog_base_url;
+            if (typeof env?.discord_blog_webhook_url === 'string') {
+                discordWebhookPath = env.discord_blog_webhook_url;
+            }
+        } catch (e) {}
+        return {
+            baseUrl,
+            discordWebhookPath,
+            imageDir: './../data/blog/images',
+        };
     }
 
     async refreshBlueprints() {

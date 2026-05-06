@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import cookieParser = require('cookie-parser');
 import { ConfigObject } from './config';
 import { upload as blueprintUpload } from './api/submissions';
+import { imageUpload as blogImageUpload } from './api/blog';
 import * as https from 'https';
 import axios from 'axios';
 
@@ -102,6 +103,71 @@ app.post(
     multerSingle,
     wrap(apiManager.submissions.handleSubmit as (...a: unknown[]) => unknown),
 );
+
+// Blog: public read endpoints + author-gated write endpoints.
+app.get('/api/blog/posts', wrap(apiManager.blog.handleListPosts as (...a: unknown[]) => unknown));
+app.get(
+    '/api/blog/posts/:slug',
+    wrap(apiManager.blog.handleGetPost as (...a: unknown[]) => unknown),
+);
+app.get('/api/blog/feed.xml', wrap(apiManager.blog.handleRss as (...a: unknown[]) => unknown));
+app.get('/api/blog/tags', wrap(apiManager.blog.handleListTags as (...a: unknown[]) => unknown));
+
+app.get(
+    '/api/blog/admin/posts',
+    wrap(apiManager.auth.requireBlogAuthor as (...a: unknown[]) => unknown),
+    wrap(apiManager.blog.handleListAdminPosts as (...a: unknown[]) => unknown),
+);
+app.get(
+    '/api/blog/admin/posts/:id',
+    wrap(apiManager.auth.requireBlogAuthor as (...a: unknown[]) => unknown),
+    wrap(apiManager.blog.handleGetAdminPost as (...a: unknown[]) => unknown),
+);
+app.post(
+    '/api/blog/admin/posts',
+    express.json({ limit: '512kb' }),
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireBlogAuthor as (...a: unknown[]) => unknown),
+    wrap(apiManager.blog.handleCreatePost as (...a: unknown[]) => unknown),
+);
+app.put(
+    '/api/blog/admin/posts/:id',
+    express.json({ limit: '512kb' }),
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireBlogAuthor as (...a: unknown[]) => unknown),
+    wrap(apiManager.blog.handleUpdatePost as (...a: unknown[]) => unknown),
+);
+app.post(
+    '/api/blog/admin/posts/:id/publish',
+    express.json({ limit: '4kb' }),
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireBlogAuthor as (...a: unknown[]) => unknown),
+    wrap(apiManager.blog.handlePublishPost as (...a: unknown[]) => unknown),
+);
+app.post(
+    '/api/blog/admin/posts/:id/unpublish',
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireBlogAuthor as (...a: unknown[]) => unknown),
+    wrap(apiManager.blog.handleUnpublishPost as (...a: unknown[]) => unknown),
+);
+app.delete(
+    '/api/blog/admin/posts/:id',
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireBlogAuthor as (...a: unknown[]) => unknown),
+    wrap(apiManager.blog.handleDeletePost as (...a: unknown[]) => unknown),
+);
+const blogImageMiddleware = blogImageUpload.single('image') as unknown as (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+) => void;
+app.post(
+    '/api/blog/admin/images',
+    wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
+    wrap(apiManager.auth.requireBlogAuthor as (...a: unknown[]) => unknown),
+    blogImageMiddleware,
+    wrap(apiManager.blog.handleUploadImage as (...a: unknown[]) => unknown),
+);
 app.get(
     '/api/me/submissions',
     wrap(apiManager.auth.requireSession as (...a: unknown[]) => unknown),
@@ -187,6 +253,82 @@ app.get('/api/*', function (req, res) {
     apiManager.manageRequest(req, res);
 });
 
+// highlight.js CSS — read once at startup. We keep our own dark code-block
+// background (#1a1d24) by appending an override so syntax themes blend with
+// the existing post styles. Failure here is non-fatal; the page just renders
+// without colored tokens.
+let highlightCss = '';
+try {
+    const themeFile = require.resolve('highlight.js/styles/github-dark.css');
+    highlightCss =
+        fs.readFileSync(themeFile, 'utf-8') +
+        '\n.hljs { background: #1a1d24 !important; padding: 14px 16px; border-radius: 8px; }';
+} catch {
+    /* ignore — fallback is no syntax colors */
+}
+app.get('/blog/highlight.css', function (_req, res) {
+    res.set('Content-Type', 'text/css; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(highlightCss);
+});
+
+// Blog image static handler. Path-traversal guarded; only known image
+// extensions are served. The directory is created lazily by BlogManager.
+const BLOG_IMAGE_ROOT = path.resolve('./../data/blog/images');
+const BLOG_IMAGE_MIME: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+    gif: 'image/gif',
+};
+app.get('/blog/images/*', function (req, res) {
+    const rel = req.url.slice('/blog/images/'.length).split('?')[0].split('#')[0];
+    const m = rel.match(/^([A-Za-z0-9._/-]+)\.([A-Za-z0-9]+)$/);
+    if (!m || rel.includes('..')) {
+        res.status(404).end();
+        return;
+    }
+    const ext = m[2].toLowerCase();
+    const ctype = BLOG_IMAGE_MIME[ext];
+    if (!ctype) {
+        res.status(404).end();
+        return;
+    }
+    const target = path.resolve(BLOG_IMAGE_ROOT, rel);
+    if (!target.startsWith(BLOG_IMAGE_ROOT + path.sep)) {
+        res.status(404).end();
+        return;
+    }
+    fs.stat(target, (err, stat) => {
+        if (err || !stat.isFile()) {
+            res.status(404).end();
+            return;
+        }
+        res.set('Content-Type', ctype);
+        res.set('Cache-Control', 'public, max-age=86400, immutable');
+        fs.createReadStream(target).pipe(res);
+    });
+});
+
+// RSS + canonical-permalink convenience routes. These mirror the API
+// endpoints under "user-friendly" URLs. On blog.bentobox.world, the bare
+// /feed.xml works; on download.bentobox.world, use /blog/feed.xml.
+function isBlogHost(req: express.Request): boolean {
+    const host = (req.hostname || '').toLowerCase();
+    return host === 'blog.bentobox.world' || host.startsWith('blog.');
+}
+app.get('/blog/feed.xml', wrap(apiManager.blog.handleRss as (...a: unknown[]) => unknown));
+app.get('/feed.xml', function (req, res, next) {
+    if (!isBlogHost(req)) return next();
+    return (apiManager.blog.handleRss as express.RequestHandler)(req, res, next);
+});
+app.get('/blog/sitemap.xml', wrap(apiManager.blog.handleSitemap as (...a: unknown[]) => unknown));
+app.get('/sitemap.xml', function (req, res, next) {
+    if (!isBlogHost(req)) return next();
+    return (apiManager.blog.handleSitemap as express.RequestHandler)(req, res, next);
+});
+
 app.get('/blueprints/images/*', function (req, res) {
     // PNG-only static handler for the cloned weblink/blueprints/images tree.
     // Path-traversal guarded; everything else 404s.
@@ -210,6 +352,30 @@ app.get('/blueprints/images/*', function (req, res) {
         res.set('Cache-Control', 'public, max-age=600');
         fs.createReadStream(target).pipe(res);
     });
+});
+
+// Server-render blog post pages so OG/Twitter scrapers and search engines
+// see real metadata. The React app on the client takes over for navigation.
+async function serveBlogPostPage(slug: string, res: express.Response): Promise<boolean> {
+    try {
+        const html = await apiManager.blog.renderPostPage(slug, page.toString('utf-8'));
+        if (!html) return false;
+        res.set('Content-Type', 'text/html; charset=utf-8');
+        res.send(html);
+        return true;
+    } catch (err) {
+        console.error('[blog] SSR failed:', (err as Error)?.message ?? err);
+        return false;
+    }
+}
+app.get('/blog/p/:slug', async function (req, res, next) {
+    const slug = String(req.params.slug || '');
+    if (!(await serveBlogPostPage(slug, res))) return next();
+});
+app.get('/p/:slug', async function (req, res, next) {
+    if (!isBlogHost(req)) return next();
+    const slug = String(req.params.slug || '');
+    if (!(await serveBlogPostPage(slug, res))) return next();
 });
 
 app.get('*', function (req, res) {

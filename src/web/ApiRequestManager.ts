@@ -38,6 +38,7 @@ export interface SessionUser {
     csrfToken: string;
     currentTermsVersion: string;
     isAdmin: boolean;
+    canAuthorBlog: boolean;
 }
 
 export async function GetMe(): Promise<SessionUser | null> {
@@ -190,6 +191,144 @@ export async function PostAdminPr(csrfToken: string): Promise<{ ok: true; prUrl:
     });
     return r.data;
 }
+
+// ---------- Blog ----------
+
+export interface BlogAuthor {
+    id: string;
+    name: string;
+    avatarUrl: string | null;
+}
+
+export interface BlogPostSummary {
+    id: number;
+    slug: string;
+    title: string;
+    summary: string;
+    coverImage: string | null;
+    author: BlogAuthor;
+    publishedAt: number;
+    updatedAt: number;
+    edited: boolean;
+    tags: string[];
+}
+
+export interface BlogPost extends BlogPostSummary {
+    bodyHtml: string;
+}
+
+export interface AdminBlogPost extends BlogPost {
+    bodyMd: string;
+    status: 'draft' | 'published' | 'scheduled';
+    createdAt: number;
+    viewCount: number;
+}
+
+export interface BlogList {
+    posts: BlogPostSummary[];
+    page: number;
+    pageSize: number;
+    total: number;
+    hasMore: boolean;
+    tag: string | null;
+}
+
+export interface BlogTag {
+    slug: string;
+    count: number;
+}
+
+export async function GetBlogList(page = 1, tag?: string): Promise<BlogList> {
+    const q = tag ? `?page=${page}&tag=${encodeURIComponent(tag)}` : `?page=${page}`;
+    return (await axios.get(`/api/blog/posts${q}`)).data;
+}
+
+export async function GetBlogTags(): Promise<BlogTag[]> {
+    return (await axios.get('/api/blog/tags')).data;
+}
+
+export async function GetBlogPost(slug: string): Promise<BlogPost> {
+    return (await axios.get(`/api/blog/posts/${encodeURIComponent(slug)}`)).data;
+}
+
+export async function GetAdminBlogPosts(): Promise<AdminBlogPost[]> {
+    return (await axios.get('/api/blog/admin/posts')).data;
+}
+
+export async function GetAdminBlogPost(id: number): Promise<AdminBlogPost> {
+    return (await axios.get(`/api/blog/admin/posts/${id}`)).data;
+}
+
+export async function PostAdminBlogPost(
+    csrfToken: string,
+    data: {
+        title: string;
+        slug?: string;
+        summary?: string;
+        bodyMd?: string;
+        coverImage?: string | null;
+        tags?: string[];
+    },
+): Promise<AdminBlogPost> {
+    const r = await axios.post('/api/blog/admin/posts', data, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+    return r.data;
+}
+
+export async function PutAdminBlogPost(
+    csrfToken: string,
+    id: number,
+    data: {
+        title: string;
+        slug?: string;
+        summary?: string;
+        bodyMd?: string;
+        coverImage?: string | null;
+        tags?: string[];
+    },
+): Promise<AdminBlogPost> {
+    const r = await axios.put(`/api/blog/admin/posts/${id}`, data, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+    return r.data;
+}
+
+export async function PostPublishBlogPost(
+    csrfToken: string,
+    id: number,
+    at?: number,
+): Promise<AdminBlogPost> {
+    const body = at && at > Date.now() ? { at } : {};
+    const r = await axios.post(`/api/blog/admin/posts/${id}/publish`, body, {
+        headers: { 'X-Csrf-Token': csrfToken, 'Content-Type': 'application/json' },
+    });
+    return r.data;
+}
+
+export async function PostUnpublishBlogPost(csrfToken: string, id: number): Promise<AdminBlogPost> {
+    const r = await axios.post(`/api/blog/admin/posts/${id}/unpublish`, null, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+    return r.data;
+}
+
+export async function DeleteAdminBlogPost(csrfToken: string, id: number): Promise<void> {
+    await axios.delete(`/api/blog/admin/posts/${id}`, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+}
+
+export async function UploadBlogImage(csrfToken: string, file: File): Promise<{ url: string }> {
+    const fd = new FormData();
+    fd.append('image', file);
+    const r = await axios.post('/api/blog/admin/images', fd, {
+        headers: { 'X-Csrf-Token': csrfToken },
+    });
+    return r.data;
+}
+
+// ---------- Submissions ----------
 
 export async function PostSubmitBlueprint(
     csrfToken: string,
