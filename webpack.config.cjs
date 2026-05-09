@@ -9,6 +9,7 @@ module.exports = (env) => {
 
         output: {
             path: path.resolve(__dirname, 'dist/web'),
+            publicPath: '/',
             filename: '[name].[contenthash].js',
             chunkFilename: '[name].[contenthash].js',
         },
