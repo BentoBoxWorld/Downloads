@@ -112,6 +112,12 @@ export default function Navigation() {
     const showAdminTab = isAdmin || canAuthorBlog;
     const TABS: Tab[] = showAdminTab ? [...BASE_TABS, ADMIN_TAB] : BASE_TABS;
 
+    // After login Discord redirects back to wherever the user was, except on the
+    // landing page where /account is the more useful confirmation landing spot.
+    const loginReturn =
+        location.pathname === '/' ? '/account' : location.pathname + location.search;
+    const loginHref = `/api/auth/discord/login?return=${encodeURIComponent(loginReturn)}`;
+
     // The header sits on top of the dark hero on `/` and stays transparent
     // until the user scrolls past it. On every other route it's solid paper.
     // The blog subdomain serves BlogList at `/` instead of Landing, so on
@@ -414,6 +420,22 @@ export default function Navigation() {
                             )}
                         </div>
                     )}
+                    {user === null && (
+                        <a
+                            href={loginHref}
+                            className="bb-btn bb-btn-discord"
+                            style={{
+                                padding: '8px 12px',
+                                fontSize: 13,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 8,
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faDiscord} />
+                            Login
+                        </a>
+                    )}
                 </div>
 
                 {/* Mobile hamburger */}
@@ -570,6 +592,25 @@ export default function Navigation() {
                                 Log out
                             </button>
                         </div>
+                    )}
+                    {user === null && (
+                        <a
+                            href={loginHref}
+                            onClick={() => setMobileOpen(false)}
+                            className="bb-btn bb-btn-discord"
+                            style={{
+                                marginTop: 16,
+                                width: '100%',
+                                fontSize: 14,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 8,
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faDiscord} />
+                            Login with Discord
+                        </a>
                     )}
                 </div>
             )}
