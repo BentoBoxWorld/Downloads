@@ -45,6 +45,7 @@ export default function BlogEditor({ user, postId, onClose }: Props) {
     const [savedAt, setSavedAt] = useState<number | null>(null);
     const [dirty, setDirty] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const coverInputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // Initial load.
@@ -159,6 +160,37 @@ export default function BlogEditor({ user, postId, onClose }: Props) {
         }
     }
 
+    async function handleCoverUpload(file: File): Promise<void> {
+        setBusy(true);
+        try {
+            const { url } = await UploadBlogImage(user.csrfToken, file);
+            setCoverImage(url);
+        } catch (e) {
+            setError(extract(e));
+        } finally {
+            setBusy(false);
+            if (coverInputRef.current) coverInputRef.current.value = '';
+        }
+    }
+
+    function promptForCoverUrl(): void {
+        const url = window.prompt('Cover image URL? (must be /blog/images/... or https://)');
+        if (!url) return;
+        const trimmed = url.trim();
+        if (!trimmed) return;
+        // Discord attachment CDN links are signed and expire within ~24h, so
+        // they break as soon as the signature lapses. Steer authors away from them.
+        if (/^https:\/\/(cdn\.discordapp\.com|media\.discordapp\.net)\//i.test(trimmed)) {
+            window.alert(
+                'That looks like a Discord attachment link. Those URLs are signed and stop\n' +
+                    'working within about a day, so the cover would break. Please use "Upload\n' +
+                    'cover" instead to host the image here.',
+            );
+            return;
+        }
+        setCoverImage(trimmed);
+    }
+
     function insertAtCursor(text: string) {
         const ta = textareaRef.current;
         if (!ta) {
@@ -271,13 +303,25 @@ export default function BlogEditor({ user, postId, onClose }: Props) {
                         if (f) handleImageUpload(f);
                     }}
                 />
+                <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleCoverUpload(f);
+                    }}
+                />
                 {coverImage && (
-                    <span css={tw`text-xs text-gray-500 truncate`} style={{ maxWidth: 280 }}>
-                        Cover: {coverImage}
+                    <span css={tw`flex items-center gap-2 text-xs text-gray-500`} style={{ minWidth: 0 }}>
+                        <span css={tw`truncate`} style={{ maxWidth: 240 }} title={coverImage}>
+                            Cover: {coverImage}
+                        </span>
                         <button
                             type="button"
                             onClick={() => setCoverImage(null)}
-                            css={tw`ml-2 text-red-700 hover:underline`}
+                            css={tw`text-red-700 hover:underline flex-shrink-0`}
                             style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
                         >
                             clear
@@ -285,17 +329,24 @@ export default function BlogEditor({ user, postId, onClose }: Props) {
                     </span>
                 )}
                 {!coverImage && (
-                    <button
-                        type="button"
-                        onClick={() => {
-                            const url = window.prompt('Cover image URL? (must be /blog/images/... or https://)');
-                            if (url) setCoverImage(url);
-                        }}
-                        css={tw`text-sm px-3 py-1 rounded border border-gray-300 hover:bg-gray-50`}
-                        style={{ background: 'white', cursor: 'pointer' }}
-                    >
-                        Set cover image
-                    </button>
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => coverInputRef.current?.click()}
+                            css={tw`text-sm px-3 py-1 rounded border border-gray-300 hover:bg-gray-50`}
+                            style={{ background: 'white', cursor: 'pointer' }}
+                        >
+                            Upload cover
+                        </button>
+                        <button
+                            type="button"
+                            onClick={promptForCoverUrl}
+                            css={tw`text-sm px-3 py-1 rounded border border-gray-300 hover:bg-gray-50`}
+                            style={{ background: 'white', cursor: 'pointer' }}
+                        >
+                            Cover from URL
+                        </button>
+                    </>
                 )}
             </div>
 
