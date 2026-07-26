@@ -327,9 +327,17 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
     /* Filtered + grouped addon list (excludes the bentobox row) */
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
-        return addonTypes
-            .filter((a) => a.name.toLowerCase() !== 'bentobox')
-            .filter((a) => !q || a.name.toLowerCase().includes(q));
+        return (
+            addonTypes
+                .filter((a) => a.name.toLowerCase() !== 'bentobox')
+                .filter((a) => !q || a.name.toLowerCase().includes(q))
+                // Sort by name rather than trusting the config order: the admin
+                // interface appends new addons to the end of the list.
+                .sort((a, b) => {
+                    if (a.gamemode !== b.gamemode) return a.gamemode ? -1 : 1;
+                    return a.name.localeCompare(b.name);
+                })
+        );
     }, [addonTypes, search]);
 
     const groups = useMemo(() => {
