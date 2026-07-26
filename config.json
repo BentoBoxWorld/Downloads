@@ -402,6 +402,18 @@
       }
     },
     {
+      "name": "DeathChest",
+      "github": "BentoBoxWorld/DeathChest",
+      "ci": "BentoBoxWorld/DeathChest",
+      "description": "**DeathChest** saves a player's items into a **chest** when they die instead of dropping them, and it knows where **islands** are.\n\n*Fell into the void? Drowned in the acid sea?*\n*Your chest goes to your own island instead of being lost.*\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "gamemode": false,
+      "versions": {
+        "26.2": "1.0.0",
+        "26.1.2": "1.0.0",
+        "1.21.11": "1.0.0"
+      }
+    },
+    {
       "name": "DimensionalTrees",
       "github": "BentoBoxWorld/DimensionalTrees",
       "ci": "BentoBoxWorld/DimensionalTrees",

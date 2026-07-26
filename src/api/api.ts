@@ -90,93 +90,29 @@ export default class ApiManager {
         }),
     );
 
-    constructor(private readonly configConstructor: ConfigObject) {
-        this.downloadCount.sync().then(async () => {
-            for await (const addon of configConstructor.addons) {
-                if (addon.name === 'BentoBox') continue;
-                const addonDownloads: DownloadCountModel | null = await Promise.resolve(
-                    this.downloadCount.findOne({
-                        where: { name: addon.name },
-                    }),
-                );
-                if (addonDownloads === null) {
-                    await this.downloadCount.create({
-                        name: addon.name,
-                        downloads: 0,
-                    });
-                }
+    /** Resolves once all three JAR/count caches have been synced. */
+    private cachesReady: Promise<void>;
+    /** Addons with no cached JAR yet — drained ahead of the round-robin. */
+    private pendingAssets: AddonsEntity[] = [];
+    /** Pinned versions missing from the old-version cache. */
+    private pendingOldVersions: { addon: string; version: string }[] = [];
+    /** Addons already looked up in the JAR cache, so we only query once. */
+    private checkedAssets = new Set<string>();
+    /** `name@version` pairs already looked up in the old-version cache. */
+    private checkedOldVersions = new Set<string>();
+    /** Round-robin cursors over the effective addon list. */
+    private updateAddon = 0;
+    private updateCiAddon = 0;
+    /** How many GitHub fetches to make per cron tick (env.github_downloads). */
+    private repeats = 1;
 
-                await this.generateDownloads();
-            }
-        });
-        this.oldVersionCache.sync();
-        this.jarCache.sync().then(async () => {
-            const undefinedAddons: AddonsEntity[] = [];
-            for await (const addon of configConstructor.addons) {
-                const addonDatabase: DatabaseModel | null = await Promise.resolve(
-                    this.jarCache.findOne({
-                        where: { name: addon.name },
-                    }),
-                );
-                if (addonDatabase === null) undefinedAddons.push(addon);
-            }
-            const repeats = env && env.github_downloads ? env.github_downloads : 1;
-            let updateAddon = 0;
-            let updateCiAddon = 0;
-            const oldAddons: Record<string, string[]> = {};
-            configConstructor.addons.forEach((a) => {
-                if (!a.versions) return;
-                oldAddons[a.name] = Object.values(a.versions);
-            });
-            const oldAddonList: { addon: string; version: string }[] = [];
-            for (const oldAddonsKey in oldAddons) {
-                for (const versionID in oldAddons[oldAddonsKey]) {
-                    const version = await this.oldVersionCache
-                        .findAll({
-                            where: {
-                                name: oldAddonsKey,
-                                version: oldAddons[oldAddonsKey][versionID],
-                            },
-                        })
-                        .then((r) => r && r.length > 0);
-                    if (!version) {
-                        oldAddonList.push({ addon: oldAddonsKey, version: oldAddons[oldAddonsKey][versionID] });
-                    }
-                }
-            }
-            cron.schedule('*/6 * * * *', () => {
-                this.generateDownloads();
-                this.refreshBlueprints();
-                const logErr = (name: string) => (e: unknown) =>
-                    console.error(`[cron] ${name} failed:`, (e as Error)?.message ?? e);
-                if (undefinedAddons.length > 0) {
-                    for (let i = 0; i < (undefinedAddons.length > repeats ? repeats : undefinedAddons.length); i++) {
-                        this.updateAsset(undefinedAddons[0]).catch(logErr(undefinedAddons[0].name));
-                        undefinedAddons.shift();
-                    }
-                } else if (oldAddonList.length > 0) {
-                    for (let i = 0; i < (oldAddonList.length > repeats ? repeats : oldAddonList.length); i++) {
-                        this.downloadOldVersion(oldAddonList[0]).catch(logErr(oldAddonList[0].addon));
-                        oldAddonList.shift();
-                    }
-                } else {
-                    for (let i = 0; i < repeats; i++) {
-                        this.updateAsset(configConstructor.addons[updateAddon]).catch(
-                            logErr(configConstructor.addons[updateAddon].name),
-                        );
-                        updateAddon++;
-                        if (updateAddon >= configConstructor.addons.length) updateAddon = 0;
-                    }
-                }
-                for (let i = 0; i < 4; i++) {
-                    this.updateJenkins(configConstructor.addons[updateCiAddon]).catch(
-                        logErr(configConstructor.addons[updateCiAddon].name),
-                    );
-                    updateCiAddon++;
-                    if (updateCiAddon >= configConstructor.addons.length) updateCiAddon = 0;
-                }
-            });
-        });
+    constructor(private readonly configConstructor: ConfigObject) {
+        this.cachesReady = Promise.all([
+            this.downloadCount.sync(),
+            this.oldVersionCache.sync(),
+            this.jarCache.sync(),
+        ]).then(() => undefined);
+
         let env: {
             github_token?: string;
             github_downloads?: number;
@@ -186,6 +122,7 @@ export default class ApiManager {
         try {
             env = require('./../../env.json');
         } catch (e) {}
+        this.repeats = env && env.github_downloads ? env.github_downloads : 1;
         const CustomOctokit = Octokit.plugin(throttling);
         this.octokit = new CustomOctokit({
             auth: env && env.github_token ? env.github_token : '',
@@ -205,7 +142,83 @@ export default class ApiManager {
             .then(() => this.reload())
             .catch((err) => console.error('[api] initial configStore load failed:', err));
 
+        this.startPollingCron();
         this.refreshBlueprints();
+    }
+
+    /**
+     * Poll GitHub + Jenkins for the addons in the *effective* config, so addons
+     * added or edited through the admin interface are picked up without a
+     * restart. The queues are filled by refreshWorkQueues().
+     */
+    private startPollingCron(): void {
+        cron.schedule('*/6 * * * *', () => {
+            this.generateDownloads();
+            this.refreshBlueprints();
+            const logErr = (name: string) => (e: unknown) =>
+                console.error(`[cron] ${name} failed:`, (e as Error)?.message ?? e);
+            const addons = this.config.addons;
+            if (addons.length === 0) return;
+            if (this.pendingAssets.length > 0) {
+                for (let i = 0; i < Math.min(this.pendingAssets.length, this.repeats); i++) {
+                    const addon = this.pendingAssets.shift() as AddonsEntity;
+                    this.updateAsset(addon).catch(logErr(addon.name));
+                }
+            } else if (this.pendingOldVersions.length > 0) {
+                for (let i = 0; i < Math.min(this.pendingOldVersions.length, this.repeats); i++) {
+                    const pending = this.pendingOldVersions.shift() as { addon: string; version: string };
+                    this.downloadOldVersion(pending).catch(logErr(pending.addon));
+                }
+            } else {
+                for (let i = 0; i < this.repeats; i++) {
+                    // Re-check the bound each pass: the list can shrink under us.
+                    if (this.updateAddon >= addons.length) this.updateAddon = 0;
+                    const addon = addons[this.updateAddon++];
+                    this.updateAsset(addon).catch(logErr(addon.name));
+                }
+            }
+            for (let i = 0; i < 4; i++) {
+                if (this.updateCiAddon >= addons.length) this.updateCiAddon = 0;
+                const addon = addons[this.updateCiAddon++];
+                this.updateJenkins(addon).catch(logErr(addon.name));
+            }
+        });
+    }
+
+    /**
+     * Seed the download counters and the fetch backlog from the effective
+     * config. Safe to call repeatedly — addons and versions already looked up
+     * are remembered and not re-queried.
+     */
+    private async refreshWorkQueues(): Promise<void> {
+        await this.cachesReady;
+        for (const addon of this.config.addons) {
+            if (addon.name !== 'BentoBox') {
+                const counted: DownloadCountModel | null = await this.downloadCount.findOne({
+                    where: { name: addon.name },
+                });
+                if (counted === null) {
+                    await this.downloadCount.create({ name: addon.name, downloads: 0 });
+                }
+            }
+            if (!this.checkedAssets.has(addon.name)) {
+                this.checkedAssets.add(addon.name);
+                const cached: DatabaseModel | null = await this.jarCache.findOne({
+                    where: { name: addon.name },
+                });
+                if (cached === null) this.pendingAssets.push(addon);
+            }
+            for (const version of Object.values(addon.versions || {})) {
+                const key = `${addon.name}@${version}`;
+                if (this.checkedOldVersions.has(key)) continue;
+                this.checkedOldVersions.add(key);
+                const have = await this.oldVersionCache
+                    .findAll({ where: { name: addon.name, version } })
+                    .then((r) => r && r.length > 0);
+                if (!have) this.pendingOldVersions.push({ addon: addon.name, version });
+            }
+        }
+        await this.generateDownloads();
     }
 
     private async rebuildAddons(): Promise<void> {
@@ -233,7 +246,8 @@ export default class ApiManager {
     async reload(): Promise<void> {
         this.config = this.configStore.getEffectiveConfig();
         await this.rebuildAddons();
-        await this.generateDownloads();
+        // Queue any addon the admin just added so the next tick fetches its JAR.
+        await this.refreshWorkQueues();
     }
 
     private createWeblinkSync(): WeblinkSync {
@@ -618,7 +632,7 @@ export default class ApiManager {
                 },
             });
             const bentoBoxJar = bentoBoxVersions.filter((a) => {
-                const addons = this.configConstructor.addons.filter((a) => a.name === 'BentoBox')[0];
+                const addons = this.config.addons.filter((a) => a.name === 'BentoBox')[0];
                 if (!addons.versions) return;
                 return a.version === addons.versions[<string>version];
             })[0];
@@ -808,7 +822,7 @@ export default class ApiManager {
     async downloadOldVersion(details: { addon: string; version: string }) {
         let release;
         let addon: AddonType | AddonsEntity = this.addons.filter((a) => a.name == details.addon)[0];
-        if (details.addon === 'BentoBox') addon = this.configConstructor.addons.filter((a) => a.name === 'BentoBox')[0];
+        if (details.addon === 'BentoBox') addon = this.config.addons.filter((a) => a.name === 'BentoBox')[0];
         try {
             release = await this.octokit.rest.repos.getReleaseByTag({
                 owner: addon.github.split('/')[0],
