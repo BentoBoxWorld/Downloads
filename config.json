@@ -247,6 +247,36 @@
       }
     },
     {
+      "name": "TradeWinds",
+      "github": "BentoBoxWorld/TradeWinds",
+      "ci": "BentoBoxWorld/TradeWinds",
+      "description": "An endless, procedurally generated ocean scattered with NPC trading islands: you start with a rowing boat and a pocketful of coal, and the boat is your cargo hold. Buy low, sell high!\n\nHighlights\n🏝️ An endless ocean to explore with islands, traders, pirates!\n\n⛵ One player, one boat, twenty hull ranks from Bamboo Raft to Pale Oak Chest Boat. Cargo lives in the ship; losing the ship means something. Boats can be traded in, bought outright, captured, stolen at anchor in lawless water — and every lifecycle event is written to an admin logbook, with /twadmin boat <player> [restore] for the day someone asks where theirs went.\n\n📈 A market worth reading. Eight island personalities buy and sell differently\n\n⚡ Two ways to travel: Rowing is free and charts everything you pass. Warping burns hold-carried fuel at the island border - and a small misjump chance drops you into the Interstice, a hostile nether sea.\n\n🚨 Crime pays you into danger. Reputation bands, customs scans, contraband that only sells where the law is thin, fines to come clean, police that never drop loot, and bounties collectible where fugitives are forced to trade.\n\n🎖️ Progression that reads like a sea story. Chart islands to climb the 19-rank Seafarer ladder, then claim a wild islet of your own at Tide Captain: protection, team, a members-only warp node, and a course home you can steer by the stars.\n",
+      "gamemode": true,
+      "versions": {
+        "26.2": "0.1.0"
+      }
+    },
+    {
+      "name": "ChunkBlock",
+      "github": "BentoBoxWorld/ChunkBlock",
+      "ci": "BentoBoxWorld/ChunkBlock",
+      "description": "You start on a single magic block, confined to a single chunk. Everything beyond it is a forbidden zone — you literally cannot leave. Mine the magic block, build, and raise your island level: every level unlocks the next chunk in a spiral of rings around your starting chunk. Lose levels (deaths, removing blocks) and your outermost chunks lock again — your builds stay, but you can't reach them until you earn the level back.",
+      "gamemode": true,
+      "versions": {
+        "26.2": "1.0.1",
+        "26.1.2": "1.0.1",
+        "26.1.1": "1.0.1",
+        "26.1": "1.0.1",
+        "1.21.11": "1.0.1",
+        "1.21.10": "1.0.1",
+        "1.21.9": "1.0.1",
+        "1.21.8": "1.0.1",
+        "1.21.7": "1.0.1",
+        "1.21.6": "1.0.1",
+        "1.21.5": "1.0.1"
+      }
+    },
+    {
       "name": "Bank",
       "github": "BentoBoxWorld/Bank",
       "ci": "BentoBoxWorld/Bank",
