@@ -169,7 +169,7 @@ export default function Landing({ presets }: LandingProps) {
                                         background: 'var(--bb-green)',
                                     }}
                                 />
-                                Powering 1,100+ servers worldwide
+                                Powering 1,300+ servers worldwide
                             </div>
                             <h1
                                 className="bb-hero-title"
@@ -359,8 +359,8 @@ export default function Landing({ presets }: LandingProps) {
                                 background: 'rgba(245, 241, 232, 0.6)',
                             }}
                         >
-                            <StatCell label="Servers running" value="1,100+" sub="and counting" />
-                            <StatCell label="Game modes" value="12" sub="first-party" />
+                            <StatCell label="Servers running" value="1,300+" sub="and counting" />
+                            <StatCell label="Game modes" value="11" sub="first-party" />
                             <StatCell label="Addons" value="20+" sub="mix and match" />
                             <StatCell
                                 label="Versions"
@@ -411,7 +411,7 @@ export default function Landing({ presets }: LandingProps) {
                                     Minecraft version.
                                 </ReasonBullet>
                                 <ReasonBullet>
-                                    Free and open source &mdash; used on 1,100+ servers worldwide.
+                                    Free and open source &mdash; used on 1,300+ servers worldwide.
                                 </ReasonBullet>
                                 <ReasonBullet>
                                     Rich API for developers who want to build custom addons.

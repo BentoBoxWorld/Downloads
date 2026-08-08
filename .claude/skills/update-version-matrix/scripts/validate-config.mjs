@@ -13,6 +13,12 @@
  *  5. If release data is supplied (--releases release-data.json), every mapped
  *     addon version must exist as a GitHub release tag for that repo (catches
  *     typos like 2.28.4 for 1.28.4).
+ *  6. Forward-compatibility: within an addon, a NEWER Minecraft version must never
+ *     map to an OLDER addon release than an older Minecraft version does. Addons
+ *     are not re-released just because a new MC version shipped, so the newest
+ *     release owns everything from its minimum upward.
+ *  7. Every addon has a key for the latest Minecraft release, unless it is listed
+ *     in HARD_FLOOR_ALLOWLIST because of a real Java/Paper/API floor.
  *
  * Usage: node validate-config.mjs [--releases release-data.json]
  * Exits non-zero if any check fails. Run from the project root.
@@ -21,6 +27,14 @@ import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const LEGACY_KEY_ALLOWLIST = new Set(['1.16-Java16']);
+
+// Addons with a genuine hard floor above the latest MC release, so they legitimately
+// have no entry for it. Add here ONLY for a real requirement the addon cannot meet
+// (Java level, Paper API, BentoBox API), never for a stale compatibility string.
+const HARD_FLOOR_ALLOWLIST = new Map([
+    // DeathChest 1.0.0 requires Java 25 + Paper 26.x + BentoBox 3.18+.
+    // (Currently satisfies latestMc, so this is documentation of the pattern.)
+]);
 let failures = 0;
 const fail = (msg) => {
     failures++;
@@ -97,6 +111,40 @@ if (relArg > -1) {
                 fail(`${addon.name}: ${mc} → "${ver}" but no such release tag on ${repo.github}`);
             }
         }
+    }
+}
+
+// 6. forward-compatibility: newer MC must never get an older addon release
+const mcRank = new Map(manifest.versions.map((v, i) => [v.id, i])); // 0 = newest
+for (const addon of config.addons) {
+    const keys = Object.keys(addon.versions || {})
+        .filter((k) => modern(k) && mcRank.has(k))
+        .sort((a, b) => mcRank.get(a) - mcRank.get(b)); // newest MC first
+    for (let i = 0; i < keys.length - 1; i++) {
+        const newerMc = keys[i];
+        const olderMc = keys[i + 1];
+        const newerVal = addon.versions[newerMc];
+        const olderVal = addon.versions[olderMc];
+        if (compareVersions(newerVal, olderVal) < 0) {
+            fail(
+                `${addon.name}: ${newerMc} → ${newerVal} is OLDER than ${olderMc} → ${olderVal}. ` +
+                    `Addons are forward-compatible; the newest release must own every MC version ` +
+                    `from its minimum upward.`,
+            );
+        }
+    }
+}
+
+// 7. every addon reaches the latest MC release
+const latestMc = manifest.latest.release;
+for (const addon of config.addons) {
+    if (HARD_FLOOR_ALLOWLIST.has(addon.name)) continue;
+    if (!(addon.versions || {})[latestMc]) {
+        fail(
+            `${addon.name}: no entry for latest Minecraft ${latestMc}, so it shows "—" on the ` +
+                `site. Extend its newest release upward, or add it to HARD_FLOOR_ALLOWLIST with ` +
+                `a real reason.`,
+        );
     }
 }
 
