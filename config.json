@@ -1,55 +1,26 @@
 {
   "addons": [
     {
-      "name": "BentoBox",
-      "github": "BentoBoxWorld/BentoBox",
-      "ci": "BentoBoxWorld/BentoBox",
-      "description": "BentoBox",
-      "gamemode": false,
-      "versions": {
-        "26.2": "3.20.0",
-        "26.1.2": "3.20.0",
-        "26.1.1": "3.20.0",
-        "1.21.11": "3.20.0",
-        "1.21.10": "3.20.0",
-        "1.21.7": "3.20.0",
-        "1.21.6": "3.20.0",
-        "1.21.5": "3.20.0",
-        "1.21.4": "3.5.0",
-        "1.21.3": "3.3.0",
-        "1.21.1": "2.7.0",
-        "1.20.6": "2.6.0",
-        "1.19": "1.23.1",
-        "1.18": "1.21.1",
-        "1.17": "1.20.1",
-        "1.16-Java16": "1.16.6",
-        "1.16": "1.16.2",
-        "1.15": "1.14.2"
-      }
-    },
-    {
       "name": "AcidIsland",
       "github": "BentoBoxWorld/AcidIsland",
       "ci": "BentoBoxWorld/AcidIsland",
       "description": "**AcidIsland** is a **survival game** where players try to survive and expand their island, surrounded by a **sea of acid**.\n\nAcid is everywhere. Acid burns everything.\n\nOh, and rain is acid too.\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
-        "26.2": "1.22.1",
-        "26.1.2": "1.22.1",
-        "26.1.1": "1.22.1",
-        "1.21.11": "1.22.1",
-        "1.21.10": "1.22.1",
-        "1.21.6": "1.22.1",
-        "1.21.5": "1.22.1",
+        "1.21.11": "1.22.0",
+        "1.21.10": "1.21.0",
+        "1.21.6": "1.21.0",
+        "1.21.5": "1.21.0",
         "1.21.4": "1.21.0",
         "1.21.3": "1.21.0",
         "1.20.6": "1.19.0",
         "1.19": "1.17.2",
         "1.18": "1.15.2",
         "1.17": "1.15.2",
-        "1.16-Java16": "1.14.6",
         "1.16": "1.14.6",
-        "1.15": "1.13.1"
+        "1.16-Java16": "1.14.6",
+        "1.15": "1.13.1",
+        "26.1.1": "1.22.0"
       }
     },
     {
@@ -59,22 +30,20 @@
       "description": "**AOneBlock** is a OneBlock **survival game**\n\nYou spawn on a block. Just *one* block. What do you do?\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
-        "26.2": "1.25.1",
-        "26.1.2": "1.25.1",
-        "26.1.1": "1.25.1",
-        "1.21.11": "1.25.1",
-        "1.21.10": "1.25.1",
-        "1.21.7": "1.25.1",
-        "1.21.6": "1.25.1",
-        "1.21.5": "1.25.1",
+        "26.1.1": "1.24.0",
+        "1.21.11": "1.24.0",
+        "1.21.10": "1.24.0",
+        "1.21.7": "1.24.0",
+        "1.21.6": "1.24.0",
+        "1.21.5": "1.24.0",
         "1.21.4": "1.19.0",
         "1.21.3": "1.21.1",
         "1.20.6": "1.17.0",
         "1.19": "1.13.0",
         "1.18": "1.10.1",
         "1.17": "1.9.0",
-        "1.16-Java16": "1.9.0",
-        "1.16": "1.7.0"
+        "1.16": "1.7.0",
+        "1.16-Java16": "1.9.0"
       }
     },
     {
@@ -84,19 +53,18 @@
       "description": "**Boxed** is a semi-vanilla **survival game**\n\nA game mode where you are boxed into a tiny space that only expands by completing advancements.\n\n\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
-        "26.1.2": "3.4.0",
-        "26.1.1": "3.4.0",
-        "1.21.11": "3.4.0",
-        "1.21.10": "3.4.0",
-        "1.21.6": "3.4.0",
-        "1.21.5": "3.4.0",
+        "1.21.11": "3.3.0",
+        "1.21.10": "3.3.0",
+        "1.21.6": "3.3.0",
+        "1.21.5": "3.3.0",
         "1.21.4": "2.8.1",
         "1.21.3": "2.8.0",
         "1.20.6": "2.7.2",
         "1.19": "2.0.3",
         "1.17": "1.2.1",
         "1.16": "1.1.5",
-        "1.16-Java16": "1.1.5"
+        "1.16-Java16": "1.1.5",
+        "26.1.1": "3.3.0"
       }
     },
     {
@@ -106,12 +74,10 @@
       "description": "**BSkyBlock** is a **survival game** where players try to survive on an **island in the sky**.\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
-        "26.1.2": "1.20.0",
-        "26.1.1": "1.20.0",
-        "1.21.11": "1.20.0",
-        "1.21.10": "1.20.0",
-        "1.21.6": "1.20.0",
-        "1.21.5": "1.20.0",
+        "1.21.11": "1.19.1",
+        "1.21.10": "1.19.1",
+        "1.21.6": "1.19.1",
+        "1.21.5": "1.19.1",
         "1.21.4": "1.19.1",
         "1.21.3": "1.19.1",
         "1.20.6": "1.18.1",
@@ -120,7 +86,8 @@
         "1.17": "1.15.2",
         "1.16": "1.14.4",
         "1.16-Java16": "1.15.2",
-        "1.15": "1.14.3"
+        "1.15": "1.14.3",
+        "26.1.1": "1.19.1"
       }
     },
     {
@@ -130,21 +97,21 @@
       "description": "**CaveBlock** is a **survival game** where players try to survive **underground**.\n\n*An ode to the dwarf's heart in the depths of each person.*\n\nBased on an original idea by the **StoneBlock modpack**.\n\nCreated and maintained by BONNe.",
       "gamemode": true,
       "versions": {
-        "26.1.2": "1.23.1",
-        "26.1.1": "1.23.1",
-        "1.21.11": "1.23.1",
-        "1.21.10": "1.23.1",
-        "1.21.6": "1.23.1",
-        "1.21.5": "1.23.1",
-        "1.21.4": "1.23.1",
-        "1.21.3": "1.23.1",
+        "1.21.8": "1.20.1",
+        "1.21.6": "1.20.1",
+        "1.21.5": "1.20.1",
+        "1.21.4": "1.20.1",
+        "1.21.3": "1.20.1",
         "1.20.6": "1.19.0",
         "1.19": "1.18.0",
         "1.18": "1.16.0",
         "1.17": "1.14.5",
         "1.16": "1.14.5",
         "1.16-Java16": "1.14.5",
-        "1.15": "1.14.0"
+        "1.15": "1.14.0",
+        "26.1.1": "1.20.1",
+        "1.21.10": "1.20.1",
+        "1.21.11": "1.20.1"
       }
     },
     {
@@ -154,9 +121,6 @@
       "description": "**SkyGrid** is a **survival game** where players try to survive in a world **made up of scattered blocks**.\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
-        "26.1.2": "2.2.3",
-        "26.1.1": "2.2.3",
-        "1.21.11": "2.2.3",
         "1.21.10": "2.2.3",
         "1.21.6": "2.2.3",
         "1.21.5": "2.2.3",
@@ -168,7 +132,9 @@
         "1.17": "1.17.0",
         "1.16": "1.16.0",
         "1.16-Java16": "1.16.0",
-        "1.15": "1.14.1"
+        "1.15": "1.14.1",
+        "1.21.11": "2.2.3",
+        "26.1.1": "2.2.3"
       }
     },
     {
@@ -178,14 +144,12 @@
       "description": "**Poseidon** Welcome to Poseidon, an underwater adventure where the ocean is both your playground and your challenge!\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
-        "26.2": "1.1.1",
-        "26.1.2": "1.1.1",
-        "26.1.1": "1.1.1",
-        "1.21.11": "1.1.1",
-        "1.21.10": "1.1.1",
-        "1.21.6": "1.1.1",
-        "1.21.5": "1.1.1",
-        "1.21.4": "1.0.1"
+        "1.21.10": "1.1.0",
+        "1.21.6": "1.1.0",
+        "1.21.5": "1.1.0",
+        "1.21.4": "1.0.0",
+        "1.21.11": "1.1.0",
+        "26.1.1": "1.1.0"
       }
     },
     {
@@ -195,16 +159,15 @@
       "description": "**Parkour** is a game where players create parkour courses and play them.\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
-        "26.1.2": "1.5.0",
-        "26.1.1": "1.5.0",
-        "1.21.11": "1.5.0",
-        "1.21.10": "1.5.0",
-        "1.21.6": "1.5.0",
-        "1.21.5": "1.5.0",
+        "1.21.10": "1.4.0",
+        "1.21.6": "1.4.0",
+        "1.21.5": "1.4.0",
         "1.21.4": "1.4.0",
         "1.21.3": "1.4.0",
         "1.20.6": "1.3.0",
-        "1.20.1": "1.1.0"
+        "1.20.1": "1.1.0",
+        "1.21.11": "1.4.0",
+        "26.1.1": "1.4.0"
       }
     },
     {
@@ -214,13 +177,8 @@
       "description": "**Bank** gives island teams a shared bank and provides a ranking system based on island balances.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
-        "26.2": "1.10.1",
-        "26.1.2": "1.10.1",
-        "26.1.1": "1.10.1",
-        "1.21.11": "1.10.1",
-        "1.21.10": "1.10.1",
-        "1.21.6": "1.10.1",
-        "1.21.5": "1.10.1",
+        "1.21.6": "1.9.1",
+        "1.21.5": "1.9.1",
         "1.21.4": "1.9.1",
         "1.21.3": "1.9.1",
         "1.21.1": "1.8.0",
@@ -228,8 +186,11 @@
         "1.19": "1.5.0",
         "1.18": "1.4.0",
         "1.17": "1.4.0",
+        "1.16": "1.3.0",
         "1.16-Java16": "1.4.0",
-        "1.16": "1.3.0"
+        "1.21.11": "1.9.1",
+        "1.21.10": "1.9.1",
+        "26.1.1": "1.9.1"
       }
     },
     {
@@ -239,12 +200,8 @@
       "description": "**Biomes** lets your players **change the biome** on their island.\n\nCreated and maintained by [BONNe](https://github.com/bonne).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "2.3.2",
-        "26.1.1": "2.3.2",
-        "1.21.11": "2.3.2",
-        "1.21.10": "2.3.2",
-        "1.21.6": "2.3.2",
-        "1.21.5": "2.3.2",
+        "1.21.6": "2.2.1",
+        "1.21.5": "2.2.1",
         "1.21.4": "2.2.0",
         "1.21.3": "2.2.0",
         "1.20.6": "2.2.0",
@@ -253,7 +210,10 @@
         "1.17": "1.14.0",
         "1.16": "1.14.0",
         "1.16-Java16": "1.14.0",
-        "1.15": "1.13.0"
+        "1.15": "1.13.0",
+        "1.21.10": "2.2.1",
+        "1.21.11": "2.2.1",
+        "26.1.1": "2.2.1"
       }
     },
     {
@@ -263,10 +223,6 @@
       "description": "**Border** displays a **world border** around your players' islands.\n\nWorks best with [WorldBorderAPI](https://github.com/yannicklamprecht/WorldBorderAPI/releases).\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "4.8.4",
-        "26.1.1": "4.8.4",
-        "1.21.11": "4.8.4",
-        "1.21.10": "4.8.4",
         "1.21.6": "4.8.3",
         "1.21.5": "4.8.3",
         "1.21.4": "4.8.3",
@@ -277,7 +233,10 @@
         "1.17": "3.2.0",
         "1.16": "3.1.1",
         "1.16-Java16": "3.1.1",
-        "1.15": "1.0.7"
+        "1.15": "1.0.7",
+        "1.21.10": "4.8.3",
+        "1.21.11": "4.8.3",
+        "26.1.1": "4.8.3"
       }
     },
     {
@@ -287,10 +246,6 @@
       "description": "**CauldronWitchery** gives your players the opportunity to get their hands on **black magic**.\nLet them **spawn monsters** using a cauldron!\n\n*What does the Witch do with her cauldron?*\n*Black Magic, of course!*\n\n*We are just not sure what could happen afterward...*\n\nBased on an original idea by the **Ex Nihilo mod**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "2.1.0",
-        "26.1.1": "2.1.0",
-        "1.21.11": "2.1.0",
-        "1.21.10": "2.1.0",
         "1.21.6": "2.1.0",
         "1.21.5": "2.1.0",
         "1.21.4": "2.1.0",
@@ -301,7 +256,10 @@
         "1.17": "1.6.0",
         "1.16": "1.5.0",
         "1.16-Java16": "1.5.0",
-        "1.15": "1.5.0"
+        "1.15": "1.5.0",
+        "1.21.10": "2.1.0",
+        "1.21.11": "2.1.0",
+        "26.1.1": "2.1.0"
       }
     },
     {
@@ -311,22 +269,20 @@
       "description": "**Challenges** lets you create Challenges for your **players to complete!**\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
-        "26.2": "1.7.0",
-        "26.1.2": "1.7.0",
-        "26.1.1": "1.7.0",
-        "1.21.11": "1.7.0",
-        "1.21.10": "1.7.0",
-        "1.21.6": "1.7.0",
-        "1.21.5": "1.7.0",
+        "1.21.6": "1.6.0",
+        "1.21.5": "1.6.0",
         "1.21.4": "1.5.1",
         "1.21.3": "1.5.1",
         "1.20.6": "1.3.1",
         "1.19": "1.2.0",
         "1.18": "1.0.0",
         "1.17": "1.0.0",
-        "1.16-Java16": "0.8.4",
         "1.16": "0.8.4",
-        "1.15": "0.8.4"
+        "1.16-Java16": "0.8.4",
+        "1.15": "0.8.4",
+        "1.21.10": "1.6.0",
+        "1.21.11": "1.6.0",
+        "26.1.1": "1.6.0"
       }
     },
     {
@@ -336,21 +292,20 @@
       "description": "**Chat** lets your players **chat with each other** in an **Island Chat** or a **Team Chat**.\n\nCreated and maintained by [tastybento](https://github.com/tastybento). ",
       "gamemode": false,
       "versions": {
-        "26.2": "1.4.1",
-        "26.1.2": "1.4.1",
-        "26.1.1": "1.4.1",
-        "1.21.11": "1.4.1",
-        "1.21.10": "1.4.1",
         "1.21.6": "1.4.1",
         "1.21.5": "1.4.1",
         "1.21.4": "1.4.1",
         "1.21.3": "1.4.1",
+        "1.20.6": "1.2.0",
         "1.19": "1.1.4",
         "1.18": "1.1.4",
         "1.17": "1.1.4",
-        "1.16-Java16": "1.1.4",
         "1.16": "1.1.4",
-        "1.15": "1.1.1"
+        "1.16-Java16": "1.1.4",
+        "1.15": "1.1.1",
+        "1.21.10": "1.4.1",
+        "1.21.11": "1.4.1",
+        "26.1.1": "1.4.1"
       }
     },
     {
@@ -360,10 +315,6 @@
       "description": "**CheckMeOut**\nis an island submission addon. This addon enables players to submit their island for consideration by admins. In this way, Admins can set up site-wide challenges or competitions that players can do and then submit their island for consideration. Admins get a GUI that lists submissions and they can teleport to the islands from there. Once an island is reviewed by admins it can be deleted, or when the whole activity is over, all submissions can be cleared.\n\nCreated and maintained by [tastybento](https://github.com/tastybento). ",
       "gamemode": false,
       "versions": {
-        "26.1.2": "1.2.0",
-        "26.1.1": "1.2.0",
-        "1.21.11": "1.2.0",
-        "1.21.10": "1.2.0",
         "1.21.6": "1.2.0",
         "1.21.5": "1.2.0",
         "1.21.4": "1.2.0",
@@ -374,7 +325,10 @@
         "1.17": "1.1.0",
         "1.16": "1.0.2",
         "1.16-Java16": "1.1.0",
-        "1.15": "1.0.2"
+        "1.15": "1.0.2",
+        "1.21.10": "1.2.0",
+        "1.21.11": "1.2.0",
+        "26.1.1": "1.2.0"
       }
     },
     {
@@ -384,10 +338,6 @@
       "description": "**ControlPanel** lets you design a flexible **Control Panel** your players can use to **manage their island**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "1.16.0",
-        "26.1.1": "1.16.0",
-        "1.21.11": "1.16.0",
-        "1.21.10": "1.16.0",
         "1.21.6": "1.16.0",
         "1.21.5": "1.16.0",
         "1.21.4": "1.16.0",
@@ -398,19 +348,10 @@
         "1.17": "1.13.0",
         "1.16": "1.13.0",
         "1.16-Java16": "1.13.0",
-        "1.15": "1.13.0"
-      }
-    },
-    {
-      "name": "DeathChest",
-      "github": "BentoBoxWorld/DeathChest",
-      "ci": "BentoBoxWorld/DeathChest",
-      "description": "**DeathChest** saves a player's items into a **chest** when they die instead of dropping them, and it knows where **islands** are.\n\n*Fell into the void? Drowned in the acid sea?*\n*Your chest goes to your own island instead of being lost.*\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
-      "gamemode": false,
-      "versions": {
-        "26.2": "1.0.0",
-        "26.1.2": "1.0.0",
-        "1.21.11": "1.0.0"
+        "1.15": "1.13.0",
+        "1.21.10": "1.16.0",
+        "1.21.11": "1.16.0",
+        "26.1.1": "1.16.0"
       }
     },
     {
@@ -420,10 +361,6 @@
       "description": "**DimensionalTrees** lets you define **exotic tree types** in **other dimensions**.\n\n*Have you ever dreamed of a glowstone tree in the Nether?*\n*What about an end stone and purpur tree in the End?*\n\nCreated by [Awakened-Redstone](https://github.com/Awakened-Redstone) and maintained by the [BentoBoxWorld Crew](https://github.com/orgs/BentoBoxWorld/teams/crew).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "1.9.0",
-        "26.1.1": "1.9.0",
-        "1.21.11": "1.9.0",
-        "1.21.10": "1.9.0",
         "1.21.6": "1.9.0",
         "1.21.5": "1.9.0",
         "1.21.4": "1.9.0",
@@ -434,7 +371,10 @@
         "1.17": "1.6.0",
         "1.16": "1.6.0",
         "1.16-Java16": "1.6.0",
-        "1.15": "1.6.0"
+        "1.15": "1.6.0",
+        "1.21.10": "1.9.0",
+        "1.21.11": "1.9.0",
+        "26.1.1": "1.9.0"
       }
     },
     {
@@ -444,21 +384,20 @@
       "description": "**ExtraMobs** changes some mob-spawning rules to make **Shulkers**, **Wither Skeletons** and more **spawn naturally in your worlds**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "1.15.0",
-        "26.1.1": "1.15.0",
-        "1.21.11": "1.15.0",
-        "1.21.10": "1.15.0",
-        "1.21.6": "1.15.0",
-        "1.21.5": "1.15.0",
+        "1.21.6": "1.14.0",
+        "1.21.5": "1.14.0",
         "1.21.4": "1.14.0",
         "1.21.3": "1.14.0",
-        "1.20.6": "1.12",
-        "1.19": "1.12",
-        "1.18": "1.12",
+        "1.20.6": "1.13",
+        "1.19": "1.12.0",
+        "1.18": "1.12.0",
         "1.17": "1.11.0.3",
         "1.16": "1.11.0.3",
         "1.16-Java16": "1.11.0.3",
-        "1.15": "1.11.0.2"
+        "1.15": "1.11.0.2",
+        "1.21.10": "1.14.0",
+        "1.21.11": "1.14.0",
+        "26.1.1": "1.14.0"
       }
     },
     {
@@ -468,17 +407,15 @@
       "description": "**FarmersDance** allows 'dance' around any growable plant to make it growing faster.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
-        "26.2": "1.2.2",
-        "26.1.2": "1.2.2",
-        "26.1.1": "1.2.2",
-        "1.21.11": "1.2.2",
-        "1.21.10": "1.2.2",
         "1.21.6": "1.2.2",
         "1.21.5": "1.2.2",
         "1.21.4": "1.2.2",
         "1.21.1": "1.2.0",
         "1.20.6": "1.0.0",
-        "1.19": "1.0.0"
+        "1.19": "1.0.0",
+        "1.21.10": "1.2.2",
+        "1.21.11": "1.2.2",
+        "26.1.1": "1.2.2"
       }
     },
     {
@@ -488,21 +425,20 @@
       "description": "**Greenhouses** lets your players **create biome greenhouses** on their islands.\n\nInteresting variation to the Biomes addon.\n\nAdapted from tastybento's Greenhouses plugin.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "1.9.5",
-        "26.1.1": "1.9.5",
-        "1.21.11": "1.9.5",
-        "1.21.10": "1.9.5",
-        "1.21.6": "1.9.5",
-        "1.21.5": "1.9.5",
+        "1.21.6": "1.9.4",
+        "1.21.5": "1.9.4",
         "1.21.4": "1.9.4",
         "1.21.3": "1.9.4",
-        "1.20.6": "1.7.5",
+        "1.20.6": "1.8.0",
         "1.19": "1.7.3",
         "1.18": "1.7.0",
         "1.17": "1.7.0",
         "1.16": "1.5.3",
         "1.16-Java16": "1.5.3",
-        "1.15": "1.0.0"
+        "1.15": "1.0.0",
+        "1.21.10": "1.9.4",
+        "1.21.11": "1.9.4",
+        "26.1.1": "1.9.4"
       }
     },
     {
@@ -512,12 +448,8 @@
       "description": "**InvSwitcher** is per-world switcher.\n\nWorld inventory switcher add-on for BentoBox. This add-on will work for any game modes.\n\nThe following can be switched per-world:\n\n* Inventory & armor\n* Advancements\n* Food level\n* Experience\n* Health\n* Enderchest contents\n\nUse the config to set what you want to be switched.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "1.19.1",
-        "26.1.1": "1.19.1",
-        "1.21.11": "1.19.1",
-        "1.21.10": "1.19.1",
-        "1.21.6": "1.19.1",
-        "1.21.5": "1.19.1",
+        "1.21.6": "1.17.0",
+        "1.21.5": "1.17.0",
         "1.21.4": "1.17.0",
         "1.21.3": "1.17.0",
         "1.21.1": "1.17.0",
@@ -527,7 +459,10 @@
         "1.17": "1.11.0",
         "1.16": "1.11.0",
         "1.16-Java16": "1.11.0",
-        "1.15": "1.8.2"
+        "1.15": "1.8.2",
+        "1.21.10": "1.17.0",
+        "1.21.11": "1.17.0",
+        "26.1.1": "1.17.0"
       }
     },
     {
@@ -537,10 +472,6 @@
       "description": "**IslandFly** lets your players **fly within their islands**!\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "1.14.3",
-        "26.1.1": "1.14.3",
-        "1.21.11": "1.14.3",
-        "1.21.10": "1.14.3",
         "1.21.6": "1.14.3",
         "1.21.5": "1.14.3",
         "1.21.4": "1.14.3",
@@ -552,7 +483,10 @@
         "1.17": "1.9.0",
         "1.16": "1.8.1",
         "1.16-Java16": "1.8.1",
-        "1.15": "1.7.0"
+        "1.15": "1.7.0",
+        "1.21.10": "1.14.3",
+        "1.21.11": "1.14.3",
+        "26.1.1": "1.14.3"
       }
     },
     {
@@ -562,12 +496,8 @@
       "description": "**Level** creates a competitive atmosphere by making your players try to **have the highest island level**.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "2.27.0",
-        "26.1.1": "2.27.0",
-        "1.21.11": "2.27.0",
-        "1.21.10": "2.27.0",
-        "1.21.6": "2.27.0",
-        "1.21.5": "2.27.0",
+        "1.21.6": "2.25.0",
+        "1.21.5": "2.25.0",
         "1.21.4": "2.21.3",
         "1.21.3": "2.21.3",
         "1.21.1": "2.21.3",
@@ -577,7 +507,10 @@
         "1.17": "2.9.0",
         "1.16": "2.6.5",
         "1.16-Java16": "2.9.0",
-        "1.15": "2.3.3"
+        "1.15": "2.3.3",
+        "1.21.11": "2.25.0",
+        "1.21.10": "2.25.0",
+        "26.1.1": "2.25.0"
       }
     },
     {
@@ -587,10 +520,6 @@
       "description": "**Likes** lets your players leave **likes or dislikes** on **islands they visit**.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "2.5.0",
-        "26.1.1": "2.5.0",
-        "1.21.11": "2.5.0",
-        "1.21.10": "2.5.0",
         "1.21.6": "2.5.0",
         "1.21.5": "2.5.0",
         "1.21.4": "2.5.0",
@@ -602,7 +531,10 @@
         "1.17": "2.3.0",
         "1.16": "2.1.1",
         "1.16-Java16": "2.1.1",
-        "1.15": "1.7.1"
+        "1.15": "1.7.1",
+        "1.21.10": "2.5.0",
+        "1.21.11": "2.5.0",
+        "26.1.1": "2.5.0"
       }
     },
     {
@@ -612,13 +544,8 @@
       "description": "**Limits** let you limit how many blocks and entities your players can have on their islands.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
-        "26.2": "1.29.0",
-        "26.1.2": "1.29.0",
-        "26.1.1": "1.29.0",
-        "1.21.11": "1.29.0",
-        "1.21.10": "1.28.4",
-        "1.21.6": "1.28.4",
-        "1.21.5": "1.28.4",
+        "1.21.6": "1.28.1",
+        "1.21.5": "1.28.1",
         "1.21.4": "1.28.1",
         "1.21.3": "1.28.1",
         "1.21.1": "1.28.1",
@@ -626,9 +553,12 @@
         "1.19": "1.19.1",
         "1.18": "1.19.0",
         "1.17": "1.19.0",
-        "1.16-Java16": "1.19.0",
         "1.16": "1.15.5",
-        "1.15": "1.12.1"
+        "1.16-Java16": "1.19.0",
+        "1.15": "1.12.1",
+        "1.21.10": "1.28.1",
+        "1.21.11": "1.28.1",
+        "26.1.1": "1.28.1"
       }
     },
     {
@@ -638,22 +568,20 @@
       "description": "**MagicCobblestoneGenerator** provide players a simple and effective way to generate resources on their islands.\n\nSome specifications about this add-on:\n\n- Offline Generation - ability to disable addon processing on islands where none of members are online.\n- Disabled GameModes - specify Game Modes where MagicCobblestoneGenerator will not work.\n- Generator Tiers - ability to specify default generator tiers\n- GameMode Tiers - ability to specify generator tiers for specific game mode.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
-        "26.2": "2.10.0",
-        "26.1.2": "2.10.0",
-        "26.1.1": "2.10.0",
-        "1.21.11": "2.10.0",
-        "1.21.10": "2.10.0",
-        "1.21.6": "2.10.0",
-        "1.21.5": "2.10.0",
+        "1.21.6": "2.7.0",
+        "1.21.5": "2.7.0",
         "1.21.4": "2.7.0",
         "1.21.3": "2.7.0",
         "1.20.6": "2.5.1",
         "1.19": "2.5.1",
         "1.18": "2.4.0",
         "1.17": "2.3.0",
-        "1.16-Java16": "2.3.0",
         "1.16": "2.3.0",
-        "1.15": "2.2.1"
+        "1.16-Java16": "2.3.0",
+        "1.15": "2.2.1",
+        "1.21.10": "2.7.0",
+        "1.21.11": "2.7.0",
+        "26.1.1": "2.7.0"
       }
     },
     {
@@ -663,11 +591,9 @@
       "description": "**StrangerRealms** The familiar world is shadowed by a terrifying, inverted dimension — the Upside Down.",
       "gamemode": true,
       "versions": {
-        "26.2": "1.0.5",
-        "26.1.2": "1.0.5",
-        "26.1.1": "1.0.5",
-        "1.21.11": "1.0.5",
-        "1.21.10": "1.0.5"
+        "1.21.10": "1.0.0",
+        "1.21.11": "1.0.0",
+        "26.1.1": "1.0.0"
       }
     },
     {
@@ -677,14 +603,10 @@
       "ci": "BentoBoxWorld/TwerkingForTrees",
       "description": "**TwerkingForTrees** lets your players **twerk** that cubic booty to get trees **growing faster**!\n\nInspired by the modded Skyblock experience.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "versions": {
-        "26.1.2": "1.6.0",
-        "26.1.1": "1.6.0",
-        "1.21.11": "1.6.0",
-        "1.21.10": "1.6.0",
-        "1.21.6": "1.6.0",
-        "1.21.5": "1.6.0",
-        "1.21.4": "1.6.0",
-        "1.21.3": "1.6.0",
+        "1.21.6": "1.5.2",
+        "1.21.5": "1.5.2",
+        "1.21.4": "1.5.2",
+        "1.21.3": "1.5.2",
         "1.20.6": "1.5.2",
         "1.19": "1.4.3",
         "1.18": "1.4.3",
@@ -701,10 +623,6 @@
       "description": "**Visit** let your players visit other islands.\n\nThe main idea of the addon is to allow faster ways how to visit any island. The main difference from warps addon is that unlike warps, signs are not necessary, and users can travel to any island.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "1.7.0",
-        "26.1.1": "1.7.0",
-        "1.21.11": "1.7.0",
-        "1.21.10": "1.7.0",
         "1.21.6": "1.7.0",
         "1.21.5": "1.7.0",
         "1.21.4": "1.7.0",
@@ -715,7 +633,10 @@
         "1.17": "1.4.0",
         "1.16": "1.3.0",
         "1.16-Java16": "1.3.0",
-        "1.15": "1.3.0"
+        "1.15": "1.3.0",
+        "1.21.10": "1.7.0",
+        "1.21.11": "1.7.0",
+        "26.1.1": "1.7.0"
       }
     },
     {
@@ -725,21 +646,16 @@
       "description": "**VoidPortals** let your players teleport to other dimensions by jumping into the Void!\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
-        "26.1.2": "1.6.1",
-        "26.1.1": "1.6.1",
-        "1.21.11": "1.6.1",
-        "1.21.10": "1.6.1",
-        "1.21.6": "1.6.1",
-        "1.21.5": "1.6.1",
-        "1.21.4": "1.6.1",
-        "1.21.3": "1.6.1",
-        "1.20.6": "1.5.0.0",
+        "1.20.6": "1.5.0.1",
         "1.19": "1.5.0.0",
         "1.18": "1.5.0.0",
         "1.17": "1.5.0.0",
         "1.16": "1.5.0.0",
         "1.16-Java16": "1.5.0.0",
-        "1.15": "1.5.0.0"
+        "1.15": "1.5.0.0",
+        "1.21.10": "1.5.0.1",
+        "1.21.11": "1.5.0.1",
+        "26.1.1": "1.5.0.1"
       }
     },
     {
@@ -749,23 +665,71 @@
       "description": "**Warps** lets your players create Warps so that other players can visit their islands.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
-        "26.2": "1.19.0",
-        "26.1.2": "1.19.0",
-        "26.1.1": "1.19.0",
-        "1.21.11": "1.19.0",
-        "1.21.10": "1.19.0",
         "1.21.6": "1.19.0",
         "1.21.5": "1.19.0",
         "1.21.4": "1.16.0",
         "1.21.3": "1.16.0",
-        "1.20.6": "1.14.0",
+        "1.20.6": "1.15.0",
         "1.19": "1.13.0",
         "1.18": "1.12.0",
         "1.17": "1.12.0",
-        "1.16-Java16": "1.10.2",
         "1.16": "1.10.2",
-        "1.15": "1.9.7"
+        "1.16-Java16": "1.10.2",
+        "1.15": "1.9.7",
+        "1.21.10": "1.19.0",
+        "1.21.11": "1.19.0",
+        "26.1.1": "1.19.0"
       }
+    },
+    {
+      "name": "BentoBox",
+      "github": "BentoBoxWorld/BentoBox",
+      "ci": "BentoBoxWorld/BentoBox",
+      "description": "BentoBox",
+      "gamemode": false,
+      "versions": {
+        "26.1.1": "3.15.0",
+        "1.21.11": "3.15.0",
+        "1.21.10": "3.15.0",
+        "1.21.6": "3.15.0",
+        "1.21.5": "3.15.0",
+        "1.21.4": "3.5.0",
+        "1.21.3": "3.3.0",
+        "1.21.1": "2.7.0",
+        "1.20.6": "2.6.0",
+        "1.19": "1.23.1",
+        "1.18": "1.21.1",
+        "1.17": "1.20.1",
+        "1.16": "1.16.2",
+        "1.16-Java16": "1.16.6",
+        "1.15": "1.14.2"
+      }
+    },
+    {
+      "name": "DeathChest",
+      "github": "BentoBoxWorld/DeathChest",
+      "ci": "BentoBoxWorld/DeathChest",
+      "description": "**DeathChest** saves a player's items into a **chest** when they die instead of dropping them, and it knows where **islands** are.\n\n*Fell into the void? Drowned in the acid sea?*\n*Your chest goes to your own island instead of being lost.*\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "gamemode": false,
+      "versions": {
+        "26.2": "1.0.0",
+        "26.1.2": "1.0.0",
+        "1.21.11": "1.0.0"
+      }
+    },
+    {
+      "name": "TradeWinds",
+      "github": "BentoBoxWorld/TradeWinds",
+      "ci": "BentoBoxWorld/TradeWinds",
+      "description": "An endless, procedurally generated ocean scattered with NPC trading islands: you start with a rowing boat and a pocketful of coal, and the boat is your cargo hold. Buy low, sell high!\n\nHighlights\n🏝️ An endless ocean to explore with islands, traders, pirates!\n\n⛵ One player, one boat, twenty hull ranks from Bamboo Raft to Pale Oak Chest Boat. Cargo lives in the ship; losing the ship means something. Boats can be traded in, bought outright, captured, stolen at anchor in lawless water — and every lifecycle event is written to an admin logbook, with /twadmin boat <player> [restore] for the day someone asks where theirs went.\n\n📈 A market worth reading. Eight island personalities buy and sell differently\n\n⚡ Two ways to travel: Rowing is free and charts everything you pass. Warping burns hold-carried fuel at the island border - and a small misjump chance drops you into the Interstice, a hostile nether sea.\n\n🚨 Crime pays you into danger. Reputation bands, customs scans, contraband that only sells where the law is thin, fines to come clean, police that never drop loot, and bounties collectible where fugitives are forced to trade.\n\n🎖️ Progression that reads like a sea story. Chart islands to climb the 19-rank Seafarer ladder, then claim a wild islet of your own at Tide Captain: protection, team, a members-only warp node, and a course home you can steer by the stars.\n",
+      "gamemode": true
+    },
+    {
+      "name": "ChunkBlock",
+      "github": "BentoBoxWorld/ChunkBlock",
+      "ci": "BentoBoxWorld/ChunkBlock",
+      "description": "You start on a single magic block, confined to a single chunk. Everything beyond it is a forbidden zone — you literally cannot leave. Mine the magic block, build, and raise your island level: every level unlocks the next chunk in a spiral of rings around your starting chunk. Lose levels (deaths, removing blocks) and your outermost chunks lock again — your builds stay, but you can't reach them until you earn the level back.",
+      "gamemode": true
     }
   ],
   "presets": [
@@ -798,6 +762,17 @@
       "color": "#48c774"
     },
     {
+      "name": "TradeWinds",
+      "description": "🏝️ An endless ocean to explore with islands, traders, pirates!",
+      "subtext": "An endless, procedurally generated ocean scattered with NPC trading islands: you start with a rowing boat and a pocketful of coal, and the boat is your cargo hold. Buy low, sell high!",
+      "addons": [
+        "TradeWinds",
+        "InvSwitcher"
+      ],
+      "color": "#1fdcf4",
+      "dependencyText": "Requires Vault and an economy. InvSwitcher can be that economy."
+    },
+    {
       "name": "Classic AcidIsland",
       "description": "The Original AcidIsland experience!",
       "subtext": "Includes the following addons:",
@@ -813,6 +788,29 @@
         "InvSwitcher"
       ],
       "color": "#ffdd57"
+    },
+    {
+      "name": "ChunkBlock",
+      "description": "You start on a single magic block, confined to a single chunk. Gain levels to gain chunks.",
+      "subtext": "You start on a single magic block, confined to a single chunk. Everything beyond it is a forbidden zone — you literally cannot leave. Mine the magic block, build, and raise your island level: every level unlocks the next chunk in a spiral of rings around your starting chunk. Lose levels (deaths, removing blocks) and your outermost chunks lock again — your builds stay, but you can't reach them until you earn the level back.",
+      "addons": [
+        "ChunkBlock",
+        "Level",
+        "Warps",
+        "Challenges",
+        "InvSwitcher"
+      ],
+      "color": "#888888",
+      "dependencies": [
+        "Bank",
+        "DeathChest",
+        "FarmersDance",
+        "Greenhouses",
+        "IslandFly",
+        "Limits",
+        "MagicCobblestoneGenerator",
+        "TwerkingForTrees"
+      ]
     },
     {
       "name": "Boxed",
