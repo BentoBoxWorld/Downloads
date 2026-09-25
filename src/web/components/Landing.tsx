@@ -243,7 +243,7 @@ export default function Landing({ presets }: LandingProps) {
                                 }}
                             >
                                 <span>Compatible with</span>
-                                {['26.2', '26.1', '1.21', '1.20', '1.19', '1.18'].map((v) => (
+                                {['26.3', '26.2', '26.1', '1.21', '1.20', '1.19', '1.18'].map((v) => (
                                     <span
                                         key={v}
                                         style={{
@@ -364,7 +364,7 @@ export default function Landing({ presets }: LandingProps) {
                             <StatCell label="Addons" value="20+" sub="mix and match" />
                             <StatCell
                                 label="Versions"
-                                value="MC 1.15–26.2.x"
+                                value="MC 1.15–26.3"
                                 sub="always current"
                                 last
                             />
