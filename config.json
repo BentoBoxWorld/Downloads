@@ -273,7 +273,7 @@
       "name": "ChunkBlock",
       "github": "BentoBoxWorld/ChunkBlock",
       "ci": "BentoBoxWorld/ChunkBlock",
-      "description": "You start on a single magic block, confined to a single chunk. Everything beyond it is a forbidden zone — you literally cannot leave. Mine the magic block, build, and raise your island level: every level unlocks the next chunk in a spiral of rings around your starting chunk. Lose levels (deaths, removing blocks) and your outermost chunks lock again — your builds stay, but you can't reach them until you earn the level back.",
+      "description": "**One Block, One Chunk**\n\nYou start on a single magic block, confined to a single chunk. Everything beyond it is a forbidden zone — you literally cannot leave. Mine the magic block, build, and raise your island level: every level unlocks the next chunk in a spiral of rings around your starting chunk. Lose levels (deaths, removing blocks) and your outermost chunks lock again — your builds stay, but you can't reach them until you earn the level back.",
       "gamemode": true,
       "versions": {
         "26.3": "1.4.1",
@@ -980,6 +980,27 @@
         "1.16": "1.10.2",
         "1.15": "1.9.7"
       }
+    },
+    {
+      "name": "TopBlock",
+      "github": "BentoBoxWorld/TopBlock",
+      "ci": "BentoBoxWorld/TopBlock",
+      "description": "TopBlock produces a Top Ten ranking for the AOneBlock and ChunkBlock game modes based on how many magic blocks each island has mined.",
+      "gamemode": false,
+      "versions": {
+        "26.3": "2.1.1",
+        "26.2": "2.1.1",
+        "26.1.2": "2.1.1",
+        "26.1.1": "2.1.1",
+        "26.1": "2.1.1",
+        "1.21.11": "2.1.1",
+        "1.21.10": "2.1.1",
+        "1.21.9": "2.1.1",
+        "1.21.8": "2.1.1",
+        "1.21.7": "2.1.1",
+        "1.21.6": "2.1.1",
+        "1.21.5": "2.1.1"
+      }
     }
   ],
   "presets": [
@@ -1012,6 +1033,17 @@
       "color": "#48c774"
     },
     {
+      "name": "TradeWinds",
+      "description": "🏝️ An endless ocean to explore with islands, traders, pirates!",
+      "subtext": "An endless, procedurally generated ocean scattered with NPC trading islands: you start with a rowing boat and a pocketful of coal, and the boat is your cargo hold. Buy low, sell high!",
+      "addons": [
+        "TradeWinds",
+        "InvSwitcher"
+      ],
+      "color": "#1fdcf4",
+      "dependencyText": "Requires Vault and an economy. InvSwitcher can be that economy."
+    },
+    {
       "name": "Classic AcidIsland",
       "description": "The Original AcidIsland experience!",
       "subtext": "Includes the following addons:",
@@ -1027,6 +1059,29 @@
         "InvSwitcher"
       ],
       "color": "#ffdd57"
+    },
+    {
+      "name": "ChunkBlock",
+      "description": "You start on a single magic block, confined to a single chunk. Gain levels to gain chunks.",
+      "subtext": "You start on a single magic block, confined to a single chunk. Everything beyond it is a forbidden zone — you literally cannot leave. Mine the magic block, build, and raise your island level: every level unlocks the next chunk in a spiral of rings around your starting chunk. Lose levels (deaths, removing blocks) and your outermost chunks lock again — your builds stay, but you can't reach them until you earn the level back.",
+      "addons": [
+        "ChunkBlock",
+        "Level",
+        "Warps",
+        "Challenges",
+        "InvSwitcher"
+      ],
+      "color": "#888888",
+      "dependencies": [
+        "Bank",
+        "DeathChest",
+        "FarmersDance",
+        "Greenhouses",
+        "IslandFly",
+        "Limits",
+        "MagicCobblestoneGenerator",
+        "TwerkingForTrees"
+      ]
     },
     {
       "name": "Boxed",
