@@ -4,7 +4,7 @@
       "name": "BentoBox",
       "github": "BentoBoxWorld/BentoBox",
       "ci": "BentoBoxWorld/BentoBox",
-      "description": "**BentoBox** is the core plugin. Every game mode and addon on this page needs it.\n\nIt provides island protection, teams, settings flags, blueprints and the API that game modes and addons build on.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "BentoBox",
       "gamemode": false,
       "versions": {
         "26.3": "3.23.1",
@@ -94,7 +94,7 @@
       "name": "Boxed",
       "github": "BentoBoxWorld/Boxed",
       "ci": "BentoBoxWorld/Boxed",
-      "description": "**Boxed** is a semi-vanilla **survival game**.\n\nYou start boxed into a tiny space that only **expands as you complete advancements**.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**Boxed** is a semi-vanilla **survival game**\n\nA game mode where you are boxed into a tiny space that only expands by completing advancements.\n\n\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
         "26.3": "3.4.1",
@@ -122,7 +122,7 @@
       "name": "BSkyBlock",
       "github": "BentoBoxWorld/BSkyBlock",
       "ci": "BentoBoxWorld/BSkyBlock",
-      "description": "**BSkyBlock** is classic **SkyBlock**: players start on a small **island in the sky** with limited resources and build their way up.\n\nThe successor to the original ASkyBlock.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**BSkyBlock** is a **survival game** where players try to survive on an **island in the sky**.\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
         "26.3": "1.20.0",
@@ -182,7 +182,7 @@
       "name": "SkyGrid",
       "github": "BentoBoxWorld/SkyGrid",
       "ci": "BentoBoxWorld/SkyGrid",
-      "description": "**SkyGrid** is a **survival game** set in a world **made up of scattered blocks** floating over the void.\n\nEvery resource is one wrong step from a fall.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**SkyGrid** is a **survival game** where players try to survive in a world **made up of scattered blocks**.\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
         "26.3": "2.2.3",
@@ -212,7 +212,7 @@
       "name": "Poseidon",
       "github": "BentoBoxWorld/poseidon",
       "ci": "BentoBoxWorld/Poseidon",
-      "description": "**Poseidon** is an **underwater survival game**. Players are shipwrecked and must breathe, build and survive in an aquatic world.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**Poseidon** Welcome to Poseidon, an underwater adventure where the ocean is both your playground and your challenge!\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
         "26.3": "1.1.1",
@@ -234,7 +234,7 @@
       "name": "Parkour",
       "github": "BentoBoxWorld/Parkour",
       "ci": "BentoBoxWorld/Parkour",
-      "description": "**Parkour** lets players **build parkour courses** and challenge others to run them.\n\nCourses have start and finish plates, checkpoints and best-time leaderboards.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**Parkour** is a game where players create parkour courses and play them.\n\nCreated and maintained by tastybento.",
       "gamemode": true,
       "versions": {
         "26.3": "1.5.1",
@@ -259,7 +259,7 @@
       "name": "TradeWinds",
       "github": "BentoBoxWorld/TradeWinds",
       "ci": "BentoBoxWorld/TradeWinds",
-      "description": "**TradeWinds** is a game mode of **sea trading, smuggling and piracy**.\n\nStart with a rowing boat on an endless ocean of NPC trading islands. Buy low, sell high, upgrade your boat, dodge customs and pirates, and earn the right to claim an island of your own.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "An endless, procedurally generated ocean scattered with NPC trading islands: you start with a rowing boat and a pocketful of coal, and the boat is your cargo hold. Buy low, sell high!\n\nHighlights\n🏝️ An endless ocean to explore with islands, traders, pirates!\n\n⛵ One player, one boat, twenty hull ranks from Bamboo Raft to Pale Oak Chest Boat. Cargo lives in the ship; losing the ship means something. Boats can be traded in, bought outright, captured, stolen at anchor in lawless water — and every lifecycle event is written to an admin logbook, with /twadmin boat <player> [restore] for the day someone asks where theirs went.\n\n📈 A market worth reading. Eight island personalities buy and sell differently\n\n⚡ Two ways to travel: Rowing is free and charts everything you pass. Warping burns hold-carried fuel at the island border - and a small misjump chance drops you into the Interstice, a hostile nether sea.\n\n🚨 Crime pays you into danger. Reputation bands, customs scans, contraband that only sells where the law is thin, fines to come clean, police that never drop loot, and bounties collectible where fugitives are forced to trade.\n\n🎖️ Progression that reads like a sea story. Chart islands to climb the 19-rank Seafarer ladder, then claim a wild islet of your own at Tide Captain: protection, team, a members-only warp node, and a course home you can steer by the stars.\n",
       "gamemode": true,
       "versions": {
         "26.3": "0.3.0",
@@ -294,7 +294,7 @@
       "name": "Bank",
       "github": "BentoBoxWorld/Bank",
       "ci": "BentoBoxWorld/Bank",
-      "description": "**Bank** gives island teams a **shared bank account** with interest, statements and a ranking of the richest islands.\n\nRequires Vault and an economy plugin.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**Bank** gives island teams a shared bank and provides a ranking system based on island balances.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
         "26.3": "1.10.1",
@@ -354,7 +354,7 @@
       "name": "Border",
       "github": "BentoBoxWorld/Border",
       "ci": "BentoBoxWorld/Border",
-      "description": "**Border** displays a **border** around your players' islands.\n\nChoose the vanilla world border or a barrier-block and particle border.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**Border** displays a **world border** around your players' islands.\n\nWorks best with [WorldBorderAPI](https://github.com/yannicklamprecht/WorldBorderAPI/releases).\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
         "26.3": "4.8.5",
@@ -415,7 +415,7 @@
       "name": "Challenges",
       "github": "BentoBoxWorld/Challenges",
       "ci": "BentoBoxWorld/Challenges",
-      "description": "**Challenges** lets you create Challenges for your **players to complete**, with rewards and optional levels to unlock.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
+      "description": "**Challenges** lets you create Challenges for your **players to complete!**\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
         "26.3": "1.8.1",
@@ -445,7 +445,7 @@
       "name": "Chat",
       "github": "BentoBoxWorld/Chat",
       "ci": "BentoBoxWorld/Chat",
-      "description": "**Chat** lets your players **chat with each other** in an **Island Chat** or a **Team Chat**.\n\nAdmins can spy on either channel.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**Chat** lets your players **chat with each other** in an **Island Chat** or a **Team Chat**.\n\nCreated and maintained by [tastybento](https://github.com/tastybento). ",
       "gamemode": false,
       "versions": {
         "26.3": "1.4.1",
@@ -474,7 +474,7 @@
       "name": "CheckMeOut",
       "github": "BentoBoxWorld/CheckMeOut",
       "ci": "BentoBoxWorld/CheckMeOut",
-      "description": "**CheckMeOut** lets players **submit their island** for review by admins.\n\nUse it to run server-wide build competitions. Admins get a GUI listing submissions and can teleport to each island, then delete a submission or clear them all when the event is over.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**CheckMeOut**\nis an island submission addon. This addon enables players to submit their island for consideration by admins. In this way, Admins can set up site-wide challenges or competitions that players can do and then submit their island for consideration. Admins get a GUI that lists submissions and they can teleport to the islands from there. Once an island is reviewed by admins it can be deleted, or when the whole activity is over, all submissions can be cleared.\n\nCreated and maintained by [tastybento](https://github.com/tastybento). ",
       "gamemode": false,
       "versions": {
         "26.3": "1.2.0",
@@ -608,7 +608,7 @@
       "name": "FarmersDance",
       "github": "BentoBoxWorld/FarmersDance",
       "ci": "BentoBoxWorld/FarmersDance",
-      "description": "**FarmersDance** lets players **dance** (crouch repeatedly) next to any growable plant to make it **grow faster**.\n\nUnlike TwerkingForTrees, it works on crops, cactus, pumpkins, mushrooms and more.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
+      "description": "**FarmersDance** allows 'dance' around any growable plant to make it growing faster.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
         "26.3": "1.2.2",
@@ -633,7 +633,7 @@
       "name": "Greenhouses",
       "github": "BentoBoxWorld/Greenhouses",
       "ci": "BentoBoxWorld/Greenhouses",
-      "description": "**Greenhouses** lets your players **create biome greenhouses** on their islands.\n\nAn alternative to the Biomes addon.\n\nAdapted from tastybento's Greenhouses plugin.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**Greenhouses** lets your players **create biome greenhouses** on their islands.\n\nInteresting variation to the Biomes addon.\n\nAdapted from tastybento's Greenhouses plugin.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
         "26.3": "1.10.2",
@@ -663,7 +663,7 @@
       "name": "InvSwitcher",
       "github": "BentoBoxWorld/InvSwitcher",
       "ci": "BentoBoxWorld/InvSwitcher",
-      "description": "**InvSwitcher** gives players a **separate inventory per world**.\n\nIt works with any game mode. The following can be switched per world:\n\n* Inventory & armor\n* Advancements\n* Food level\n* Experience\n* Health\n* Ender chest contents\n\nUse the config to choose what is switched.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**InvSwitcher** is per-world switcher.\n\nWorld inventory switcher add-on for BentoBox. This add-on will work for any game modes.\n\nThe following can be switched per-world:\n\n* Inventory & armor\n* Advancements\n* Food level\n* Experience\n* Health\n* Enderchest contents\n\nUse the config to set what you want to be switched.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
         "26.3": "1.19.3",
@@ -725,7 +725,7 @@
       "name": "Level",
       "github": "BentoBoxWorld/Level",
       "ci": "BentoBoxWorld/Level",
-      "description": "**Level** creates a competitive atmosphere by making your players try to **have the highest island level**.\n\nIslands are scored by the blocks on them, with a Top Ten leaderboard.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**Level** creates a competitive atmosphere by making your players try to **have the highest island level**.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
         "26.3": "2.29.0",
@@ -787,7 +787,7 @@
       "name": "Limits",
       "github": "BentoBoxWorld/Limits",
       "ci": "BentoBoxWorld/Limits",
-      "description": "**Limits** lets you limit how many **blocks and entities** your players can have on their islands.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**Limits** let you limit how many blocks and entities your players can have on their islands.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
       "gamemode": false,
       "versions": {
         "26.3": "1.30.2",
@@ -818,7 +818,7 @@
       "name": "MagicCobblestoneGenerator",
       "github": "BentoBoxWorld/MagicCobblestoneGenerator",
       "ci": "BentoBoxWorld/MagicCobblestoneGenerator",
-      "description": "**MagicCobblestoneGenerator** gives players a simple and effective way to **generate resources** on their islands.\n\n- **Generator tiers** that unlock as islands progress\n- **Per-game-mode tiers**, or disable it in chosen game modes\n- **Offline generation** can be turned off for islands with no members online\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
+      "description": "**MagicCobblestoneGenerator** provide players a simple and effective way to generate resources on their islands.\n\nSome specifications about this add-on:\n\n- Offline Generation - ability to disable addon processing on islands where none of members are online.\n- Disabled GameModes - specify Game Modes where MagicCobblestoneGenerator will not work.\n- Generator Tiers - ability to specify default generator tiers\n- GameMode Tiers - ability to specify generator tiers for specific game mode.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
         "26.3": "2.10.0",
@@ -848,7 +848,7 @@
       "name": "Stranger Realms",
       "github": "BentoBoxWorld/StrangerRealms",
       "ci": "BentoBoxWorld/StrangerRealms",
-      "description": "**StrangerRealms** is a **survival game** where the Nether is replaced by the **Upside Down**: a dark, block-for-block copy of the Overworld full of corrupted mobs.\n\nClaim land that is protected in both dimensions.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "**StrangerRealms** The familiar world is shadowed by a terrifying, inverted dimension — the Upside Down.",
       "gamemode": true,
       "versions": {
         "26.3": "1.0.5",
@@ -894,7 +894,7 @@
       "name": "Visit",
       "github": "BentoBoxWorld/Visit",
       "ci": "BentoBoxWorld/Visit",
-      "description": "**Visit** lets your players **visit other islands**.\n\nUnlike Warps, no signs are needed: players can travel to any island that allows visitors.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
+      "description": "**Visit** let your players visit other islands.\n\nThe main idea of the addon is to allow faster ways how to visit any island. The main difference from warps addon is that unlike warps, signs are not necessary, and users can travel to any island.\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
         "26.3": "1.7.0",
@@ -925,7 +925,7 @@
       "name": "VoidPortals",
       "github": "BentoBoxWorld/VoidPortals",
       "ci": "BentoBoxWorld/VoidPortals",
-      "description": "**VoidPortals** lets your players teleport to other dimensions by **jumping into the void**!\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
+      "description": "**VoidPortals** let your players teleport to other dimensions by jumping into the Void!\n\nCreated and maintained by [BONNe](https://github.com/BONNe).",
       "gamemode": false,
       "versions": {
         "26.3": "1.6.1",
@@ -985,7 +985,7 @@
       "name": "TopBlock",
       "github": "BentoBoxWorld/TopBlock",
       "ci": "BentoBoxWorld/TopBlock",
-      "description": "**TopBlock** shows a **Top Ten** of islands in AOneBlock and ChunkBlock, ranked by how many magic blocks they have mined.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "TopBlock produces a Top Ten ranking for the AOneBlock and ChunkBlock game modes based on how many magic blocks each island has mined.",
       "gamemode": false,
       "versions": {
         "26.3": "2.1.1",
@@ -1006,29 +1006,8 @@
       "name": "Lag Budget",
       "github": "BentoBoxWorld/LagBudget",
       "ci": "BentoBoxWorld/LagBudget",
-      "description": "**Lag Budget** gives every island a **lag budget**. When an island goes over budget, new spawns there are silently dropped. Nothing is blocked and players get no message. Optionally, hopper transfers can be dropped too.\n\nAdmins can see what is going on with `/<admin> lagbudget top` and `/<admin> lagbudget info <player>`.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
+      "description": "Gives every island a **lag budget** and quietly drops spawns on islands that exceed it. When an island is **over budget**, new spawns there are silently dropped. Nothing is blocked and players get no message. Optionally, hopper transfers can be dropped too.\n\nThe admin can see what is going on with `/<admin> lagbudget top` and `/<admin> lagbudget info <player>`.",
       "gamemode": false
-    },
-    {
-      "name": "Upgrades",
-      "github": "BentoBoxWorld/Upgrades",
-      "ci": "BentoBoxWorld/Upgrades",
-      "description": "**Upgrades** lets players **buy island upgrades**: a bigger protection range, higher block and entity limits, and custom command rewards.\n\nUses Vault for costs. Works with the Level and Limits addons.\n\nCreated and maintained by [tastybento](https://github.com/tastybento).",
-      "gamemode": false,
-      "versions": {
-        "26.3": "1.0.5",
-        "26.2": "1.0.5",
-        "26.1.2": "1.0.5",
-        "26.1.1": "1.0.5",
-        "26.1": "1.0.5",
-        "1.21.11": "1.0.5",
-        "1.21.10": "1.0.5",
-        "1.21.9": "1.0.5",
-        "1.21.8": "1.0.5",
-        "1.21.7": "1.0.5",
-        "1.21.6": "1.0.5",
-        "1.21.5": "1.0.5"
-      }
     }
   ],
   "presets": [
