@@ -27,6 +27,7 @@ import { AuthConfig, AuthManager } from './auth';
 import { BlogConfig, BlogManager } from './blog';
 import { ConfigStore } from './configStore';
 import { SubmissionManager } from './submissions';
+import { ServerStats } from './serverStats';
 
 const { throttling } = require('@octokit/plugin-throttling');
 
@@ -69,6 +70,7 @@ export default class ApiManager {
         logging: false,
         storage: './../data/Blog.sqlite',
     });
+    serverStats: ServerStats = new ServerStats();
     blog: BlogManager = new BlogManager(this.auth, this.blogSequelize, this.loadBlogConfig());
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
