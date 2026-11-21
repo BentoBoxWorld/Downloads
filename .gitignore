@@ -19,3 +19,6 @@ env.json
 # Design hand-off bundles dropped at the repo root
 /design_handoff_*/
 /BentoBox Download Site*.zip
+
+# Blog post drafts (produced by the blog-post skill)
+.drafts/
