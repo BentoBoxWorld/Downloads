@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -12,6 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import PresetsPage from './PresetsPage';
 import { PresetsEntity } from '../../config';
+import { GetServerCount } from '../ApiRequestManager';
 
 interface LandingProps {
     presets: PresetsEntity[];
@@ -92,6 +93,17 @@ function StatCell({
 
 export default function Landing({ presets }: LandingProps) {
     const { hash } = useLocation();
+    // Server count comes from bStats via /api/stats (already bucketed and
+    // ratcheted server-side); show the last known floor until it loads.
+    const [servers, setServers] = useState(1600);
+    useEffect(() => {
+        GetServerCount()
+            .then((n) => {
+                if (Number.isFinite(n) && n > 0) setServers(n);
+            })
+            .catch(() => undefined);
+    }, []);
+    const serversLabel = `${servers.toLocaleString('en-US')}+`;
 
     function scrollToPresets(e: React.MouseEvent) {
         e.preventDefault();
@@ -169,7 +181,7 @@ export default function Landing({ presets }: LandingProps) {
                                         background: 'var(--bb-green)',
                                     }}
                                 />
-                                Powering 1,600+ servers worldwide
+                                Powering {serversLabel} servers worldwide
                             </div>
                             <h1
                                 className="bb-hero-title"
@@ -359,7 +371,7 @@ export default function Landing({ presets }: LandingProps) {
                                 background: 'rgba(245, 241, 232, 0.6)',
                             }}
                         >
-                            <StatCell label="Servers running" value="1,600+" sub="and counting" />
+                            <StatCell label="Servers running" value={serversLabel} sub="and counting" />
                             <StatCell label="Game modes" value="11" sub="first-party" />
                             <StatCell label="Addons" value="20+" sub="mix and match" />
                             <StatCell
@@ -411,7 +423,7 @@ export default function Landing({ presets }: LandingProps) {
                                     Minecraft version.
                                 </ReasonBullet>
                                 <ReasonBullet>
-                                    Free and open source &mdash; used on 1,600+ servers worldwide.
+                                    Free and open source &mdash; used on {serversLabel} servers worldwide.
                                 </ReasonBullet>
                                 <ReasonBullet>
                                     Rich API for developers who want to build custom addons.

@@ -17,6 +17,10 @@ export async function GetBlueprints(): Promise<BlueprintCatalog> {
     return (await axios.get('/api/blueprints')).data;
 }
 
+export async function GetServerCount(): Promise<number> {
+    return (await axios.get('/api/stats')).data.servers;
+}
+
 export function BlueprintFileUrl(id: string, type: 'blueprint' | 'bundle' = 'blueprint'): string {
     return `/api/blueprints/download?id=${encodeURIComponent(id)}&type=${type}`;
 }

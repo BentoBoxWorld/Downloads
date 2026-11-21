@@ -85,6 +85,7 @@ app.post(
     wrap(apiManager.auth.requireCsrf as (...a: unknown[]) => unknown),
     wrap(apiManager.auth.handleLogout as (...a: unknown[]) => unknown),
 );
+app.get('/api/stats', wrap(apiManager.serverStats.handleGet as (...a: unknown[]) => unknown));
 app.get('/api/me', wrap(apiManager.auth.handleMe as (...a: unknown[]) => unknown));
 app.post(
     '/api/me/delete',
