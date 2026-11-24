@@ -1,9 +1,11 @@
 import axios from 'axios';
 import * as cron from 'node-cron';
 import { Request, Response } from 'express';
-import { Op, Sequelize } from 'sequelize';
+import { col, fn, Op, Sequelize } from 'sequelize';
+import { Octokit } from 'octokit';
 import { AddonsEntity } from '../config';
 import { SnapshotAttributes, SnapshotFactory, SnapshotStatic } from './models/stats';
+import { DownloadCounts, fetchCurseforge, fetchGithub, fetchHangar, fetchModrinth } from './downloadSources';
 import { BRAND_GREEN, BRAND_INK, LOGO_SVG, parseColor, parseStyle, renderBadge } from './badge';
 
 /**
@@ -18,6 +20,9 @@ import { BRAND_GREEN, BRAND_INK, LOGO_SVG, parseColor, parseStyle, renderBadge }
  *                                  current value only, no history upstream, so
  *                                  ours starts the day this runs)
  *   siteDownloads                  all-time ZIP download counter per addon
+ *   githubDownloads / modrinthDownloads / hangarDownloads / curseforgeDownloads
+ *                                  all-time totals per addon from each platform,
+ *                                  fetched once per UTC day (retried hourly on failure)
  *
  * Line charts are backfilled from bStats' ~13 months of history on first run.
  */
@@ -31,6 +36,10 @@ const LINE_CHARTS: { chart: string; agg: 'max' | 'sum' }[] = [
     { chart: 'islandsCreated', agg: 'sum' },
 ];
 
+/** Platform download sources: metric name → fetcher. CurseForge is added when a key is configured. */
+const SITE_METRIC = 'siteDownloads';
+const PLATFORM_METRICS = ['githubDownloads', 'modrinthDownloads', 'hangarDownloads', 'curseforgeDownloads'];
+
 const BAR_CHARTS: { chart: string; metric: string }[] = [
     { chart: 'addonsBar', metric: 'addonServers' },
     { chart: 'gameModeAddonsBar', metric: 'gameModeServers' },
@@ -40,6 +49,8 @@ const BAR_CHARTS: { chart: string; metric: string }[] = [
 const PEAK_WINDOW_DAYS = 7;
 /** Below this many servers the "servers" badge falls back to the Minecraft range. */
 const MIN_SERVERS = 10;
+/** Below this many downloads the "downloads" badge falls back to the Minecraft range. */
+const MIN_DOWNLOADS = 100;
 /** Rank badges only show a top-N placing; otherwise they fall back to servers. */
 const MAX_RANK = 10;
 /** 30-min samples to fetch on a normal hourly run: 48h, so yesterday is always complete. */
@@ -53,6 +64,18 @@ export interface StatsDeps {
     siteDownloads: () => Record<string, number>;
     /** The effective addon list from config.json + admin overrides. */
     addons: () => AddonsEntity[];
+    /** Authenticated GitHub client (release asset download counts). */
+    octokit: () => Octokit;
+    /** CurseForge Core API key; CurseForge is skipped when absent. */
+    curseforgeKey?: string;
+}
+
+export interface DownloadBreakdown {
+    site: number;
+    github: number;
+    modrinth: number;
+    hangar: number;
+    curseforge: number;
 }
 
 export interface AddonStats {
@@ -64,7 +87,9 @@ export interface AddonStats {
     share: number | null;
     /** 1-based popularity rank among addons (or game modes) on bStats. */
     rank: number | null;
+    /** All-time downloads across every source (null when no source knows it). */
     downloads: number | null;
+    downloadsBySource: DownloadBreakdown;
     mc: { min: string; max: string } | null;
     version: string | null;
 }
@@ -75,6 +100,8 @@ export interface EcosystemStats {
     players: number | null;
     islands: number | null;
     islandsPerDay: number | null;
+    /** All-time downloads of every addon (and BentoBox) across every source. */
+    downloads: number;
 }
 
 interface PeakCache {
@@ -84,6 +111,8 @@ interface PeakCache {
     players: number | null;
     islands: number | null;
     islandsPerDay: number | null;
+    /** Latest cumulative platform totals: metric → addon name → downloads. */
+    platform: Record<string, DownloadCounts>;
 }
 
 interface BadgeContent {
@@ -165,8 +194,11 @@ export class StatsManager {
         players: null,
         islands: null,
         islandsPerDay: null,
+        platform: {},
     };
     private collecting = false;
+    /** metric → UTC day of its last successful platform fetch. */
+    private platformFetched: Record<string, string> = {};
 
     constructor(private readonly deps: StatsDeps) {
         this.snapshots
@@ -197,7 +229,8 @@ export class StatsManager {
             };
             for (const c of LINE_CHARTS) await run(c.chart, () => this.collectLine(c.chart, c.agg));
             for (const b of BAR_CHARTS) await run(b.chart, () => this.collectBar(b.chart, b.metric));
-            await run('siteDownloads', () => this.collectSiteDownloads());
+            await run(SITE_METRIC, () => this.collectSiteDownloads());
+            await this.collectPlatforms(run);
             await this.rebuildCache();
         } finally {
             this.collecting = false;
@@ -240,11 +273,35 @@ export class StatsManager {
     }
 
     private async collectSiteDownloads(): Promise<void> {
-        const counts = this.deps.siteDownloads();
+        await this.storeCounts(SITE_METRIC, this.deps.siteDownloads());
+    }
+
+    private async storeCounts(metric: string, counts: DownloadCounts): Promise<void> {
         const day = utcDay(Date.now());
-        await this.upsertMax(
-            Object.keys(counts).map((key) => ({ day, metric: 'siteDownloads', key, value: counts[key] })),
-        );
+        await this.upsertMax(Object.keys(counts).map((key) => ({ day, metric, key, value: counts[key] })));
+    }
+
+    /** Platform totals move slowly and GitHub costs a request per repo: once a day each. */
+    private async collectPlatforms(run: (what: string, fn: () => Promise<void>) => Promise<void>): Promise<void> {
+        const addons = this.deps.addons();
+        if (addons.length === 0) return; // config not loaded yet — try next hour
+        const sources: Record<string, () => Promise<DownloadCounts>> = {
+            githubDownloads: () => fetchGithub(this.deps.octokit(), addons),
+            modrinthDownloads: () => fetchModrinth(addons),
+            hangarDownloads: () => fetchHangar(addons),
+        };
+        const cfKey = this.deps.curseforgeKey;
+        if (cfKey) sources.curseforgeDownloads = () => fetchCurseforge(cfKey, addons);
+        const today = utcDay(Date.now());
+        for (const metric of Object.keys(sources)) {
+            if (this.platformFetched[metric] === today) continue;
+            await run(metric, async () => {
+                const counts = await sources[metric]();
+                await this.storeCounts(metric, counts);
+                this.platformFetched[metric] = today;
+                console.log(`[stats] ${metric}: ${Object.keys(counts).length} addons matched`);
+            });
+        }
     }
 
     /**
@@ -311,6 +368,20 @@ export class StatsManager {
         }
         rank(addons);
         rank(gameModes);
+
+        // Platform totals are cumulative, so the all-time max is the latest value.
+        const platform: Record<string, DownloadCounts> = {};
+        const totals = (await this.snapshots.findAll({
+            attributes: ['metric', 'key', [fn('MAX', col('value')), 'value']],
+            where: { metric: { [Op.in]: PLATFORM_METRICS } },
+            group: ['metric', 'key'],
+            raw: true,
+        })) as unknown as SnapshotAttributes[];
+        for (const t of totals) {
+            if (!platform[t.metric]) platform[t.metric] = {};
+            platform[t.metric][t.key] = Number(t.value);
+        }
+
         this.cache = {
             addons,
             gameModes,
@@ -318,6 +389,7 @@ export class StatsManager {
             players,
             islands,
             islandsPerDay: createdDays > 0 ? Math.round(createdSum / createdDays) : null,
+            platform,
         };
     }
 
@@ -330,7 +402,6 @@ export class StatsManager {
         const isCore = addon.name === 'BentoBox';
         const k = norm(addon.name);
         const entry = isCore ? undefined : addon.gamemode ? this.cache.gameModes[k] : this.cache.addons[k];
-        const downloads = this.deps.siteDownloads();
 
         let servers: number | null = entry ? entry.value : null;
         let share: number | null = null;
@@ -345,12 +416,10 @@ export class StatsManager {
         const mc = keys.length ? { min: keys[0], max: keys[keys.length - 1] } : null;
         const version = keys.length ? (addon.versions as Record<string, string>)[keys[keys.length - 1]] : null;
 
-        let dl: number | null = null;
-        if (isCore) {
-            dl = Object.keys(downloads).reduce((s, n) => s + downloads[n], 0);
-        } else if (typeof downloads[addon.name] === 'number') {
-            dl = downloads[addon.name];
-        }
+        const bySource = this.downloadsOf(addon.name);
+        const dl = bySource
+            ? bySource.site + bySource.github + bySource.modrinth + bySource.hangar + bySource.curseforge
+            : null;
 
         return {
             name: addon.name,
@@ -359,13 +428,40 @@ export class StatsManager {
             share,
             rank: entry ? entry.rank : null,
             downloads: dl,
+            downloadsBySource: bySource ?? { site: 0, github: 0, modrinth: 0, hangar: 0, curseforge: 0 },
             mc,
             version,
         };
     }
 
-    ecosystemStats(): EcosystemStats {
+    /** Per-source downloads for one addon, or null if no source has a number for it. */
+    private downloadsOf(name: string): DownloadBreakdown | null {
+        const p = this.cache.platform;
+        const pick = (counts: DownloadCounts | undefined) =>
+            counts && typeof counts[name] === 'number' ? counts[name] : null;
+        const site = pick(this.deps.siteDownloads());
+        const github = pick(p.githubDownloads);
+        const modrinth = pick(p.modrinthDownloads);
+        const hangar = pick(p.hangarDownloads);
+        const curseforge = pick(p.curseforgeDownloads);
+        if ([site, github, modrinth, hangar, curseforge].every((v) => v === null)) return null;
         return {
+            site: site ?? 0,
+            github: github ?? 0,
+            modrinth: modrinth ?? 0,
+            hangar: hangar ?? 0,
+            curseforge: curseforge ?? 0,
+        };
+    }
+
+    ecosystemStats(): EcosystemStats {
+        let downloads = 0;
+        for (const a of this.deps.addons()) {
+            const d = this.downloadsOf(a.name);
+            if (d) downloads += d.site + d.github + d.modrinth + d.hangar + d.curseforge;
+        }
+        return {
+            downloads,
             servers: this.deps.serverCount(),
             players: this.cache.players,
             islands: this.cache.islands,
@@ -400,11 +496,8 @@ export class StatsManager {
                     ? { label: 'popularity', message: `#${s.rank} most-used ${s.gamemode ? 'game mode' : 'addon'}` }
                     : servers();
             case 'downloads':
-                return s.downloads
-                    ? {
-                          label: s.name === 'BentoBox' ? 'addon downloads' : 'downloads',
-                          message: niceCount(s.downloads),
-                      }
+                return s.downloads !== null && s.downloads >= MIN_DOWNLOADS
+                    ? { label: 'downloads', message: niceCount(s.downloads) }
                     : mc();
             case 'mc':
                 return mc();
@@ -424,6 +517,10 @@ export class StatsManager {
                 return e.players ? { label: 'players online', message: niceCount(e.players) } : null;
             case 'islands':
                 return e.islands ? { label: 'BentoBox', message: `${niceCount(e.islands)} islands` } : null;
+            case 'downloads':
+                return e.downloads >= MIN_DOWNLOADS
+                    ? { label: 'BentoBox', message: `${niceCount(e.downloads)} downloads` }
+                    : null;
             case 'islands-created':
                 return e.islandsPerDay
                     ? { label: 'new islands', message: `${niceCount(e.islandsPerDay)} a day` }
