@@ -80,6 +80,8 @@ export default class ApiManager {
             return out;
         },
         addons: () => (this.config ? this.config.addons : []),
+        octokit: () => this.octokit,
+        curseforgeKey: this.loadCurseforgeKey(),
     });
     blog: BlogManager = new BlogManager(this.auth, this.blogSequelize, this.loadBlogConfig());
 
@@ -333,6 +335,14 @@ export default class ApiManager {
             }
         } catch (e) {}
         return null;
+    }
+
+    private loadCurseforgeKey(): string | undefined {
+        try {
+            const env = require('./../../env.json');
+            if (typeof env?.curseforge_api_key === 'string' && env.curseforge_api_key) return env.curseforge_api_key;
+        } catch (e) {}
+        return undefined;
     }
 
     private loadBlogConfig(): BlogConfig {
