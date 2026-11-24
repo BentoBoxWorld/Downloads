@@ -21,6 +21,33 @@ export async function GetServerCount(): Promise<number> {
     return (await axios.get('/api/stats')).data.servers;
 }
 
+export interface AddonStatsSummary {
+    name: string;
+    gamemode: boolean;
+    servers: number | null;
+    share: number | null;
+    rank: number | null;
+    downloads: number | null;
+    downloadsBySource: { site: number; github: number; modrinth: number; hangar: number; curseforge: number };
+    mc: { min: string; max: string } | null;
+    version: string | null;
+}
+
+export interface StatsSummary {
+    ecosystem: {
+        servers: number;
+        downloads: number;
+        players: number | null;
+        islands: number | null;
+        islandsPerDay: number | null;
+    };
+    addons: AddonStatsSummary[];
+}
+
+export async function GetStatsSummary(): Promise<StatsSummary> {
+    return (await axios.get('/api/stats/addons')).data;
+}
+
 export function BlueprintFileUrl(id: string, type: 'blueprint' | 'bundle' = 'blueprint'): string {
     return `/api/blueprints/download?id=${encodeURIComponent(id)}&type=${type}`;
 }
@@ -100,16 +127,8 @@ export async function GetAdminUsers(): Promise<AdminUser[]> {
     return (await axios.get('/api/admin/users')).data;
 }
 
-export async function PostSetAdmin(
-    csrfToken: string,
-    discordId: string,
-    isAdmin: boolean,
-): Promise<void> {
-    await axios.post(
-        '/api/admin/users',
-        { discordId, isAdmin },
-        { headers: { 'X-Csrf-Token': csrfToken } },
-    );
+export async function PostSetAdmin(csrfToken: string, discordId: string, isAdmin: boolean): Promise<void> {
+    await axios.post('/api/admin/users', { discordId, isAdmin }, { headers: { 'X-Csrf-Token': csrfToken } });
 }
 
 export interface BlogAuthorRow {
@@ -124,26 +143,15 @@ export async function GetAdminAuthors(): Promise<BlogAuthorRow[]> {
     return (await axios.get('/api/admin/authors')).data;
 }
 
-export async function PostSetAuthor(
-    csrfToken: string,
-    discordId: string,
-    canAuthorBlog: boolean,
-): Promise<void> {
-    await axios.post(
-        '/api/admin/authors',
-        { discordId, canAuthorBlog },
-        { headers: { 'X-Csrf-Token': csrfToken } },
-    );
+export async function PostSetAuthor(csrfToken: string, discordId: string, canAuthorBlog: boolean): Promise<void> {
+    await axios.post('/api/admin/authors', { discordId, canAuthorBlog }, { headers: { 'X-Csrf-Token': csrfToken } });
 }
 
 export async function GetAdminPresets(): Promise<PresetsEntity[]> {
     return (await axios.get('/api/admin/presets')).data;
 }
 
-export async function PutAdminPresets(
-    csrfToken: string,
-    presets: PresetsEntity[],
-): Promise<void> {
+export async function PutAdminPresets(csrfToken: string, presets: PresetsEntity[]): Promise<void> {
     await axios.put('/api/admin/presets', presets, {
         headers: { 'X-Csrf-Token': csrfToken },
     });
@@ -153,20 +161,13 @@ export async function GetAdminAddons(): Promise<AddonsEntity[]> {
     return (await axios.get('/api/admin/addons')).data;
 }
 
-export async function PostAdminAddon(
-    csrfToken: string,
-    addon: AddonsEntity,
-): Promise<void> {
+export async function PostAdminAddon(csrfToken: string, addon: AddonsEntity): Promise<void> {
     await axios.post('/api/admin/addons', addon, {
         headers: { 'X-Csrf-Token': csrfToken },
     });
 }
 
-export async function PutAdminAddon(
-    csrfToken: string,
-    name: string,
-    addon: AddonsEntity,
-): Promise<void> {
+export async function PutAdminAddon(csrfToken: string, name: string, addon: AddonsEntity): Promise<void> {
     await axios.put(`/api/admin/addons/${encodeURIComponent(name)}`, addon, {
         headers: { 'X-Csrf-Token': csrfToken },
     });
@@ -204,10 +205,7 @@ export async function GetAdminAudits(): Promise<AdminAudit[]> {
     return (await axios.get('/api/admin/audits')).data;
 }
 
-export async function DeleteAdminOverride(
-    csrfToken: string,
-    scope: AdminScope,
-): Promise<void> {
+export async function DeleteAdminOverride(csrfToken: string, scope: AdminScope): Promise<void> {
     await axios.delete(`/api/admin/overrides/${encodeURIComponent(scope)}`, {
         headers: { 'X-Csrf-Token': csrfToken },
     });
@@ -267,11 +265,7 @@ export interface BlogTag {
     count: number;
 }
 
-export async function GetBlogList(
-    page = 1,
-    tag?: string,
-    query?: string,
-): Promise<BlogList> {
+export async function GetBlogList(page = 1, tag?: string, query?: string): Promise<BlogList> {
     const params = new URLSearchParams();
     params.set('page', String(page));
     if (tag) params.set('tag', tag);
@@ -330,11 +324,7 @@ export async function PutAdminBlogPost(
     return r.data;
 }
 
-export async function PostPublishBlogPost(
-    csrfToken: string,
-    id: number,
-    at?: number,
-): Promise<AdminBlogPost> {
+export async function PostPublishBlogPost(csrfToken: string, id: number, at?: number): Promise<AdminBlogPost> {
     const body = at && at > Date.now() ? { at } : {};
     const r = await axios.post(`/api/blog/admin/posts/${id}/publish`, body, {
         headers: { 'X-Csrf-Token': csrfToken, 'Content-Type': 'application/json' },

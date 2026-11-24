@@ -9,6 +9,7 @@ import {
     faHistory,
     faNewspaper,
     faPenNib,
+    faAward,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { GetMe, PostLogout, SessionUser } from '../../ApiRequestManager';
@@ -18,8 +19,9 @@ import PresetsTab from './PresetsTab';
 import AddonsTab from './AddonsTab';
 import BlogTab from './BlogTab';
 import AuthorsTab from './AuthorsTab';
+import BadgesTab from './BadgesTab';
 
-type TabId = 'recent' | 'admins' | 'authors' | 'presets' | 'addons' | 'blog';
+type TabId = 'recent' | 'admins' | 'authors' | 'presets' | 'addons' | 'blog' | 'badges';
 
 interface TabDef {
     id: TabId;
@@ -34,6 +36,7 @@ const TABS: TabDef[] = [
     { id: 'presets', label: 'Presets', icon: faCube },
     { id: 'addons', label: 'Addons', icon: faPuzzlePiece },
     { id: 'blog', label: 'Blog', icon: faNewspaper },
+    { id: 'badges', label: 'Badges', icon: faAward },
 ];
 
 export default function AdminPage() {
@@ -139,6 +142,7 @@ export default function AdminPage() {
                     {activeTab === 'presets' && <PresetsTab user={user} />}
                     {activeTab === 'addons' && <AddonsTab user={user} />}
                     {activeTab === 'blog' && <BlogTab user={user} />}
+                    {activeTab === 'badges' && <BadgesTab />}
                 </div>
             </div>
         </div>
