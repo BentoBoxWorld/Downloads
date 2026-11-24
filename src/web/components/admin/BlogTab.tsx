@@ -11,7 +11,7 @@ import {
 } from '../../ApiRequestManager';
 import BlogEditor from './BlogEditor';
 
-export default function BlogTab({ user }: { user: SessionUser }) {
+export default function BlogTab({ user }: Readonly<{ user: SessionUser }>) {
     const [posts, setPosts] = useState<AdminBlogPost[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<number | null>(null);

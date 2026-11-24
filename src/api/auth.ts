@@ -1,5 +1,5 @@
-import { Request, RequestHandler, Response } from 'express';
-import * as crypto from 'crypto';
+import { Request, RequestHandler } from 'express';
+import * as crypto from 'node:crypto';
 import * as cron from 'node-cron';
 import { BOOLEAN, Op, Sequelize } from 'sequelize';
 import axios from 'axios';
@@ -465,9 +465,9 @@ export class AuthManager {
     // and by Discord user-id for submissions. Map entries are pruned lazily
     // on read, so memory stays bounded by active actors.
 
-    private callbackHits = new Map<string, number[]>();
-    private static CALLBACK_WINDOW_MS = 60_000;
-    private static CALLBACK_LIMIT = 30;
+    private readonly callbackHits = new Map<string, number[]>();
+    private static readonly CALLBACK_WINDOW_MS = 60_000;
+    private static readonly CALLBACK_LIMIT = 30;
 
     callbackRateLimit: RequestHandler = (req, res, next) => {
         const ip = (req.ip || req.socket.remoteAddress || 'unknown').toString();
@@ -482,11 +482,11 @@ export class AuthManager {
         next();
     };
 
-    private submissionHits = new Map<string, number[]>();
-    private static SUBMISSION_HOUR_MS = 60 * 60 * 1000;
-    private static SUBMISSION_DAY_MS = 24 * 60 * 60 * 1000;
-    private static SUBMISSION_PER_HOUR = 3;
-    private static SUBMISSION_PER_DAY = 10;
+    private readonly submissionHits = new Map<string, number[]>();
+    private static readonly SUBMISSION_HOUR_MS = 60 * 60 * 1000;
+    private static readonly SUBMISSION_DAY_MS = 24 * 60 * 60 * 1000;
+    private static readonly SUBMISSION_PER_HOUR = 3;
+    private static readonly SUBMISSION_PER_DAY = 10;
 
     consumeSubmissionQuota(userId: string): { ok: true } | { ok: false; reason: string } {
         const now = Date.now();

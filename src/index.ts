@@ -1,14 +1,14 @@
 import * as express from 'express';
 import apiClass from './api/api';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import * as mime from 'mime-types';
 import helmet from 'helmet';
 import cookieParser = require('cookie-parser');
 import { ConfigObject } from './config';
 import { upload as blueprintUpload } from './api/submissions';
 import { imageUpload as blogImageUpload } from './api/blog';
-import * as https from 'https';
+import * as https from 'node:https';
 import axios from 'axios';
 
 const config: ConfigObject = JSON.parse(fs.readFileSync('./../config.json').toString());

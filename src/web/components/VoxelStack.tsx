@@ -326,7 +326,7 @@ interface CubeProps {
     mat: string;
 }
 
-function IsoCube({ x, y, z, size, mat }: CubeProps): JSX.Element | null {
+function IsoCube({ x, y, z, size, mat }: Readonly<CubeProps>): JSX.Element | null {
     const c = colorFor(mat);
     if (!c) return null;
     const sx = (x - z) * size;
@@ -378,7 +378,7 @@ export default function VoxelStack({
     variant = 'island',
     width = 260,
     height = 150,
-}: VoxelStackProps): JSX.Element {
+}: Readonly<VoxelStackProps>): JSX.Element {
     const mats = stackMaterials(topBlocks);
     const tile = Math.min(width, height) / 8;
     const cubes: { x: number; y: number; z: number; mat: string }[] = [];
@@ -598,7 +598,7 @@ export function BlueprintVoxels({
     width = 260,
     height = 150,
     maxCubes = 2000,
-}: BlueprintVoxelsProps): JSX.Element {
+}: Readonly<BlueprintVoxelsProps>): JSX.Element {
     const prepared = useMemo(
         () => prepareVoxels(voxels, maxCubes),
         [voxels, maxCubes],

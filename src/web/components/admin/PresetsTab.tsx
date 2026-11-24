@@ -20,7 +20,7 @@ import {
 } from '../../ApiRequestManager';
 import PresetEditor from './PresetEditor';
 
-export default function PresetsTab({ user }: { user: SessionUser }) {
+export default function PresetsTab({ user }: Readonly<{ user: SessionUser }>) {
     const [server, setServer] = useState<PresetsEntity[] | null>(null);
     const [draft, setDraft] = useState<PresetsEntity[] | null>(null);
     const [addons, setAddons] = useState<AddonType[]>([]);
@@ -247,13 +247,13 @@ function IconButton({
     onClick,
     disabled,
     danger,
-}: {
+}: Readonly<{
     icon: import('@fortawesome/fontawesome-svg-core').IconDefinition;
     label: string;
     onClick: () => void;
     disabled?: boolean;
     danger?: boolean;
-}) {
+}>) {
     return (
         <button
             type="button"
@@ -276,7 +276,7 @@ function IconButton({
     );
 }
 
-function ErrorBanner({ text }: { text: string }) {
+function ErrorBanner({ text }: Readonly<{ text: string }>) {
     return (
         <div css={tw`mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800`}>
             {text}

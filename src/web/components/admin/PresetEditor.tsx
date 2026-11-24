@@ -29,7 +29,7 @@ interface Props {
     onChange: (next: PresetsEntity) => void;
 }
 
-export default function PresetEditor({ preset, addons, onChange }: Props) {
+export default function PresetEditor({ preset, addons, onChange }: Readonly<Props>) {
     function set<K extends keyof PresetsEntity>(key: K, value: PresetsEntity[K]) {
         onChange({ ...preset, [key]: value });
     }
@@ -153,11 +153,11 @@ function ChipPicker({
     addons,
     selected,
     onToggle,
-}: {
+}: Readonly<{
     addons: AddonType[];
     selected: string[];
     onToggle: (name: string) => void;
-}) {
+}>) {
     const sorted = [...addons].filter((a) => a.name.toLowerCase() !== 'bentobox').sort((a, b) => {
         if (a.gamemode !== b.gamemode) return a.gamemode ? -1 : 1;
         return a.name.localeCompare(b.name);

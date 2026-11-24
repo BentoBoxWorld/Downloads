@@ -77,7 +77,7 @@ export default function TermsPage() {
     );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: Readonly<{ title: string; children: React.ReactNode }>) {
     return (
         <section css={tw`mb-5`}>
             <h2 css={tw`text-xl font-semibold mt-4 mb-2`}>{title}</h2>

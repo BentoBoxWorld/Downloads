@@ -31,7 +31,7 @@ interface Props {
 
 const AUTOSAVE_INTERVAL_MS = 12_000;
 
-export default function BlogEditor({ user, postId, onClose }: Props) {
+export default function BlogEditor({ user, postId, onClose }: Readonly<Props>) {
     const [post, setPost] = useState<AdminBlogPost | null>(null);
     const [title, setTitle] = useState('');
     const [slug, setSlug] = useState('');

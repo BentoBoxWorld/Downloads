@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 import * as cron from 'node-cron';
 import { Op, Sequelize } from 'sequelize';
 import axios from 'axios';
@@ -156,7 +156,7 @@ export class BlogManager {
 
     /** GET /api/blog/posts?page=N&tag=X&q=foo */
     handleListPosts: RequestHandler = async (req, res) => {
-        const page = Math.max(1, parseInt(String(req.query.page ?? '1'), 10) || 1);
+        const page = Math.max(1, Number.parseInt(String(req.query.page ?? '1'), 10) || 1);
         const offset = (page - 1) * POSTS_PER_PAGE;
         const tagFilter = typeof req.query.tag === 'string' ? normalizeTag(req.query.tag) : '';
         const q = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 80) : '';
@@ -359,7 +359,7 @@ export class BlogManager {
             `    <meta name="twitter:title" content="${title}" />`,
             `    <meta name="twitter:description" content="${desc}" />`,
             twImage,
-            `    <script type="application/ld+json">${jsonLd.replace(/</g, '\\u003c')}</script>`,
+            `    <script type="application/ld+json">${jsonLd.replace(/</g, String.raw`\u003c`)}</script>`,
         ]
             .filter(Boolean)
             .join('\n');
@@ -379,7 +379,7 @@ export class BlogManager {
 
     /** GET /api/blog/admin/posts/:id */
     handleGetAdminPost: RequestHandler = async (req, res) => {
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -444,7 +444,7 @@ export class BlogManager {
             res.status(401).json({ error: 'unauthenticated' });
             return;
         }
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -511,7 +511,7 @@ export class BlogManager {
      *  Body: { at?: number } — when set to a future ms-epoch, schedules the
      *  post; otherwise publishes immediately. */
     handlePublishPost: RequestHandler = async (req, res) => {
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -550,7 +550,7 @@ export class BlogManager {
 
     /** POST /api/blog/admin/posts/:id/unpublish */
     handleUnpublishPost: RequestHandler = async (req, res) => {
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -566,7 +566,7 @@ export class BlogManager {
 
     /** DELETE /api/blog/admin/posts/:id */
     handleDeletePost: RequestHandler = async (req, res) => {
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -847,8 +847,8 @@ function processCallouts(html: string): string {
     return html.replace(
         /<blockquote>([\s\S]*?)<\/blockquote>/g,
         (match: string, inner: string): string => {
-            const m = inner.match(
-                /^\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(?:<br\s*\/?>|\n|\s)*([\s\S]*)$/i,
+            const m = /^\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(?:<br\s*\/?>|\n|\s)*([\s\S]*)$/i.exec(
+                inner,
             );
             if (!m) return match;
             const type = m[1].toLowerCase();

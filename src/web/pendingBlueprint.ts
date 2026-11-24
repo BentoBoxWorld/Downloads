@@ -90,7 +90,7 @@ function readFromStorage(): File | null {
     try {
         const bin = atob(parsed.base64);
         const bytes = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.codePointAt(i) ?? 0;
         return new File([bytes], parsed.name, {
             type: parsed.type,
             lastModified: parsed.lastModified,

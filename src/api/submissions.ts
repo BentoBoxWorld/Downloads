@@ -1,16 +1,15 @@
 import { RequestHandler } from 'express';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { Octokit } from 'octokit';
 import multer = require('multer');
 import Ajv2020 from 'ajv/dist/2020';
 import { ValidateFunction } from 'ajv';
 import addFormats from 'ajv-formats';
 import { AuthedRequest, AuthManager, TERMS_VERSION } from './auth';
-import { CatalogOverlay, computeStats, parseBlueprintId } from './blueprintCatalog';
+import { CatalogOverlay, computeStats, parseBlueprintId, validateBlueprintSubmission } from './blueprintCatalog';
 import { WeblinkSync } from './weblink';
 import schema from './schemas/blueprint.schema.json';
-import { validateBlueprintSubmission } from './blueprintCatalog';
 
 // 5 MB cap.
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -27,8 +26,8 @@ interface SubmissionsConfig {
 }
 
 export class SubmissionManager {
-    private validate: ValidateFunction;
-    private octokit: Octokit | null;
+    private readonly validate: ValidateFunction;
+    private readonly octokit: Octokit | null;
 
     constructor(
         private readonly auth: AuthManager,
@@ -261,7 +260,7 @@ export class SubmissionManager {
                 /* fall through to empty */
             }
         }
-        if (!overlay.blueprints) overlay.blueprints = {};
+        overlay.blueprints ??= {};
         overlay.blueprints[entry.id] = {
             displayName: entry.displayName,
             description: entry.description,
@@ -398,11 +397,13 @@ function summariseStats(
     name: string,
 ): string {
     const lines: string[] = [];
-    lines.push(`- **Display name:** ${displayName}`);
-    lines.push(`- **Path:** \`${gameMode}/${name}.blueprint\``);
-    lines.push(`- **Dimensions:** ${s.dimensions.x} × ${s.dimensions.y} × ${s.dimensions.z}`);
-    lines.push(`- **Blocks:** ${s.blockCount}, attached: ${s.attachedCount}, air: ${s.airCount}`);
-    lines.push(`- **Entities:** ${s.entityCount}`);
+    lines.push(
+        `- **Display name:** ${displayName}`,
+        `- **Path:** \`${gameMode}/${name}.blueprint\``,
+        `- **Dimensions:** ${s.dimensions.x} × ${s.dimensions.y} × ${s.dimensions.z}`,
+        `- **Blocks:** ${s.blockCount}, attached: ${s.attachedCount}, air: ${s.airCount}`,
+        `- **Entities:** ${s.entityCount}`,
+    );
     if (s.biomes.length) lines.push(`- **Biomes:** ${s.biomes.join(', ')}`);
     if (s.sinking) lines.push(`- **Sinking:** yes`);
     if (s.topBlocks.length) {

@@ -154,7 +154,7 @@ export function niceCount(n: number): string {
 }
 
 function versionKey(v: string): number[] {
-    const m = v.match(/^\d+(?:\.\d+)*/);
+    const m = /^\d+(?:\.\d+)*/.exec(v);
     return m ? m[0].split('.').map(Number) : [];
 }
 
@@ -180,13 +180,13 @@ function rank(values: Record<string, { name: string; value: number }>): void {
 // ── manager ──────────────────────────────────────────────────────────────────
 
 export class StatsManager {
-    private sequelize = new Sequelize('stats', 'user', 'password', {
+    private readonly sequelize = new Sequelize('stats', 'user', 'password', {
         host: 'localhost',
         dialect: 'sqlite',
         logging: false,
         storage: './../data/Stats.sqlite',
     });
-    private snapshots: SnapshotStatic = SnapshotFactory(this.sequelize);
+    private readonly snapshots: SnapshotStatic = SnapshotFactory(this.sequelize);
     private cache: PeakCache = {
         addons: {},
         gameModes: {},
@@ -265,7 +265,7 @@ export class StatsManager {
         const day = utcDay(Date.now());
         const rows: SnapshotAttributes[] = [];
         for (const e of res.data as { name?: unknown; data?: unknown }[]) {
-            const v = Array.isArray(e?.data) ? Number(e.data[0]) : NaN;
+            const v = Array.isArray(e?.data) ? Number(e.data[0]) : Number.NaN;
             if (typeof e?.name !== 'string' || !e.name || e.name.length > 64 || !Number.isFinite(v)) continue;
             rows.push({ day, metric, key: e.name, value: Math.round(v) });
         }

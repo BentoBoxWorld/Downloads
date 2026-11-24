@@ -12,7 +12,7 @@ interface GiscusConfig {
 
 /** Embeds the Giscus comments widget. The component is a no-op when the
  *  server returns null from /api/blog/comments-config (i.e. no env.giscus). */
-export default function Giscus({ slug }: { slug: string }) {
+export default function Giscus({ slug }: Readonly<{ slug: string }>) {
     const ref = useRef<HTMLDivElement | null>(null);
     const [config, setConfig] = useState<GiscusConfig | null>(null);
 
@@ -40,18 +40,18 @@ export default function Giscus({ slug }: { slug: string }) {
         s.src = 'https://giscus.app/client.js';
         s.async = true;
         s.crossOrigin = 'anonymous';
-        s.setAttribute('data-repo', config.repo);
-        s.setAttribute('data-repo-id', config.repoId);
-        s.setAttribute('data-category', config.category);
-        s.setAttribute('data-category-id', config.categoryId);
-        s.setAttribute('data-mapping', config.mapping);
-        s.setAttribute('data-strict', '0');
-        s.setAttribute('data-reactions-enabled', '1');
-        s.setAttribute('data-emit-metadata', '0');
-        s.setAttribute('data-input-position', 'bottom');
-        s.setAttribute('data-theme', config.theme);
-        s.setAttribute('data-lang', 'en');
-        s.setAttribute('data-loading', 'lazy');
+        s.dataset.repo = config.repo;
+        s.dataset.repoId = config.repoId;
+        s.dataset.category = config.category;
+        s.dataset.categoryId = config.categoryId;
+        s.dataset.mapping = config.mapping;
+        s.dataset.strict = '0';
+        s.dataset.reactionsEnabled = '1';
+        s.dataset.emitMetadata = '0';
+        s.dataset.inputPosition = 'bottom';
+        s.dataset.theme = config.theme;
+        s.dataset.lang = 'en';
+        s.dataset.loading = 'lazy';
         container.appendChild(s);
         return () => {
             container.innerHTML = '';

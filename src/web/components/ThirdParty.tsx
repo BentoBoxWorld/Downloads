@@ -19,12 +19,12 @@ function ThirdPartyCard({
     addon,
     tagColors,
     tagDescriptions,
-}: {
+}: Readonly<{
     name: string;
     addon: ThirdParty['addons'][string];
     tagColors: Record<string, string>;
     tagDescriptions: Record<string, string | undefined>;
-}): JSX.Element {
+}>): JSX.Element {
     const firstTag = addon.Tags?.[0];
     const tile = firstTag ? tagColors[firstTag] : 'var(--bb-mute-2)';
     return (
@@ -180,7 +180,7 @@ function ThirdPartyCard({
     );
 }
 
-export default function ThirdPartyPage({ data }: { data: ThirdParty }) {
+export default function ThirdPartyPage({ data }: Readonly<{ data: ThirdParty }>) {
     const [query, setQuery] = useState('');
     const [activeTags, setActiveTags] = useState<string[]>([]);
 

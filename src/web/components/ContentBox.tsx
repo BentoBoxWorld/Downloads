@@ -22,14 +22,14 @@ const BlogPost = React.lazy(() => import('./blog/BlogPost'));
 function RouteAwareBody() {
     const location = useLocation();
     useEffect(() => {
-        document.body.setAttribute('data-route', location.pathname);
+        document.body.dataset.route = location.pathname;
     }, [location.pathname]);
     return null;
 }
 
 /** Paper-card wrapper used for every interior route (everything except `/`).
  *  Retains the original "soft surface" feel without the yellow tint. */
-function InteriorWrap({ children }: { children: React.ReactNode }) {
+function InteriorWrap({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <div
             style={{
@@ -62,7 +62,7 @@ export default function ContentBox() {
                 <Async promiseFn={addonTypes}>
                     {({ data, isLoading }) => {
                         if (isLoading) return <></>;
-                        if (data) return <CustomPage addonTypes={data.filter((a) => a)} />;
+                        if (data) return <CustomPage addonTypes={data.filter(Boolean)} />;
                     }}
                 </Async>
             </Suspense>
@@ -76,7 +76,7 @@ export default function ContentBox() {
                 <Async promiseFn={presets}>
                     {({ data, isLoading }) => {
                         if (isLoading) return <></>;
-                        if (data) return <Landing presets={data.filter((a) => a)} />;
+                        if (data) return <Landing presets={data.filter(Boolean)} />;
                     }}
                 </Async>
             </Suspense>

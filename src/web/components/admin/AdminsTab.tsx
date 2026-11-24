@@ -9,9 +9,9 @@ import {
     SessionUser,
 } from '../../ApiRequestManager';
 
-const DISCORD_ID_RE = /^[0-9]{15,25}$/;
+const DISCORD_ID_RE = /^\d{15,25}$/;
 
-export default function AdminsTab({ user }: { user: SessionUser }) {
+export default function AdminsTab({ user }: Readonly<{ user: SessionUser }>) {
     const [admins, setAdmins] = useState<AdminUser[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);

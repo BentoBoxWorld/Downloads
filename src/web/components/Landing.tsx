@@ -18,7 +18,7 @@ interface LandingProps {
     presets: PresetsEntity[];
 }
 
-function ReasonBullet({ children }: { children: React.ReactNode }) {
+function ReasonBullet({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <li
             style={{
@@ -57,12 +57,12 @@ function StatCell({
     value,
     sub,
     last,
-}: {
+}: Readonly<{
     label: string;
     value: string;
     sub?: string;
     last?: boolean;
-}) {
+}>) {
     return (
         <div
             style={{
@@ -91,7 +91,7 @@ function StatCell({
     );
 }
 
-export default function Landing({ presets }: LandingProps) {
+export default function Landing({ presets }: Readonly<LandingProps>) {
     const { hash } = useLocation();
     // Server count comes from bStats via /api/stats (already bucketed and
     // ratcheted server-side); show the last known floor until it loads.

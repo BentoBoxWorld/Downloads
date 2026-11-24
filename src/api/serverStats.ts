@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as cron from 'node-cron';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { Request, Response } from 'express';
 
 /**
@@ -75,7 +75,7 @@ export class ServerStats {
         const points: unknown = res.data;
         if (!Array.isArray(points)) throw new Error('unexpected bStats response');
         const values = points
-            .map((p) => (Array.isArray(p) ? Number(p[1]) : NaN))
+            .map((p) => (Array.isArray(p) ? Number(p[1]) : Number.NaN))
             .filter((v) => Number.isFinite(v) && v > 0);
         if (values.length === 0) throw new Error('bStats returned no data points');
 

@@ -290,13 +290,13 @@ function SubmitHero({
     signedIn,
     user,
     onLogout,
-}: {
+}: Readonly<{
     step: 1 | 2 | 3;
     hasFile: boolean;
     signedIn: boolean;
     user?: SessionUser;
     onLogout?: () => void;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <section
             className="bp-paper with-grid"
@@ -586,11 +586,11 @@ function SubmitForm({
     user,
     catalog,
     onLogout,
-}: {
+}: Readonly<{
     user: SessionUser;
     catalog: BlueprintCatalog | null;
     onLogout: () => void;
-}): JSX.Element {
+}>): JSX.Element {
     const [dropped, setDropped] = useState<DroppedFile | null>(null);
     const [dropError, setDropError] = useState<string | null>(null);
 
@@ -1251,11 +1251,11 @@ function FieldLabel({
     children,
     hint,
     required,
-}: {
+}: Readonly<{
     children: React.ReactNode;
     hint?: string;
     required?: boolean;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <div
             style={{
@@ -1331,10 +1331,10 @@ function bpSelectStyle(): React.CSSProperties {
 function HelpText({
     children,
     tone = 'soft',
-}: {
+}: Readonly<{
     children: React.ReactNode;
     tone?: 'soft' | 'error';
-}): JSX.Element {
+}>): JSX.Element {
     const color = tone === 'error' ? 'var(--bb-rose)' : 'var(--bp-ink-soft)';
     return (
         <div style={{ fontSize: 12, color, marginTop: 6, lineHeight: 1.45 }}>
@@ -1350,12 +1350,12 @@ function FileReceipt({
     summary,
     derivedSlug,
     onReplace,
-}: {
+}: Readonly<{
     file: File;
     summary: ParsedSummary;
     derivedSlug: string;
     onReplace: () => void;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <div
             style={{
@@ -1505,13 +1505,13 @@ function SpecCell({
     mono,
     accent,
     last,
-}: {
+}: Readonly<{
     label: string;
     value: string;
     mono?: boolean;
     accent?: boolean;
     last?: boolean;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <div
             style={{
@@ -1546,7 +1546,7 @@ function SpecCell({
 
 /* ── Empty drop ────────────────────────────────────────────────── */
 
-function EmptyDrop({ onAccept }: { onAccept: (f: File) => void }): JSX.Element {
+function EmptyDrop({ onAccept }: Readonly<{ onAccept: (f: File) => void }>): JSX.Element {
     const [drag, setDrag] = useState(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
     return (
@@ -1663,12 +1663,12 @@ function GameModePicker({
     onChange,
     options,
     catalog,
-}: {
+}: Readonly<{
     value: string;
     onChange: (v: string) => void;
     options: string[];
     catalog: BlueprintCatalog | null;
-}): JSX.Element {
+}>): JSX.Element {
     const list = options.length ? options : Object.keys(GM_SWATCH);
     return (
         <div
@@ -1759,10 +1759,10 @@ function GameModePicker({
 function DescriptionField({
     value,
     onChange,
-}: {
+}: Readonly<{
     value: string;
     onChange: (v: string) => void;
-}): JSX.Element {
+}>): JSX.Element {
     const lines = value.split('\n').length;
     const overflow = lines > MAX_DESCRIPTION_LINES;
     const counterColor = overflow
@@ -1817,11 +1817,11 @@ function TagsField({
     tags,
     onChange,
     tagColors,
-}: {
+}: Readonly<{
     tags: string[];
     onChange: (t: string[]) => void;
     tagColors: Record<string, string>;
-}): JSX.Element {
+}>): JSX.Element {
     const [draft, setDraft] = useState('');
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1985,7 +1985,7 @@ function PreviewBlueprintCard({
     summary,
     voxels,
     tagColors,
-}: {
+}: Readonly<{
     displayName: string;
     gameMode: string;
     author: string;
@@ -1996,7 +1996,7 @@ function PreviewBlueprintCard({
     summary: ParsedSummary | null;
     voxels: RealVoxel[];
     tagColors: Record<string, string>;
-}): JSX.Element {
+}>): JSX.Element {
     const dim = summary?.dim || { x: 0, y: 0, z: 0 };
     const blocks = summary?.blocks ?? 0;
     const entities = summary?.entities ?? 0;
@@ -2277,10 +2277,10 @@ function PreviewBlueprintCard({
 function PreviewStat({
     label,
     value,
-}: {
+}: Readonly<{
     label: string;
     value: string;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <div>
             <div
@@ -2311,10 +2311,10 @@ function PreviewStat({
 function Checklist({
     done,
     items,
-}: {
+}: Readonly<{
     done: number;
     items: { ok: boolean; label: string }[];
-}): JSX.Element {
+}>): JSX.Element {
     const total = items.length;
     return (
         <div
@@ -2411,10 +2411,10 @@ function Checklist({
 function SuccessState({
     prUrl,
     onAnother,
-}: {
+}: Readonly<{
     prUrl: string;
     onAnother: () => void;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <>
             <SubmitHero step={3} hasFile signedIn={false} />

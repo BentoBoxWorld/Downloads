@@ -28,7 +28,7 @@ function versionState(v: string | undefined): VersionState {
     return 'older';
 }
 
-function VersionWarning({ state }: { state: VersionState }): JSX.Element {
+function VersionWarning({ state }: Readonly<{ state: VersionState }>): JSX.Element {
     const map: Record<
         VersionState,
         { bg: string; fg: string; label: string }
@@ -118,7 +118,7 @@ function AddonRow({
     inputProps,
     isHovered,
     onHover,
-}: AddonRowProps): JSX.Element {
+}: Readonly<AddonRowProps>): JSX.Element {
     const versionPill = (() => {
         if (versionTone === 'none') {
             return (
@@ -248,13 +248,13 @@ function AddonRow({
 }
 
 /* ── The page ────────────────────────────────────────────────── */
-export default function CustomPage(props: { addonTypes: AddonType[] }) {
+export default function CustomPage(props: Readonly<{ addonTypes: AddonType[] }>) {
     const { addonTypes } = props;
-    const { register, getValues, setValue, watch } = useForm();
+    const { register, setValue, watch } = useForm();
     const value = (watch('version') as string) || 'latest';
     const watchedAll = watch();
 
-    const [versions, setVersionList] = useState<string[]>([]);
+    const [versions, setVersions] = useState<string[]>([]);
     const [hovered, setHovered] = useState<AddonType | null>(null);
     const [search, setSearch] = useState('');
     const [groupBy, setGroupBy] = useState<'category' | 'flat'>('category');
@@ -302,7 +302,7 @@ export default function CustomPage(props: { addonTypes: AddonType[] }) {
                 if (v !== 'latest' && v !== 'beta') seen[v] = true;
             }
         }
-        setVersionList(Object.keys(seen));
+        setVersions(Object.keys(seen));
     }, [addonTypes]);
 
     /* Hash → preselect addons (preserve original behaviour) */

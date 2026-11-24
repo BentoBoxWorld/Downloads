@@ -43,7 +43,7 @@ interface Props {
     onCancel: () => void;
 }
 
-export default function AddonEditor({ initial, creating, onSave, onCancel }: Props) {
+export default function AddonEditor({ initial, creating, onSave, onCancel }: Readonly<Props>) {
     const [draft, setDraft] = useState<AddonsEntity>(() => clone(initial));
     const [versionRows, setVersionRows] = useState<VersionRow[]>(() => versionsToRows(initial.versions));
     const [busy, setBusy] = useState(false);
@@ -328,8 +328,8 @@ function rowsToVersions(rows: VersionRow[]): Record<string, string> | undefined 
 }
 
 function compareMcVersion(a: string, b: string): number {
-    const pa = a.split('.').map((n) => parseInt(n, 10) || 0);
-    const pb = b.split('.').map((n) => parseInt(n, 10) || 0);
+    const pa = a.split('.').map((n) => Number.parseInt(n, 10) || 0);
+    const pb = b.split('.').map((n) => Number.parseInt(n, 10) || 0);
     const len = Math.max(pa.length, pb.length);
     for (let i = 0; i < len; i++) {
         const da = pa[i] ?? 0;

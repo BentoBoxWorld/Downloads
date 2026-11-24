@@ -225,7 +225,7 @@ export default function BlogList() {
     );
 }
 
-function PostCard({ post }: { post: BlogPostSummary }) {
+function PostCard({ post }: Readonly<{ post: BlogPostSummary }>) {
     const date = new Date(post.publishedAt);
     return (
         <li

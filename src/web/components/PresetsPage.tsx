@@ -15,13 +15,13 @@ interface PresetsPageProps {
     embedded?: boolean;
 }
 
-export default function PresetsPage({ presets, embedded = false }: PresetsPageProps) {
+export default function PresetsPage({ presets, embedded = false }: Readonly<PresetsPageProps>) {
     const hash =
         typeof location !== 'undefined' && location.hash.length >= 2
             ? location.hash.slice(1)
             : undefined;
     const preset = hash
-        ? presets.filter((p) => hash.toLowerCase() === p.addons[0].toLowerCase())[0]
+        ? presets.find((p) => hash.toLowerCase() === p.addons[0].toLowerCase())
         : undefined;
 
     return (
@@ -123,7 +123,7 @@ export default function PresetsPage({ presets, embedded = false }: PresetsPagePr
     );
 }
 
-function Hero({ presetCount }: { presetCount: number }) {
+function Hero({ presetCount }: Readonly<{ presetCount: number }>) {
     return (
         <div css={tw`mb-8`}>
             <div

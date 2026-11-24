@@ -11,7 +11,7 @@ export interface AdminGithubConfig {
     token: string;
 }
 
-const DISCORD_ID_RE = /^[0-9]{15,25}$/;
+const DISCORD_ID_RE = /^\d{15,25}$/;
 const COLOR_RE = /^#[0-9a-fA-F]{3,8}$/;
 const ADDON_NAME_RE = /^[A-Za-z0-9 _-]+$/;
 const GITHUB_REPO_RE = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;

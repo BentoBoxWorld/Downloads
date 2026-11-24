@@ -52,7 +52,7 @@ function BlueprintCard({
     expanded,
     onHover,
     tagColors,
-}: {
+}: Readonly<{
     bp: BlueprintEntry;
     gameModeInfo?: BlueprintCatalogGameMode;
     selected: boolean;
@@ -60,7 +60,7 @@ function BlueprintCard({
     expanded: boolean;
     onHover: (id: string | null) => void;
     tagColors: Record<string, string>;
-}) {
+}>) {
     const gameModeLabel = gameModeInfo?.displayName || bp.gameMode;
     const dims = `${bp.stats.dimensions.x} × ${bp.stats.dimensions.y} × ${bp.stats.dimensions.z}`;
     const sortedTags = (bp.tags || []).slice().sort((a, b) => a.localeCompare(b));
@@ -390,7 +390,7 @@ function BlueprintCard({
     );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: Readonly<{ label: string; value: string }>) {
     return (
         <div>
             <div
@@ -416,7 +416,7 @@ function Stat({ label, value }: { label: string; value: string }) {
     );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <div
             style={{
@@ -573,12 +573,12 @@ function ToggleChip({
     onClick,
     swatch,
     children,
-}: {
+}: Readonly<{
     active: boolean;
     onClick: () => void;
     swatch?: string;
     children: React.ReactNode;
-}) {
+}>) {
     return (
         <button
             type="button"
@@ -613,7 +613,7 @@ function ToggleChip({
     );
 }
 
-export default function BlueprintsPage({ data }: { data: BlueprintCatalog }) {
+export default function BlueprintsPage({ data }: Readonly<{ data: BlueprintCatalog }>) {
     const [search, setSearch] = useState('');
     const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
     const [gameModeFilter, setGameModeFilter] = useState<string>('all');

@@ -12,8 +12,8 @@ import {
 import { Sequelize } from 'sequelize';
 import { JenkinsAPI } from 'jenkins';
 import axios from 'axios';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import Archiver = require('archiver');
 import { WeblinkSync } from './weblink';
 import {
@@ -107,18 +107,18 @@ export default class ApiManager {
     /** Resolves once all three JAR/count caches have been synced. */
     private cachesReady!: Promise<void>;
     /** Addons with no cached JAR yet — drained ahead of the round-robin. */
-    private pendingAssets: AddonsEntity[] = [];
+    private readonly pendingAssets: AddonsEntity[] = [];
     /** Pinned versions missing from the old-version cache. */
-    private pendingOldVersions: { addon: string; version: string }[] = [];
+    private readonly pendingOldVersions: { addon: string; version: string }[] = [];
     /** Addons already looked up in the JAR cache, so we only query once. */
-    private checkedAssets = new Set<string>();
+    private readonly checkedAssets = new Set<string>();
     /** `name@version` pairs already looked up in the old-version cache. */
-    private checkedOldVersions = new Set<string>();
+    private readonly checkedOldVersions = new Set<string>();
     /** Round-robin cursors over the effective addon list. */
     private updateAddon = 0;
     private updateCiAddon = 0;
     /** How many GitHub fetches to make per cron tick (env.github_downloads). */
-    private repeats = 1;
+    private readonly repeats: number = 1;
 
     constructor(private readonly configConstructor: ConfigObject) {
         let env: {
@@ -438,7 +438,7 @@ export default class ApiManager {
                 ciId: latestJenkins,
                 ciJarFile: assetURL,
             });
-            const liveAddon = this.addons.filter((a) => a.name === addon.name)[0];
+            const liveAddon = this.addons.find((a) => a.name === addon.name);
             if (liveAddon) liveAddon.versions.beta = String(latestJenkins);
         });
     }
@@ -491,14 +491,10 @@ export default class ApiManager {
         } else if (releaseFiles.data.length === 1) {
             assetURL = releaseFiles.data[0];
         } else {
-            for (let i = 0; i < releaseFiles.data.length; i++) {
-                if (
-                    !releaseFiles.data[i].name
-                        .toLowerCase()
-                        .match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`)
-                )
+            for (const file of releaseFiles.data) {
+                if (!file.name.toLowerCase().match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`))
                     continue;
-                assetURL = releaseFiles.data[i];
+                assetURL = file;
             }
             if (!assetURL) return;
         }
@@ -529,10 +525,8 @@ export default class ApiManager {
                 version: latestRelease.data.tag_name,
             });
         }
-        const oldAddon = this.addons.filter((a) => a.name === addon.name)[0];
-        const newAddon = oldAddon;
-        newAddon.versions['latest'] = latestRelease.data.tag_name;
-        this.addons[this.addons.indexOf(oldAddon)] = newAddon;
+        const liveEntry = this.addons.find((a) => a.name === addon.name);
+        if (liveEntry) liveEntry.versions['latest'] = latestRelease.data.tag_name;
     }
 
     manageRequest(req: Request, res: Response) {
@@ -671,11 +665,11 @@ export default class ApiManager {
                     name: 'BentoBox',
                 },
             });
-            const bentoBoxJar = bentoBoxVersions.filter((a) => {
-                const addons = this.config.addons.filter((a) => a.name === 'BentoBox')[0];
-                if (!addons.versions) return;
-                return a.version === addons.versions[<string>version];
-            })[0];
+            const bentoBoxJar = bentoBoxVersions.find((a) => {
+                const bentoBox = this.config.addons.find((c) => c.name === 'BentoBox');
+                if (!bentoBox?.versions) return false;
+                return a.version === bentoBox.versions[<string>version];
+            });
             if (bentoBoxJar) {
                 archive.append(bentoBoxJar.release, { name: bentoBoxJar.releaseJarFile });
             }
@@ -715,7 +709,7 @@ export default class ApiManager {
                         name: addon.name,
                     },
                 });
-                const addonJar = addonVersions.filter((a) => a.version === addon.versions[<string>version])[0];
+                const addonJar = addonVersions.find((a) => a.version === addon.versions[<string>version]);
                 if (addonJar) {
                     archive.append(addonJar.release, { name: 'BentoBox/addons/' + addonJar.releaseJarFile });
                 }
@@ -863,8 +857,11 @@ export default class ApiManager {
 
     async downloadOldVersion(details: { addon: string; version: string }) {
         let release;
-        let addon: AddonType | AddonsEntity = this.addons.filter((a) => a.name == details.addon)[0];
-        if (details.addon === 'BentoBox') addon = this.config.addons.filter((a) => a.name === 'BentoBox')[0];
+        const addon: AddonType | AddonsEntity | undefined =
+            details.addon === 'BentoBox'
+                ? this.config.addons.find((a) => a.name === 'BentoBox')
+                : this.addons.find((a) => a.name === details.addon);
+        if (!addon) return;
         try {
             release = await this.octokit.rest.repos.getReleaseByTag({
                 owner: addon.github.split('/')[0],
@@ -887,14 +884,10 @@ export default class ApiManager {
         } else if (releaseFiles.data.length === 1) {
             assetURL = releaseFiles.data[0];
         } else {
-            for (let i = 0; i < releaseFiles.data.length; i++) {
-                if (
-                    !releaseFiles.data[i].name
-                        .toLowerCase()
-                        .match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`)
-                )
+            for (const file of releaseFiles.data) {
+                if (!file.name.toLowerCase().match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`))
                     continue;
-                assetURL = releaseFiles.data[i];
+                assetURL = file;
             }
             if (!assetURL) return;
         }

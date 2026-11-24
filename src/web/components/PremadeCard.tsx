@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faWrench } from '@fortawesome/free-solid-svg-icons';
 import { PremadeCardType } from '../web';
 
-export default function PremadeCard(props: PremadeCardType) {
+export default function PremadeCard(props: Readonly<PremadeCardType>) {
     const { addons, color, description, name, subtext, dependencies, dependencyText } = props;
     if (!addons) return <></>;
 

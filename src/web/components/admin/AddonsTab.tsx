@@ -20,7 +20,7 @@ import AddonEditor from './AddonEditor';
 
 const PROTECTED = new Set(['BentoBox']);
 
-export default function AddonsTab({ user }: { user: SessionUser }) {
+export default function AddonsTab({ user }: Readonly<{ user: SessionUser }>) {
     const [addons, setAddons] = useState<AddonsEntity[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [expanded, setExpanded] = useState<string | null>(null);
@@ -216,7 +216,7 @@ export default function AddonsTab({ user }: { user: SessionUser }) {
     );
 }
 
-function TypePill({ name, gamemode }: { name: string; gamemode: boolean }) {
+function TypePill({ name, gamemode }: Readonly<{ name: string; gamemode: boolean }>) {
     if (name === 'BentoBox') {
         return (
             <span css={tw`text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-800`}>

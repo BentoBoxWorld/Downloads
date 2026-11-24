@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { Octokit } from 'octokit';
 import { AddonsEntity } from '../config';
 
@@ -32,7 +32,7 @@ const CURSEFORGE_ID_CACHE = './../data/CurseforgeProjects.json';
 /** "https://github.com/BentoBoxWorld/Level/" → "bentoboxworld/level" (or null if not a GitHub repo URL). */
 export function repoKey(url: unknown): string | null {
     if (typeof url !== 'string') return null;
-    const m = url.match(/github\.com\/([^/\s]+)\/([^/\s#?]+)/i);
+    const m = /github\.com\/([^/\s]+)\/([^/\s#?]+)/i.exec(url);
     return m ? `${m[1]}/${m[2].replace(/\.git$/i, '')}`.toLowerCase() : null;
 }
 
@@ -132,7 +132,7 @@ export async function fetchCurseforge(apiKey: string, addons: AddonsEntity[]): P
     const terms = ['bentobox'];
     for (const a of addons) {
         for (const t of [a.name.toLowerCase(), a.name.toLowerCase().replace(/\s+/g, '')]) {
-            if (terms.indexOf(t) < 0) terms.push(t);
+            if (!terms.includes(t)) terms.push(t);
         }
     }
     let searched = 0;

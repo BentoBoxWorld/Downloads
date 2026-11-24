@@ -13,9 +13,9 @@ export type ConfigScope = 'addons' | 'presets';
 const SCOPES: ConfigScope[] = ['addons', 'presets'];
 
 export class ConfigStore {
-    private overrides = new Map<ConfigScope, AddonsEntity[] | PresetsEntity[]>();
-    private overrideModel: ConfigOverrideStatic;
-    private auditModel: ConfigAuditStatic;
+    private readonly overrides = new Map<ConfigScope, AddonsEntity[] | PresetsEntity[]>();
+    private readonly overrideModel: ConfigOverrideStatic;
+    private readonly auditModel: ConfigAuditStatic;
 
     constructor(private readonly baseConfig: ConfigObject, sequelize: Sequelize) {
         this.overrideModel = ConfigOverrideFactory(sequelize);
