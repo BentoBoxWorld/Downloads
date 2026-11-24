@@ -173,21 +173,27 @@ export default function SubmitPage(): JSX.Element {
             .catch(() => setCatalog(null));
     }, []);
 
-    return (
-        <div style={{ minHeight: '100vh', background: 'var(--bp-paper-2)' }}>
-            {user === undefined ? (
-                <Loading />
-            ) : user === null ? (
-                <LoginGate />
-            ) : (
-                <SubmitForm
-                    user={user}
-                    catalog={catalog}
-                    onLogout={() => setUser(null)}
-                />
-            )}
-        </div>
-    );
+    let body: JSX.Element;
+    if (user === undefined) body = <Loading />;
+    else if (user === null) body = <LoginGate />;
+    else body = <SubmitForm user={user} catalog={catalog} onLogout={() => setUser(null)} />;
+
+    return <div style={{ minHeight: '100vh', background: 'var(--bp-paper-2)' }}>{body}</div>;
+}
+
+interface StepState {
+    done: boolean;
+    active: boolean;
+}
+
+function stepNumberColor(s: StepState): string {
+    if (s.done) return '#06121f';
+    return s.active ? 'var(--bp-accent)' : 'var(--bp-ink-soft)';
+}
+
+function stepLabelColor(s: StepState): string {
+    if (s.active) return '#fff';
+    return s.done ? 'var(--bp-ink)' : 'var(--bp-ink-soft)';
 }
 
 function Loading(): JSX.Element {
@@ -518,17 +524,9 @@ function SubmitHero({
                                         borderRadius: '50%',
                                         background: s.done ? 'var(--bp-accent)' : 'transparent',
                                         border: `1px solid ${
-                                            s.done
-                                                ? 'var(--bp-accent)'
-                                                : s.active
-                                                ? 'var(--bp-accent)'
-                                                : 'var(--bp-line-strong)'
+                                            s.done || s.active ? 'var(--bp-accent)' : 'var(--bp-line-strong)'
                                         }`,
-                                        color: s.done
-                                            ? '#06121f'
-                                            : s.active
-                                            ? 'var(--bp-accent)'
-                                            : 'var(--bp-ink-soft)',
+                                        color: stepNumberColor(s),
                                         display: 'grid',
                                         placeItems: 'center',
                                         fontFamily: 'var(--bb-mono)',
@@ -551,11 +549,7 @@ function SubmitHero({
                                         fontFamily: 'var(--bb-mono)',
                                         textTransform: 'uppercase',
                                         letterSpacing: '0.12em',
-                                        color: s.active
-                                            ? '#fff'
-                                            : s.done
-                                            ? 'var(--bp-ink)'
-                                            : 'var(--bp-ink-soft)',
+                                        color: stepLabelColor(s),
                                         fontWeight: s.active ? 600 : 500,
                                     }}
                                 >
@@ -893,7 +887,7 @@ function SubmitForm({
                                         height: 1,
                                         background: 'var(--bp-line-strong)',
                                     }}
-                                />
+                                />{' '}
                                 Metadata
                             </div>
 
@@ -1765,11 +1759,9 @@ function DescriptionField({
 }>): JSX.Element {
     const lines = value.split('\n').length;
     const overflow = lines > MAX_DESCRIPTION_LINES;
-    const counterColor = overflow
-        ? 'var(--bb-rose)'
-        : lines >= MAX_DESCRIPTION_LINES - 1
-        ? 'var(--bp-accent)'
-        : 'var(--bp-ink-soft)';
+    let counterColor = 'var(--bp-ink-soft)';
+    if (overflow) counterColor = 'var(--bb-rose)';
+    else if (lines >= MAX_DESCRIPTION_LINES - 1) counterColor = 'var(--bp-accent)';
     return (
         <div>
             <textarea
@@ -2001,8 +1993,10 @@ function PreviewBlueprintCard({
     const blocks = summary?.blocks ?? 0;
     const entities = summary?.entities ?? 0;
     const variant: Variant =
-        summary && summary.dim.x ? variantFor(summary.dim) : 'island';
-    const sizeBucket = blocks > 1500 ? 'Large' : blocks > 400 ? 'Medium' : 'Small';
+        summary?.dim.x ? variantFor(summary.dim) : 'island';
+    let sizeBucket = 'Small';
+    if (blocks > 1500) sizeBucket = 'Large';
+    else if (blocks > 400) sizeBucket = 'Medium';
 
     return (
         <div
@@ -2043,7 +2037,7 @@ function PreviewBlueprintCard({
                         borderRadius: '50%',
                         background: 'var(--bp-accent)',
                     }}
-                />
+                />{' '}
                 Live preview
             </div>
 
@@ -2092,20 +2086,11 @@ function PreviewBlueprintCard({
                         zIndex: 1,
                     }}
                 >
-                    {voxels.length > 0 ? (
-                        <BlueprintVoxels
-                            voxels={voxels}
-                            width={260}
-                            height={150}
-                        />
-                    ) : summary ? (
-                        <VoxelStack
-                            topBlocks={summary.topBlocks}
-                            variant={variant}
-                            width={260}
-                            height={150}
-                        />
-                    ) : (
+                    {voxels.length > 0 && <BlueprintVoxels voxels={voxels} width={260} height={150} />}
+                    {voxels.length === 0 && summary && (
+                        <VoxelStack topBlocks={summary.topBlocks} variant={variant} width={260} height={150} />
+                    )}
+                    {voxels.length === 0 && !summary && (
                         <div
                             style={{
                                 fontFamily: 'var(--bb-mono)',
@@ -2365,9 +2350,9 @@ function Checklist({
                     gap: 6,
                 }}
             >
-                {items.map((it, i) => (
+                {items.map((it) => (
                     <li
-                        key={i}
+                        key={it.label}
                         style={{
                             display: 'flex',
                             alignItems: 'center',

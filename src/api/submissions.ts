@@ -165,7 +165,7 @@ export class SubmissionManager {
         // 10. Open the PR.
         try {
             const pretty = JSON.stringify(parsed, null, 2);
-            const updatedCatalog = await this.patchedCatalog({
+            const updatedCatalog = this.patchedCatalog({
                 id: `${gameMode}/${name}`,
                 displayName,
                 description,
@@ -242,14 +242,14 @@ export class SubmissionManager {
 
     // ----- GitHub plumbing -----
 
-    private async patchedCatalog(entry: {
+    private patchedCatalog(entry: {
         id: string;
         displayName: string;
         description: string[];
         authorDiscordId: string;
         authorUsername: string;
         tags: string[];
-    }): Promise<string> {
+    }): string {
         // Read current catalog.json from the weblink clone (or default to empty).
         const catalogPath = path.join(this.weblink.blueprintsDir, 'catalog.json');
         let overlay: CatalogOverlay = {};
@@ -407,10 +407,12 @@ function summariseStats(
     if (s.biomes.length) lines.push(`- **Biomes:** ${s.biomes.join(', ')}`);
     if (s.sinking) lines.push(`- **Sinking:** yes`);
     if (s.topBlocks.length) {
-        lines.push(`- **Top blocks:** ${s.topBlocks.map((b) => `${b.material}×${b.count}`).join(', ')}`);
+        const blocks = s.topBlocks.map((b) => `${b.material}×${b.count}`).join(', ');
+        lines.push(`- **Top blocks:** ${blocks}`);
     }
     if (s.topEntities.length) {
-        lines.push(`- **Top entities:** ${s.topEntities.map((e) => `${e.type}×${e.count}`).join(', ')}`);
+        const entities = s.topEntities.map((e) => `${e.type}×${e.count}`).join(', ');
+        lines.push(`- **Top entities:** ${entities}`);
     }
     return lines.join('\n');
 }

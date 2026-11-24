@@ -81,7 +81,7 @@ export class ConfigStore {
         } as never);
     }
 
-    async getAuditLog(limit = 50): Promise<ConfigAuditModel[]> {
+    getAuditLog(limit = 50): Promise<ConfigAuditModel[]> {
         return this.auditModel.findAll({ order: [['at', 'DESC']], limit });
     }
 

@@ -160,9 +160,9 @@ function ThirdPartyCard({
                     </a>
                 )}
                 {!addon.Releases && !addon.Github && !addon.Issues && (
-                    <a
-                        href={'#'}
+                    <span
                         className="bb-btn bb-btn-ghost"
+                        aria-disabled="true"
                         style={{
                             flex: 1,
                             padding: '8px 12px',
@@ -173,7 +173,7 @@ function ThirdPartyCard({
                     >
                         <FontAwesomeIcon icon={faExternalLinkAlt} />
                         No links
-                    </a>
+                    </span>
                 )}
             </div>
         </article>

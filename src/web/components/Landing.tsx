@@ -313,7 +313,7 @@ export default function Landing({ presets }: Readonly<LandingProps>) {
                                     },
                                 ].map((s, i) => (
                                     <li
-                                        key={i}
+                                        key={s.t}
                                         style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}
                                     >
                                         <div

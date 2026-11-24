@@ -276,8 +276,8 @@ export class AuthManager {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             identity = me.data;
-        } catch (err) {
-            // Deliberately do not log err.config or err.response.data — token may be in there.
+        } catch {
+            // Deliberately do not log the error: its config/response data may contain the token.
             console.error('[auth] Discord token exchange failed');
             res.status(502).send('Could not complete Discord login. Please try again.');
             return;
@@ -437,7 +437,7 @@ export class AuthManager {
             return;
         }
         const user = await this.users.findByPk(session.userId);
-        if (!user || !user.isAdmin) {
+        if (!user?.isAdmin) {
             res.status(403).json({ error: 'forbidden' });
             return;
         }
@@ -511,7 +511,7 @@ export class AuthManager {
         await this.users.update({ acceptedTermsVersion: version }, { where: { id: userId } });
     }
 
-    async findUser(userId: string) {
+    findUser(userId: string) {
         return this.users.findByPk(userId);
     }
 

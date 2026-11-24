@@ -139,7 +139,7 @@ function BlueprintCard({
                             checked={selected}
                             onChange={onToggle}
                             style={{ accentColor: 'var(--bp-accent)' }}
-                        />
+                        />{' '}
                         Select
                     </label>
                     <span className="bp-chip">{dims}</span>

@@ -12,9 +12,8 @@ export interface ConfigOverrideAttributes {
 
 export interface ConfigOverrideModel extends Model<ConfigOverrideAttributes>, ConfigOverrideAttributes {}
 
-export type ConfigOverrideStatic = typeof Model & {
-    new (values?: Record<string, unknown>, options?: BuildOptions): ConfigOverrideModel;
-};
+export type ConfigOverrideStatic = typeof Model &
+    (new (values?: Record<string, unknown>, options?: BuildOptions) => ConfigOverrideModel);
 
 export function ConfigOverrideFactory(sequelize: Sequelize): ConfigOverrideStatic {
     return <ConfigOverrideStatic>sequelize.define(
@@ -41,9 +40,8 @@ export interface ConfigAuditAttributes {
 
 export interface ConfigAuditModel extends Model<ConfigAuditAttributes>, ConfigAuditAttributes {}
 
-export type ConfigAuditStatic = typeof Model & {
-    new (values?: Record<string, unknown>, options?: BuildOptions): ConfigAuditModel;
-};
+export type ConfigAuditStatic = typeof Model &
+    (new (values?: Record<string, unknown>, options?: BuildOptions) => ConfigAuditModel);
 
 export function ConfigAuditFactory(sequelize: Sequelize): ConfigAuditStatic {
     return <ConfigAuditStatic>sequelize.define(

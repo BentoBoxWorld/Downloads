@@ -129,11 +129,13 @@ export default class ApiManager {
         } = {};
         try {
             env = require('./../../env.json');
-        } catch (e) {}
-        this.repeats = env && env.github_downloads ? env.github_downloads : 1;
+        } catch {
+            /* env.json is optional */
+        }
+        this.repeats = env?.github_downloads ? env.github_downloads : 1;
         const CustomOctokit = Octokit.plugin(throttling);
         this.octokit = new CustomOctokit({
-            auth: env && env.github_token ? env.github_token : '',
+            auth: env?.github_token ? env.github_token : '',
         });
         this.configStore = new ConfigStore(configConstructor, this.authSequelize);
         this.admin = new AdminManager(
@@ -279,22 +281,26 @@ export default class ApiManager {
         let overrides: Partial<{ url: string; path: string; branch: string }> = {};
         try {
             const env = require('./../../env.json');
-            if (env && env.weblink) overrides = env.weblink;
-        } catch (e) {}
+            if (env?.weblink) overrides = env.weblink;
+        } catch {
+            /* env.json is optional */
+        }
         return new WeblinkSync(overrides);
     }
 
     private loadSubmissionsConfig() {
         try {
             const env = require('./../../env.json');
-            if (env && env.weblink_github_token) {
+            if (env?.weblink_github_token) {
                 return {
                     weblinkRepo: { owner: 'BentoBoxWorld', repo: 'weblink' },
                     weblinkToken: env.weblink_github_token as string,
-                    weblinkBranch: (env.weblink && env.weblink.branch) || 'master',
+                    weblinkBranch: env.weblink?.branch || 'master',
                 };
             }
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return null;
     }
 
@@ -317,7 +323,9 @@ export default class ApiManager {
                     token: cfg.token,
                 };
             }
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return null;
     }
 
@@ -325,7 +333,7 @@ export default class ApiManager {
         try {
             const env = require('./../../env.json');
             const inProd = process.env.NODE_ENV === 'production';
-            if (env && env.discord_client_id && env.discord_client_secret && env.discord_redirect_uri) {
+            if (env?.discord_client_id && env.discord_client_secret && env.discord_redirect_uri) {
                 const adminDiscordIds = Array.isArray(env.admin_discord_ids)
                     ? (env.admin_discord_ids as unknown[]).filter((x): x is string => typeof x === 'string')
                     : [];
@@ -344,7 +352,9 @@ export default class ApiManager {
                     cookieDomain: typeof env.cookie_domain === 'string' ? env.cookie_domain : undefined,
                 };
             }
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return null;
     }
 
@@ -352,7 +362,9 @@ export default class ApiManager {
         try {
             const env = require('./../../env.json');
             if (typeof env?.curseforge_api_key === 'string' && env.curseforge_api_key) return env.curseforge_api_key;
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return undefined;
     }
 
@@ -383,7 +395,9 @@ export default class ApiManager {
                     theme: typeof g.theme === 'string' ? g.theme : undefined,
                 };
             }
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return {
             baseUrl,
             discordWebhookPath,
@@ -597,7 +611,7 @@ export default class ApiManager {
                 res.end();
                 return;
             }
-        } catch (e) {
+        } catch {
             res.setHeader('Content-Type', 'application/json');
             res.send({ Error: 400, Reason: 'Not Valid Json' });
             res.statusCode = 400;

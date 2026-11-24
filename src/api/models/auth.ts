@@ -16,9 +16,7 @@ export interface UserAttributes {
 
 export interface UserModel extends Model<UserAttributes>, UserAttributes {}
 
-export type UserStatic = typeof Model & {
-    new (values?: Record<string, unknown>, options?: BuildOptions): UserModel;
-};
+export type UserStatic = typeof Model & (new (values?: Record<string, unknown>, options?: BuildOptions) => UserModel);
 
 export function UserFactory(sequelize: Sequelize): UserStatic {
     return <UserStatic>sequelize.define(
@@ -51,9 +49,8 @@ export interface SessionAttributes {
 
 export interface SessionModel extends Model<SessionAttributes>, SessionAttributes {}
 
-export type SessionStatic = typeof Model & {
-    new (values?: Record<string, unknown>, options?: BuildOptions): SessionModel;
-};
+export type SessionStatic = typeof Model &
+    (new (values?: Record<string, unknown>, options?: BuildOptions) => SessionModel);
 
 export function SessionFactory(sequelize: Sequelize): SessionStatic {
     return <SessionStatic>sequelize.define(
@@ -85,9 +82,8 @@ export interface SubmissionAttributes {
 
 export interface SubmissionModel extends Model<SubmissionAttributes>, SubmissionAttributes {}
 
-export type SubmissionStatic = typeof Model & {
-    new (values?: Record<string, unknown>, options?: BuildOptions): SubmissionModel;
-};
+export type SubmissionStatic = typeof Model &
+    (new (values?: Record<string, unknown>, options?: BuildOptions) => SubmissionModel);
 
 export function SubmissionFactory(sequelize: Sequelize): SubmissionStatic {
     return <SubmissionStatic>sequelize.define(

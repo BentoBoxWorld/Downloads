@@ -435,6 +435,8 @@ export default function VoxelStack({
             width={width}
             height={height}
             viewBox={`0 0 ${width} ${height}`}
+            role="img"
+            aria-label="Blueprint block preview"
             style={{ display: 'block' }}
         >
             <defs>
@@ -451,8 +453,8 @@ export default function VoxelStack({
                 fill="url(#vx-shadow)"
             />
             <g transform={`translate(${tx}, ${ty})`}>
-                {cubes.map((c, i) => (
-                    <IsoCube key={i} {...c} size={tile} />
+                {cubes.map((c) => (
+                    <IsoCube key={`${c.x},${c.y},${c.z}`} {...c} size={tile} />
                 ))}
             </g>
         </svg>
@@ -609,6 +611,8 @@ export function BlueprintVoxels({
             width={width}
             height={height}
             viewBox={prepared.viewBox}
+            role="img"
+            aria-label="Blueprint voxel preview"
             preserveAspectRatio="xMidYMid meet"
             style={{ display: 'block' }}
         >

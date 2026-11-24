@@ -115,7 +115,7 @@ export class BlogManager {
                 } catch {
                     return '';
                 }
-                const classes = `hljs${language ? ` language-${language}` : ''}`;
+                const classes = language ? `hljs language-${language}` : 'hljs';
                 return `<pre><code class="${classes}">${body}</code></pre>`;
             },
         });
@@ -326,9 +326,10 @@ export class BlogManager {
         const canonical = `${base}/p/${encodeURIComponent(post.slug)}`;
         const title = escapeAttr(post.title);
         const desc = escapeAttr(post.summary || stripTags(post.bodyHtml).slice(0, 280));
-        const cover = post.coverImage
-            ? (post.coverImage.startsWith('http') ? post.coverImage : base + post.coverImage)
-            : '';
+        let cover = '';
+        if (post.coverImage) {
+            cover = post.coverImage.startsWith('http') ? post.coverImage : base + post.coverImage;
+        }
         const ogImage = cover ? `<meta property="og:image" content="${escapeAttr(cover)}" />` : '';
         const twImage = cover ? `<meta name="twitter:image" content="${escapeAttr(cover)}" />` : '';
         const jsonLd = JSON.stringify({
@@ -582,7 +583,7 @@ export class BlogManager {
     };
 
     /** POST /api/blog/admin/images — multipart with field 'image'. */
-    handleUploadImage: RequestHandler = async (req, res) => {
+    handleUploadImage: RequestHandler = (req, res) => {
         type WithFile = typeof req & { file?: Express.Multer.File };
         const r = req as WithFile;
         if (!r.file) {
@@ -827,7 +828,7 @@ function imageExtFor(mime: string): string | null {
 }
 
 function stripTags(html: string): string {
-    return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    return html.replace(/<[^<>]+>/g, '').replace(/\s+/g, ' ').trim();
 }
 
 function escapeAttr(s: string): string {
@@ -847,7 +848,7 @@ function processCallouts(html: string): string {
     return html.replace(
         /<blockquote>([\s\S]*?)<\/blockquote>/g,
         (match: string, inner: string): string => {
-            const m = /^\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(?:<br\s*\/?>|\n|\s)*([\s\S]*)$/i.exec(
+            const m = /^\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s|<br\s*\/?>)*([\s\S]*)$/i.exec(
                 inner,
             );
             if (!m) return match;

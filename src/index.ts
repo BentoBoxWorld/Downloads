@@ -429,7 +429,8 @@ app.get('*', function (req, res) {
 });
 
 app.listen(port, () => {
-    console.log(`Web server running on http://localhost${port != 80 ? `:${port}` : ''}/`);
+    const portSuffix = port != 80 ? `:${port}` : '';
+    console.log(`Web server running on http://localhost${portSuffix}/`);
 });
 
 process.on('uncaughtException', async function (err) {

@@ -27,7 +27,7 @@ export default function BlogTab({ user }: Readonly<{ user: SessionUser }>) {
 
     async function handleCreate() {
         const title = window.prompt('Post title?');
-        if (!title || !title.trim()) return;
+        if (!title?.trim()) return;
         setCreating(true);
         try {
             const p = await PostAdminBlogPost(user.csrfToken, { title: title.trim() });
@@ -81,7 +81,7 @@ export default function BlogTab({ user }: Readonly<{ user: SessionUser }>) {
 
             {posts === null && !error && <div css={tw`text-sm text-gray-500`}>Loading…</div>}
 
-            {posts && posts.length === 0 && (
+            {posts?.length === 0 && (
                 <div
                     css={tw`text-center text-gray-600 border border-dashed border-gray-300 rounded p-8`}
                 >

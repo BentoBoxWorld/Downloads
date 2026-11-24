@@ -137,6 +137,10 @@ body[data-route="/"] {
   font-family: inherit;
 }
 .bb-btn:active { transform: translateY(1px); }
+@media (prefers-reduced-motion: reduce) {
+  .bb-card-hover, .bb-btn { transition: none; }
+  .bb-card-hover:hover, .bb-btn:active { transform: none; }
+}
 .bb-btn-primary,
 .bb-btn-ink      { background: var(--bb-ink); color: var(--bb-paper); }
 .bb-btn-primary:hover,

@@ -19,11 +19,11 @@ export default function TermsPage() {
                     You represent and warrant that (a) you authored the Content yourself, or (b) you have all rights
                     necessary to redistribute it under an open-source license. You grant the BentoBoxWorld project a
                     perpetual, worldwide, irrevocable, royalty-free license to host, copy, modify, redistribute, and
-                    sublicense the Content under the terms of the&nbsp;
+                    sublicense the Content under the terms of the{' '}
                     <a href="https://www.eclipse.org/legal/epl-2.0/" target="_blank" rel="noopener noreferrer" css={tw`text-blue-700 underline`}>
                         Eclipse Public License 2.0
-                    </a>
-                    &nbsp;(or any later version of that license at our discretion).
+                    </a>{' '}
+                    (or any later version of that license at our discretion).
                 </p>
             </Section>
 
@@ -47,15 +47,15 @@ export default function TermsPage() {
             <Section title="4. Account and data">
                 <p>
                     To submit, you must sign in with Discord. We store the minimum information needed to attribute and
-                    moderate submissions, as described in the&nbsp;
+                    moderate submissions, as described in the{' '}
                     <a href="/privacy" css={tw`text-blue-700 underline`}>
                         Privacy Policy
                     </a>
-                    . You may delete your account at any time from the&nbsp;
+                    . You may delete your account at any time from the{' '}
                     <a href="/account" css={tw`text-blue-700 underline`}>
                         Account
-                    </a>
-                    &nbsp;page.
+                    </a>{' '}
+                    page.
                 </p>
             </Section>
 
@@ -67,7 +67,7 @@ export default function TermsPage() {
             </Section>
 
             <p css={tw`text-sm text-gray-500 mt-8`}>
-                Questions? Contact us on the&nbsp;
+                Questions? Contact us on the{' '}
                 <a href="https://discord.gg/KwjFBUaNSt" target="_blank" rel="noopener noreferrer" css={tw`text-blue-700 underline`}>
                     BentoBox Discord
                 </a>

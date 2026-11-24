@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-module.exports = (env) => {
+module.exports = function webpackConfig(env) {
     return {
         entry: path.resolve(__dirname, 'src/web', 'index.tsx'),
 

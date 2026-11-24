@@ -4,6 +4,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { AddonType, PresetsEntity } from '../../../config';
 
+/** Per-instance id prefix so label/control pairs stay unique when several editors are open. */
+let editorSeq = 0;
+
 const labelStyle: React.CSSProperties = {
     display: 'block',
     fontSize: 12,
@@ -30,6 +33,7 @@ interface Props {
 }
 
 export default function PresetEditor({ preset, addons, onChange }: Readonly<Props>) {
+    const [uid] = React.useState(() => `preset-editor-${++editorSeq}`);
     function set<K extends keyof PresetsEntity>(key: K, value: PresetsEntity[K]) {
         onChange({ ...preset, [key]: value });
     }
@@ -55,8 +59,11 @@ export default function PresetEditor({ preset, addons, onChange }: Readonly<Prop
         <div css={tw`grid gap-4 mt-4 pt-4 border-t border-gray-200`}>
             <div css={tw`grid gap-4`} style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <div>
-                    <label style={labelStyle}>Name</label>
+                    <label htmlFor={`${uid}-name`} style={labelStyle}>
+                        Name
+                    </label>
                     <input
+                        id={`${uid}-name`}
                         type="text"
                         value={preset.name}
                         onChange={(e) => set('name', e.target.value)}
@@ -64,9 +71,12 @@ export default function PresetEditor({ preset, addons, onChange }: Readonly<Prop
                     />
                 </div>
                 <div>
-                    <label style={labelStyle}>Highlight color</label>
+                    <label htmlFor={`${uid}-color`} style={labelStyle}>
+                        Highlight color
+                    </label>
                     <div css={tw`flex items-center gap-2`}>
                         <input
+                            id={`${uid}-color`}
                             type="color"
                             value={normalizeHex(preset.color)}
                             onChange={(e) => set('color', e.target.value)}
@@ -92,8 +102,11 @@ export default function PresetEditor({ preset, addons, onChange }: Readonly<Prop
             </div>
 
             <div>
-                <label style={labelStyle}>Description (short pitch)</label>
+                <label htmlFor={`${uid}-description`} style={labelStyle}>
+                    Description (short pitch)
+                </label>
                 <input
+                    id={`${uid}-description`}
                     type="text"
                     value={preset.description}
                     onChange={(e) => set('description', e.target.value)}
@@ -102,8 +115,11 @@ export default function PresetEditor({ preset, addons, onChange }: Readonly<Prop
             </div>
 
             <div>
-                <label style={labelStyle}>Subtext (longer description shown below)</label>
+                <label htmlFor={`${uid}-subtext`} style={labelStyle}>
+                    Subtext (longer description shown below)
+                </label>
                 <textarea
+                    id={`${uid}-subtext`}
                     value={preset.subtext}
                     onChange={(e) => set('subtext', e.target.value)}
                     rows={3}

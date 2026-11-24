@@ -42,11 +42,11 @@ export default function PrivacyPage() {
 
             <Section title="California (CCPA) and other deletion rights">
                 <p>
-                    You may delete your account at any time from the&nbsp;
+                    You may delete your account at any time from the{' '}
                     <a href="/account" css={tw`text-blue-700 underline`}>
                         Account
-                    </a>
-                    &nbsp;page. Deletion removes your user record, all sessions, and the local index of submissions
+                    </a>{' '}
+                    page. Deletion removes your user record, all sessions, and the local index of submissions
                     you have made. It does <strong>not</strong> retract pull requests already opened on weblink, since
                     those are public artefacts hosted on GitHub. If you need a pull request itself removed, contact us
                     on the BentoBox Discord and we will do our best to accommodate the request.

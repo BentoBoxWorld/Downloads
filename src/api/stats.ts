@@ -136,8 +136,20 @@ function daysAgo(n: number): string {
     return utcDay(Date.now() - n * 86400000);
 }
 
+/** 1759 → "1,759". For the non-negative integers the stats deal in. */
 function withCommas(n: number): string {
-    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const digits = String(n);
+    let out = '';
+    for (let i = 0; i < digits.length; i++) {
+        if (i > 0 && (digits.length - i) % 3 === 0) out += ',';
+        out += digits.charAt(i);
+    }
+    return out;
+}
+
+function mcRange(mc: { min: string; max: string } | null): string {
+    if (!mc) return 'latest';
+    return mc.min === mc.max ? mc.max : `${mc.min} – ${mc.max}`;
 }
 
 /**
@@ -401,7 +413,8 @@ export class StatsManager {
     addonStats(addon: AddonsEntity): AddonStats {
         const isCore = addon.name === 'BentoBox';
         const k = norm(addon.name);
-        const entry = isCore ? undefined : addon.gamemode ? this.cache.gameModes[k] : this.cache.addons[k];
+        let entry: PeakCache['addons'][string] | undefined;
+        if (!isCore) entry = addon.gamemode ? this.cache.gameModes[k] : this.cache.addons[k];
 
         let servers: number | null = entry ? entry.value : null;
         let share: number | null = null;
@@ -474,16 +487,14 @@ export class StatsManager {
     private addonBadge(s: AddonStats, metric: string): BadgeContent | null {
         const mc = (): BadgeContent => ({
             label: 'Minecraft',
-            message: s.mc ? (s.mc.min === s.mc.max ? s.mc.max : `${s.mc.min} – ${s.mc.max}`) : 'latest',
+            message: mcRange(s.mc),
         });
-        const servers = (): BadgeContent =>
-            s.servers !== null && s.servers >= MIN_SERVERS
-                ? {
-                      label: 'used on',
-                      // BentoBox's count is already bucketed by ServerStats.
-                      message: `${s.name === 'BentoBox' ? `${withCommas(s.servers)}+` : niceCount(s.servers)} servers`,
-                  }
-                : mc();
+        const servers = (): BadgeContent => {
+            if (s.servers === null || s.servers < MIN_SERVERS) return mc();
+            // BentoBox's count is already bucketed by ServerStats.
+            const count = s.name === 'BentoBox' ? withCommas(s.servers) + '+' : niceCount(s.servers);
+            return { label: 'used on', message: `${count} servers` };
+        };
         switch (metric) {
             case 'servers':
                 return servers();

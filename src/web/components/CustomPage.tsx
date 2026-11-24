@@ -135,12 +135,9 @@ function AddonRow({
                 </span>
             );
         }
-        const tone =
-            versionTone === 'latest'
-                ? { bg: 'var(--bb-green-soft)', fg: 'var(--bb-green-ink)' }
-                : versionTone === 'beta'
-                ? { bg: 'oklch(0.95 0.06 80)', fg: 'var(--bb-amber-ink)' }
-                : { bg: 'rgba(207,27,33,0.10)', fg: 'var(--bb-rose)' };
+        let tone = { bg: 'rgba(207,27,33,0.10)', fg: 'var(--bb-rose)' };
+        if (versionTone === 'latest') tone = { bg: 'var(--bb-green-soft)', fg: 'var(--bb-green-ink)' };
+        else if (versionTone === 'beta') tone = { bg: 'oklch(0.95 0.06 80)', fg: 'var(--bb-amber-ink)' };
         return (
             <span
                 style={{
@@ -594,7 +591,7 @@ export default function CustomPage(props: Readonly<{ addonTypes: AddonType[] }>)
                         <div>
                             {groupOrder.map((group) => {
                                 const items = (groups as Record<string, AddonType[]>)[group];
-                                if (!items || !items.length) return null;
+                                if (!items?.length) return null;
                                 return (
                                     <div key={group}>
                                         {groupBy === 'category' && (
