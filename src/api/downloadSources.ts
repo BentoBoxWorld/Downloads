@@ -113,7 +113,8 @@ export async function fetchHangar(addons: AddonsEntity[]): Promise<DownloadCount
 }
 
 /**
- * Needs a CurseForge Core API key (console.curseforge.com, "$2a$10$…").
+ * Needs a CurseForge Core API key (console.curseforge.com, "$2a$10$…") — the
+ * author upload token is a different credential and is rejected with 403.
  *
  * Our key may fetch mods by ID but not use /v1/mods/search, so discovery is:
  *   1. search Bukkit's public ServerMods API for "bentobox" and each addon
@@ -166,7 +167,10 @@ export async function fetchCurseforge(apiKey: string, addons: AddonsEntity[]): P
             )
             .catch((e) => {
                 if (e?.response?.status === 403) {
-                    throw new Error('key rejected (403) — curseforge_api_key must be a Core API key');
+                    throw new Error(
+                        'key rejected (403) — curseforge_api_key must be a Core API key from ' +
+                            'console.curseforge.com, not the author upload token',
+                    );
                 }
                 throw e;
             });
