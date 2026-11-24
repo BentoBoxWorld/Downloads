@@ -86,6 +86,9 @@ app.post(
     wrap(apiManager.auth.handleLogout as (...a: unknown[]) => unknown),
 );
 app.get('/api/stats', wrap(apiManager.serverStats.handleGet as (...a: unknown[]) => unknown));
+app.get('/api/stats/addons', wrap(apiManager.stats.handleSummary as (...a: unknown[]) => unknown));
+app.get('/api/badge/:metric', wrap(apiManager.stats.handleBadgeJson as (...a: unknown[]) => unknown));
+app.get('/api/badge/:addon/:metric', wrap(apiManager.stats.handleBadgeJson as (...a: unknown[]) => unknown));
 app.get('/api/me', wrap(apiManager.auth.handleMe as (...a: unknown[]) => unknown));
 app.post(
     '/api/me/delete',
@@ -270,6 +273,10 @@ app.post(
     wrap(apiManager.auth.requireAdmin as (...a: unknown[]) => unknown),
     wrap(apiManager.admin.handleOpenPr as (...a: unknown[]) => unknown),
 );
+
+// README badges (SVG). Outside /api so they skip session loading.
+app.get('/badge/:metric.svg', wrap(apiManager.stats.handleBadgeSvg as (...a: unknown[]) => unknown));
+app.get('/badge/:addon/:metric.svg', wrap(apiManager.stats.handleBadgeSvg as (...a: unknown[]) => unknown));
 
 app.get('/api/*', function (req, res) {
     apiManager.manageRequest(req, res);

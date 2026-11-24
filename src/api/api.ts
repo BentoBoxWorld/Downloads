@@ -28,6 +28,7 @@ import { BlogConfig, BlogManager } from './blog';
 import { ConfigStore } from './configStore';
 import { SubmissionManager } from './submissions';
 import { ServerStats } from './serverStats';
+import { StatsManager } from './stats';
 
 const { throttling } = require('@octokit/plugin-throttling');
 
@@ -71,6 +72,15 @@ export default class ApiManager {
         storage: './../data/Blog.sqlite',
     });
     serverStats: ServerStats = new ServerStats();
+    stats: StatsManager = new StatsManager({
+        serverCount: () => this.serverStats.servers,
+        siteDownloads: () => {
+            const out: Record<string, number> = {};
+            for (const a of this.addons) if (typeof a.downloads === 'number') out[a.name] = a.downloads;
+            return out;
+        },
+        addons: () => (this.config ? this.config.addons : []),
+    });
     blog: BlogManager = new BlogManager(this.auth, this.blogSequelize, this.loadBlogConfig());
 
     jarSequelize = new Sequelize('database', 'user', 'password', {
