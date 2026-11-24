@@ -108,7 +108,7 @@ function ThirdPartyCard({
             {addon.Tags && addon.Tags.length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                     {addon.Tags.slice()
-                        .sort()
+                        .sort((a, b) => a.localeCompare(b))
                         .map((tag) => (
                             <span
                                 key={tag}
@@ -184,7 +184,7 @@ export default function ThirdPartyPage({ data }: { data: ThirdParty }) {
     const [query, setQuery] = useState('');
     const [activeTags, setActiveTags] = useState<string[]>([]);
 
-    const allTagKeys = useMemo(() => Object.keys(data.tags).sort(), [data.tags]);
+    const allTagKeys = useMemo(() => Object.keys(data.tags).sort((a, b) => a.localeCompare(b)), [data.tags]);
 
     const tagColors = useMemo(() => {
         const out: Record<string, string> = {};
@@ -199,7 +199,7 @@ export default function ThirdPartyPage({ data }: { data: ThirdParty }) {
     }, [data.tags]);
 
     const allNames = useMemo(
-        () => Object.keys(data.addons).sort(),
+        () => Object.keys(data.addons).sort((a, b) => a.localeCompare(b)),
         [data.addons],
     );
 

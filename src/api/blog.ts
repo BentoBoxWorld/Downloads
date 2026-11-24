@@ -85,7 +85,7 @@ export class BlogManager {
 
     constructor(
         private readonly auth: AuthManager,
-        sequelize: Sequelize,
+        private readonly sequelize: Sequelize,
         cfg: BlogConfig,
     ) {
         this.cfg = cfg;
@@ -120,12 +120,16 @@ export class BlogManager {
             },
         });
 
-        this.bootstrap(sequelize).catch((err) => console.error('[blog] bootstrap failed:', err));
         try {
             fs.mkdirSync(this.cfg.imageDir, { recursive: true });
         } catch {
-            /* ignore */
+            /* ignore — uploads report their own error if the directory is unusable */
         }
+    }
+
+    /** Sync tables and schedule housekeeping. Call once, right after construction. */
+    start(): void {
+        this.bootstrap(this.sequelize).catch((err) => console.error('[blog] bootstrap failed:', err));
 
         // Daily prune of orphaned revisions older than 90 days.
         cron.schedule('30 4 * * *', () => this.pruneOldRevisions());

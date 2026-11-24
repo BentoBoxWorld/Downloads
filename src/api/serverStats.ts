@@ -52,6 +52,10 @@ export class ServerStats {
         } catch {
             /* no saved state yet */
         }
+    }
+
+    /** First fetch plus the hourly refresh. Call once, right after construction. */
+    start(): void {
         this.refresh().catch((e) => console.error('[stats] initial fetch failed:', e?.message ?? e));
         // Hourly, offset from the 6-minute addon cron.
         cron.schedule('17 * * * *', () => {

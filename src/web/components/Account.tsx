@@ -17,12 +17,23 @@ export default function AccountPage() {
     const [deleted, setDeleted] = useState(false);
 
     useEffect(() => {
-        GetMe()
-            .then((u) => {
-                setUser(u);
-                if (u) GetMySubmissions().then(setSubmissions).catch(() => setSubmissions([]));
-            })
-            .catch(() => setUser(null));
+        const load = async () => {
+            let u: SessionUser | null;
+            try {
+                u = await GetMe();
+            } catch {
+                setUser(null);
+                return;
+            }
+            setUser(u);
+            if (!u) return;
+            try {
+                setSubmissions(await GetMySubmissions());
+            } catch {
+                setSubmissions([]);
+            }
+        };
+        void load();
     }, []);
 
     if (deleted) {

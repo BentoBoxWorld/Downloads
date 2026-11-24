@@ -16,12 +16,15 @@ export class ConfigStore {
     private overrides = new Map<ConfigScope, AddonsEntity[] | PresetsEntity[]>();
     private overrideModel: ConfigOverrideStatic;
     private auditModel: ConfigAuditStatic;
-    readonly ready: Promise<void>;
 
     constructor(private readonly baseConfig: ConfigObject, sequelize: Sequelize) {
         this.overrideModel = ConfigOverrideFactory(sequelize);
         this.auditModel = ConfigAuditFactory(sequelize);
-        this.ready = this.init();
+    }
+
+    /** Load the override layer from disk. Call once; resolves when ready. */
+    start(): Promise<void> {
+        return this.init();
     }
 
     private async init(): Promise<void> {

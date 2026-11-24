@@ -163,7 +163,7 @@ export default function AuthorsTab({ user }: { user: SessionUser }) {
                         css={tw`flex-1 px-3 py-2 border border-gray-300 rounded text-sm`}
                         style={{ fontFamily: 'var(--bb-mono)' }}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleAdd();
+                            if (e.key === 'Enter') void handleAdd();
                         }}
                     />
                     <button

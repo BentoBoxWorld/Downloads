@@ -46,7 +46,7 @@ async function persistToStorage(file: File): Promise<void> {
         const dataUrl: string = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result as string);
-            reader.onerror = () => reject(reader.error);
+            reader.onerror = () => reject(reader.error ?? new Error('Could not read file'));
             reader.readAsDataURL(file);
         });
         const idx = dataUrl.indexOf('base64,');

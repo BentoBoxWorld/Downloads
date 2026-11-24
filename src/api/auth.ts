@@ -55,12 +55,18 @@ export class AuthManager {
     private readonly users: UserStatic;
     private readonly sessions: SessionStatic;
     readonly submissions: SubmissionStatic;
+    private readonly sequelize: Sequelize;
 
     constructor(private readonly config: AuthConfig | null, sequelize: Sequelize) {
         this.users = UserFactory(sequelize);
         this.sessions = SessionFactory(sequelize);
         this.submissions = SubmissionFactory(sequelize);
-        this.bootstrap(sequelize).catch((err) => console.error('[auth] bootstrap failed:', err));
+        this.sequelize = sequelize;
+    }
+
+    /** Sync tables and schedule housekeeping. Call once, right after construction. */
+    start(): void {
+        this.bootstrap(this.sequelize).catch((err) => console.error('[auth] bootstrap failed:', err));
 
         // Daily prune of expired sessions.
         cron.schedule('0 4 * * *', () => this.pruneExpiredSessions());

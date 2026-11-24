@@ -105,7 +105,7 @@ export default class ApiManager {
     );
 
     /** Resolves once all three JAR/count caches have been synced. */
-    private cachesReady: Promise<void>;
+    private cachesReady!: Promise<void>;
     /** Addons with no cached JAR yet — drained ahead of the round-robin. */
     private pendingAssets: AddonsEntity[] = [];
     /** Pinned versions missing from the old-version cache. */
@@ -121,12 +121,6 @@ export default class ApiManager {
     private repeats = 1;
 
     constructor(private readonly configConstructor: ConfigObject) {
-        this.cachesReady = Promise.all([
-            this.downloadCount.sync(),
-            this.oldVersionCache.sync(),
-            this.jarCache.sync(),
-        ]).then(() => undefined);
-
         let env: {
             github_token?: string;
             github_downloads?: number;
@@ -149,15 +143,32 @@ export default class ApiManager {
             this.loadAdminGithubConfig(),
         );
         this.config = configConstructor;
+    }
+
+    /**
+     * Kick off all startup work: database syncs, the first bStats/blueprint
+     * fetches and the cron jobs. Call once, right after construction.
+     */
+    start(): void {
+        this.auth.start();
+        this.serverStats.start();
+        this.blog.start();
+
+        this.cachesReady = Promise.all([
+            this.downloadCount.sync(),
+            this.oldVersionCache.sync(),
+            this.jarCache.sync(),
+        ]).then(() => undefined);
 
         // Once the override layer has loaded from disk, swap in the effective
         // config and (re)build the derived addons array off it.
-        this.configStore.ready
+        this.configStore
+            .start()
             .then(() => this.reload())
             .catch((err) => console.error('[api] initial configStore load failed:', err));
 
         this.startPollingCron();
-        this.refreshBlueprints();
+        this.refreshBlueprints().catch(() => undefined); // logs its own errors
     }
 
     /**
@@ -167,10 +178,10 @@ export default class ApiManager {
      */
     private startPollingCron(): void {
         cron.schedule('*/6 * * * *', () => {
-            this.generateDownloads();
-            this.refreshBlueprints();
             const logErr = (name: string) => (e: unknown) =>
                 console.error(`[cron] ${name} failed:`, (e as Error)?.message ?? e);
+            this.generateDownloads().catch(logErr('download counts'));
+            this.refreshBlueprints().catch(logErr('blueprints'));
             const addons = this.config.addons;
             if (addons.length === 0) return;
             if (this.pendingAssets.length > 0) {
@@ -237,7 +248,7 @@ export default class ApiManager {
 
     private async rebuildAddons(): Promise<void> {
         const next: AddonType[] = [];
-        for await (const addon1 of this.config.addons) {
+        for (const addon1 of this.config.addons) {
             const cached = await this.jarCache.findOne({ where: { name: addon1.name } });
             const versions = {
                 latest: cached?.version || '0',
@@ -552,10 +563,10 @@ export default class ApiManager {
                 this.downloadBlueprintFile(req, res);
                 break;
             case 'blueprints/zip':
-                this.downloadBlueprintZip(req, res).then();
+                this.downloadBlueprintZip(req, res).catch((err) => this.failRequest(res, 'blueprint zip', err));
                 break;
             case 'generate':
-                this.generateZIP(req, res).then();
+                this.generateZIP(req, res).catch((err) => this.failRequest(res, 'zip generation', err));
                 break;
             default:
                 res.setHeader('Content-Type', 'application/json');
@@ -563,6 +574,13 @@ export default class ApiManager {
                 res.statusCode = 404;
                 res.end();
         }
+    }
+
+    /** Log a failed async request handler and end the response if nothing was sent yet. */
+    private failRequest(res: Response, what: string, err: unknown): void {
+        console.error(`[api] ${what} failed:`, (err as Error)?.message ?? err);
+        if (!res.headersSent) res.status(500).json({ Error: 500 });
+        else res.end();
     }
 
     async generateZIP(req: Request, res: Response) {
@@ -822,15 +840,17 @@ export default class ApiManager {
             where: { name: addon },
         });
         if (addonDatabase !== null) {
-            addonDatabase.update({ downloads: addonDatabase.downloads + 1 });
+            await addonDatabase.update({ downloads: addonDatabase.downloads + 1 });
         }
     }
 
     async generateDownloads() {
-        this.addons.map(async (a) => {
-            const downloadCount = await this.downloadCount.findOne({ where: { name: a.name } });
-            a.downloads = downloadCount?.downloads;
-        });
+        await Promise.all(
+            this.addons.map(async (a) => {
+                const downloadCount = await this.downloadCount.findOne({ where: { name: a.name } });
+                a.downloads = downloadCount?.downloads;
+            }),
+        );
     }
 
     getBase64(url: string) {

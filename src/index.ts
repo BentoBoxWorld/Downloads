@@ -14,6 +14,7 @@ import axios from 'axios';
 const config: ConfigObject = JSON.parse(fs.readFileSync('./../config.json').toString());
 
 const apiManager = new apiClass(config);
+apiManager.start();
 const page = fs.readFileSync('web/index.html');
 const app = express.default();
 const publicFiles = new Map<string, Buffer>();

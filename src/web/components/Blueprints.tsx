@@ -63,6 +63,7 @@ function BlueprintCard({
 }) {
     const gameModeLabel = gameModeInfo?.displayName || bp.gameMode;
     const dims = `${bp.stats.dimensions.x} × ${bp.stats.dimensions.y} × ${bp.stats.dimensions.z}`;
+    const sortedTags = (bp.tags || []).slice().sort((a, b) => a.localeCompare(b));
 
     return (
         <article
@@ -119,7 +120,6 @@ function BlueprintCard({
                     }}
                 >
                     <label
-                        onClick={(e) => e.stopPropagation()}
                         style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -355,7 +355,7 @@ function BlueprintCard({
                     }}
                 >
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                        {(bp.tags || []).sort().map((t) => (
+                        {sortedTags.map((t) => (
                             <span
                                 key={t}
                                 style={{
@@ -629,13 +629,13 @@ export default function BlueprintsPage({ data }: { data: BlueprintCatalog }) {
     const allTags = useMemo(() => {
         const s = new Set<string>();
         data.blueprints.forEach((b) => (b.tags || []).forEach((t) => s.add(t)));
-        return [...s].sort();
+        return [...s].sort((a, b) => a.localeCompare(b));
     }, [data.blueprints]);
 
     const allModes = useMemo(() => {
         const s = new Set<string>();
         data.blueprints.forEach((b) => s.add(b.gameMode));
-        return [...s].sort();
+        return [...s].sort((a, b) => a.localeCompare(b));
     }, [data.blueprints]);
 
     const filtered = useMemo(() => {

@@ -615,7 +615,7 @@ function SubmitForm({
                   ]),
               ]
             : [];
-        return fromCatalog.sort();
+        return fromCatalog.sort((a, b) => a.localeCompare(b));
     }, [catalog]);
 
     const tagColors = useMemo(() => {
@@ -1838,7 +1838,10 @@ function TagsField({
 
     return (
         <div>
+            {/* Mouse convenience only: clicking the box focuses the text input,
+                which keyboard users reach directly with Tab. */}
             <div
+                role="presentation"
                 onClick={() => inputRef.current?.focus()}
                 style={{
                     ...bpInputStyle(),

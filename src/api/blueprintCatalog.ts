@@ -205,7 +205,7 @@ export function computeStats(bp: BlueprintJson): BlueprintStats {
         attachedCount: attached.length,
         entityCount: entityTotal,
         airCount,
-        biomes: Array.from(biomes).sort(),
+        biomes: Array.from(biomes).sort((a, b) => a.localeCompare(b)),
         sinking: bp.sink === true,
         topBlocks: topN(blockCounts, 5, (material, count) => ({ material, count })),
         topEntities: topN(entityCounts, 5, (type, count) => ({ type, count })),

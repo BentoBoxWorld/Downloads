@@ -396,7 +396,7 @@ export default function Navigation() {
                                         type="button"
                                         onClick={() => {
                                             setMenuOpen(false);
-                                            handleLogout();
+                                            void handleLogout();
                                         }}
                                         style={{
                                             display: 'flex',

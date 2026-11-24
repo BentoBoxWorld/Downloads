@@ -175,7 +175,7 @@ export default function AddonsTab({ user }: { user: SessionUser }) {
                                         if (
                                             confirm(`Delete addon "${a.name}"? This cannot be undone.`)
                                         ) {
-                                            handleDelete(a.name);
+                                            void handleDelete(a.name);
                                         }
                                     }}
                                     disabled={isProtected}

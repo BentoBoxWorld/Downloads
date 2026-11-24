@@ -300,7 +300,7 @@ export default function BlogEditor({ user, postId, onClose }: Props) {
                     style={{ display: 'none' }}
                     onChange={(e) => {
                         const f = e.target.files?.[0];
-                        if (f) handleImageUpload(f);
+                        if (f) void handleImageUpload(f);
                     }}
                 />
                 <input
@@ -310,7 +310,7 @@ export default function BlogEditor({ user, postId, onClose }: Props) {
                     style={{ display: 'none' }}
                     onChange={(e) => {
                         const f = e.target.files?.[0];
-                        if (f) handleCoverUpload(f);
+                        if (f) void handleCoverUpload(f);
                     }}
                 />
                 {coverImage && (
