@@ -22,9 +22,14 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build
+    # Dependencies are installed exactly as locked, with lifecycle scripts
+    # disabled. sqlite3 is the only dependency that needs its install script
+    # (it fetches the prebuilt native binding), so that one is run explicitly.
+    - name: Install
       run: |
-        npm i -g yarn
-        yarn
-        yarn add sqlite3
-        yarn build
+        npm install --global --ignore-scripts yarn@1.22.22
+        yarn install --frozen-lockfile --ignore-scripts
+        npm rebuild sqlite3
+
+    - name: Build
+      run: yarn build

@@ -20,7 +20,7 @@ import {
 } from '../../ApiRequestManager';
 import PresetEditor from './PresetEditor';
 
-export default function PresetsTab({ user }: { user: SessionUser }) {
+export default function PresetsTab({ user }: Readonly<{ user: SessionUser }>) {
     const [server, setServer] = useState<PresetsEntity[] | null>(null);
     const [draft, setDraft] = useState<PresetsEntity[] | null>(null);
     const [addons, setAddons] = useState<AddonType[]>([]);
@@ -197,8 +197,8 @@ export default function PresetsTab({ user }: { user: SessionUser }) {
                 >
                     <div css={tw`font-semibold mb-1`}>Validation issues:</div>
                     <ul css={tw`list-disc list-inside space-y-0.5`}>
-                        {issues.map((s, i) => (
-                            <li key={i}>{s}</li>
+                        {issues.map((s) => (
+                            <li key={s}>{s}</li>
                         ))}
                     </ul>
                 </div>
@@ -247,13 +247,13 @@ function IconButton({
     onClick,
     disabled,
     danger,
-}: {
+}: Readonly<{
     icon: import('@fortawesome/fontawesome-svg-core').IconDefinition;
     label: string;
     onClick: () => void;
     disabled?: boolean;
     danger?: boolean;
-}) {
+}>) {
     return (
         <button
             type="button"
@@ -263,11 +263,9 @@ function IconButton({
             title={label}
             css={[
                 tw`w-8 h-8 rounded flex items-center justify-center text-sm`,
-                disabled
-                    ? tw`text-gray-300 cursor-not-allowed`
-                    : danger
-                    ? tw`text-red-700 hover:bg-red-50`
-                    : tw`text-gray-600 hover:bg-gray-100`,
+                disabled && tw`text-gray-300 cursor-not-allowed`,
+                !disabled && danger && tw`text-red-700 hover:bg-red-50`,
+                !disabled && !danger && tw`text-gray-600 hover:bg-gray-100`,
             ]}
             style={{ background: 'transparent', border: 'none', cursor: disabled ? 'not-allowed' : 'pointer' }}
         >
@@ -276,7 +274,7 @@ function IconButton({
     );
 }
 
-function ErrorBanner({ text }: { text: string }) {
+function ErrorBanner({ text }: Readonly<{ text: string }>) {
     return (
         <div css={tw`mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800`}>
             {text}

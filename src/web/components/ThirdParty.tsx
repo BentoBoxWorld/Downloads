@@ -19,12 +19,12 @@ function ThirdPartyCard({
     addon,
     tagColors,
     tagDescriptions,
-}: {
+}: Readonly<{
     name: string;
     addon: ThirdParty['addons'][string];
     tagColors: Record<string, string>;
     tagDescriptions: Record<string, string | undefined>;
-}): JSX.Element {
+}>): JSX.Element {
     const firstTag = addon.Tags?.[0];
     const tile = firstTag ? tagColors[firstTag] : 'var(--bb-mute-2)';
     return (
@@ -108,7 +108,7 @@ function ThirdPartyCard({
             {addon.Tags && addon.Tags.length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                     {addon.Tags.slice()
-                        .sort()
+                        .sort((a, b) => a.localeCompare(b))
                         .map((tag) => (
                             <span
                                 key={tag}
@@ -160,9 +160,9 @@ function ThirdPartyCard({
                     </a>
                 )}
                 {!addon.Releases && !addon.Github && !addon.Issues && (
-                    <a
-                        href={'#'}
+                    <span
                         className="bb-btn bb-btn-ghost"
+                        aria-disabled="true"
                         style={{
                             flex: 1,
                             padding: '8px 12px',
@@ -173,18 +173,18 @@ function ThirdPartyCard({
                     >
                         <FontAwesomeIcon icon={faExternalLinkAlt} />
                         No links
-                    </a>
+                    </span>
                 )}
             </div>
         </article>
     );
 }
 
-export default function ThirdPartyPage({ data }: { data: ThirdParty }) {
+export default function ThirdPartyPage({ data }: Readonly<{ data: ThirdParty }>) {
     const [query, setQuery] = useState('');
     const [activeTags, setActiveTags] = useState<string[]>([]);
 
-    const allTagKeys = useMemo(() => Object.keys(data.tags).sort(), [data.tags]);
+    const allTagKeys = useMemo(() => Object.keys(data.tags).sort((a, b) => a.localeCompare(b)), [data.tags]);
 
     const tagColors = useMemo(() => {
         const out: Record<string, string> = {};
@@ -199,7 +199,7 @@ export default function ThirdPartyPage({ data }: { data: ThirdParty }) {
     }, [data.tags]);
 
     const allNames = useMemo(
-        () => Object.keys(data.addons).sort(),
+        () => Object.keys(data.addons).sort((a, b) => a.localeCompare(b)),
         [data.addons],
     );
 

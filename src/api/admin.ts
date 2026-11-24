@@ -11,7 +11,7 @@ export interface AdminGithubConfig {
     token: string;
 }
 
-const DISCORD_ID_RE = /^[0-9]{15,25}$/;
+const DISCORD_ID_RE = /^\d{15,25}$/;
 const COLOR_RE = /^#[0-9a-fA-F]{3,8}$/;
 const ADDON_NAME_RE = /^[A-Za-z0-9 _-]+$/;
 const GITHUB_REPO_RE = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
@@ -92,7 +92,7 @@ export class AdminManager {
         }
 
         const actor = (req as AuthedRequest).user;
-        if (actor && actor.id === discordId && !isAdmin) {
+        if (actor?.id === discordId && !isAdmin) {
             res.status(400).json({ error: 'cannot_demote_self' });
             return;
         }
@@ -101,7 +101,7 @@ export class AdminManager {
         res.json({ ok: true });
     };
 
-    handleListPresets: RequestHandler = async (_req, res) => {
+    handleListPresets: RequestHandler = (_req, res) => {
         res.json(this.configStore.getEffectiveConfig().presets);
     };
 
@@ -126,7 +126,7 @@ export class AdminManager {
         res.json({ ok: true });
     };
 
-    handleListAddons: RequestHandler = async (_req, res) => {
+    handleListAddons: RequestHandler = (_req, res) => {
         res.json(this.configStore.getEffectiveConfig().addons);
     };
 
@@ -185,7 +185,7 @@ export class AdminManager {
             .filter(
                 (p) =>
                     p.addons.includes(targetName) ||
-                    (p.dependencies && p.dependencies.includes(targetName)),
+                    p.dependencies?.includes(targetName),
             )
             .map((p) => p.name);
         if (blockingPresets.length > 0) {
@@ -274,6 +274,7 @@ export class AdminManager {
         const { owner, repo, branch: baseBranch } = this.github;
         const actor = (req as AuthedRequest).user;
         const ts = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+        const overrideScopes = overrides.map((o) => `\`${o.scope}\``).join(', ');
         const head = `admin/config-sync-${ts}`;
 
         try {
@@ -326,7 +327,7 @@ export class AdminManager {
             const body = [
                 `This PR syncs the live admin overrides back to \`config.json\`.`,
                 ``,
-                `**Active overrides:** ${overrides.map((o) => `\`${o.scope}\``).join(', ')}`,
+                `**Active overrides:** ${overrideScopes}`,
                 actor ? `**Opened by:** Discord \`${actor.id}\`` : '',
                 ``,
                 `### Recent audit entries`,

@@ -78,7 +78,7 @@ export async function GetMe(): Promise<SessionUser | null> {
         return r.data;
     } catch (err) {
         const e = err as { response?: { status?: number } };
-        if (e.response && e.response.status === 401) return null;
+        if (e.response?.status === 401) return null;
         throw err;
     }
 }

@@ -12,8 +12,8 @@ import {
 import { Sequelize } from 'sequelize';
 import { JenkinsAPI } from 'jenkins';
 import axios from 'axios';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import Archiver = require('archiver');
 import { WeblinkSync } from './weblink';
 import {
@@ -36,6 +36,21 @@ const { throttling } = require('@octokit/plugin-throttling');
 try {
     fs.mkdirSync('./../data', { recursive: true });
 } catch (e) {}
+
+/**
+ * Pick the plugin JAR from a release's assets: the only asset if there is
+ * one, otherwise the last one named like `Name-1.2.3[-SNAPSHOT-b45].jar`.
+ */
+function pickJarAsset<T extends { name: string }>(assets: T[]): T | undefined {
+    if (assets.length === 1) return assets[0];
+    let picked: T | undefined;
+    for (const asset of assets) {
+        if (asset.name.toLowerCase().match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`)) {
+            picked = asset;
+        }
+    }
+    return picked;
+}
 
 export default class ApiManager {
     config: ConfigObject;
@@ -105,28 +120,22 @@ export default class ApiManager {
     );
 
     /** Resolves once all three JAR/count caches have been synced. */
-    private cachesReady: Promise<void>;
+    private cachesReady!: Promise<void>;
     /** Addons with no cached JAR yet — drained ahead of the round-robin. */
-    private pendingAssets: AddonsEntity[] = [];
+    private readonly pendingAssets: AddonsEntity[] = [];
     /** Pinned versions missing from the old-version cache. */
-    private pendingOldVersions: { addon: string; version: string }[] = [];
+    private readonly pendingOldVersions: { addon: string; version: string }[] = [];
     /** Addons already looked up in the JAR cache, so we only query once. */
-    private checkedAssets = new Set<string>();
+    private readonly checkedAssets = new Set<string>();
     /** `name@version` pairs already looked up in the old-version cache. */
-    private checkedOldVersions = new Set<string>();
+    private readonly checkedOldVersions = new Set<string>();
     /** Round-robin cursors over the effective addon list. */
     private updateAddon = 0;
     private updateCiAddon = 0;
     /** How many GitHub fetches to make per cron tick (env.github_downloads). */
-    private repeats = 1;
+    private readonly repeats: number = 1;
 
     constructor(private readonly configConstructor: ConfigObject) {
-        this.cachesReady = Promise.all([
-            this.downloadCount.sync(),
-            this.oldVersionCache.sync(),
-            this.jarCache.sync(),
-        ]).then(() => undefined);
-
         let env: {
             github_token?: string;
             github_downloads?: number;
@@ -135,11 +144,13 @@ export default class ApiManager {
         } = {};
         try {
             env = require('./../../env.json');
-        } catch (e) {}
-        this.repeats = env && env.github_downloads ? env.github_downloads : 1;
+        } catch {
+            /* env.json is optional */
+        }
+        this.repeats = env?.github_downloads ? env.github_downloads : 1;
         const CustomOctokit = Octokit.plugin(throttling);
         this.octokit = new CustomOctokit({
-            auth: env && env.github_token ? env.github_token : '',
+            auth: env?.github_token ? env.github_token : '',
         });
         this.configStore = new ConfigStore(configConstructor, this.authSequelize);
         this.admin = new AdminManager(
@@ -149,15 +160,32 @@ export default class ApiManager {
             this.loadAdminGithubConfig(),
         );
         this.config = configConstructor;
+    }
+
+    /**
+     * Kick off all startup work: database syncs, the first bStats/blueprint
+     * fetches and the cron jobs. Call once, right after construction.
+     */
+    start(): void {
+        this.auth.start();
+        this.serverStats.start();
+        this.blog.start();
+
+        this.cachesReady = Promise.all([
+            this.downloadCount.sync(),
+            this.oldVersionCache.sync(),
+            this.jarCache.sync(),
+        ]).then(() => undefined);
 
         // Once the override layer has loaded from disk, swap in the effective
         // config and (re)build the derived addons array off it.
-        this.configStore.ready
+        this.configStore
+            .start()
             .then(() => this.reload())
             .catch((err) => console.error('[api] initial configStore load failed:', err));
 
         this.startPollingCron();
-        this.refreshBlueprints();
+        this.refreshBlueprints().catch(() => undefined); // logs its own errors
     }
 
     /**
@@ -167,36 +195,41 @@ export default class ApiManager {
      */
     private startPollingCron(): void {
         cron.schedule('*/6 * * * *', () => {
-            this.generateDownloads();
-            this.refreshBlueprints();
             const logErr = (name: string) => (e: unknown) =>
                 console.error(`[cron] ${name} failed:`, (e as Error)?.message ?? e);
+            this.generateDownloads().catch(logErr('download counts'));
+            this.refreshBlueprints().catch(logErr('blueprints'));
             const addons = this.config.addons;
             if (addons.length === 0) return;
-            if (this.pendingAssets.length > 0) {
-                for (let i = 0; i < Math.min(this.pendingAssets.length, this.repeats); i++) {
-                    const addon = this.pendingAssets.shift() as AddonsEntity;
-                    this.updateAsset(addon).catch(logErr(addon.name));
-                }
-            } else if (this.pendingOldVersions.length > 0) {
-                for (let i = 0; i < Math.min(this.pendingOldVersions.length, this.repeats); i++) {
-                    const pending = this.pendingOldVersions.shift() as { addon: string; version: string };
-                    this.downloadOldVersion(pending).catch(logErr(pending.addon));
-                }
-            } else {
-                for (let i = 0; i < this.repeats; i++) {
-                    // Re-check the bound each pass: the list can shrink under us.
-                    if (this.updateAddon >= addons.length) this.updateAddon = 0;
-                    const addon = addons[this.updateAddon++];
-                    this.updateAsset(addon).catch(logErr(addon.name));
-                }
-            }
+            this.pollReleases(addons, logErr);
             for (let i = 0; i < 4; i++) {
                 if (this.updateCiAddon >= addons.length) this.updateCiAddon = 0;
                 const addon = addons[this.updateCiAddon++];
                 this.updateJenkins(addon).catch(logErr(addon.name));
             }
         });
+    }
+
+    /** One cron tick of GitHub release work: backlog first, then the round-robin refresh. */
+    private pollReleases(addons: AddonsEntity[], logErr: (name: string) => (e: unknown) => void): void {
+        if (this.pendingAssets.length > 0) {
+            for (let i = 0; i < Math.min(this.pendingAssets.length, this.repeats); i++) {
+                const addon = this.pendingAssets.shift() as AddonsEntity;
+                this.updateAsset(addon).catch(logErr(addon.name));
+            }
+        } else if (this.pendingOldVersions.length > 0) {
+            for (let i = 0; i < Math.min(this.pendingOldVersions.length, this.repeats); i++) {
+                const pending = this.pendingOldVersions.shift() as { addon: string; version: string };
+                this.downloadOldVersion(pending).catch(logErr(pending.addon));
+            }
+        } else {
+            for (let i = 0; i < this.repeats; i++) {
+                // Re-check the bound each pass: the list can shrink under us.
+                if (this.updateAddon >= addons.length) this.updateAddon = 0;
+                const addon = addons[this.updateAddon++];
+                this.updateAsset(addon).catch(logErr(addon.name));
+            }
+        }
     }
 
     /**
@@ -206,38 +239,42 @@ export default class ApiManager {
      */
     private async refreshWorkQueues(): Promise<void> {
         await this.cachesReady;
-        for (const addon of this.config.addons) {
-            if (addon.name !== 'BentoBox') {
-                const counted: DownloadCountModel | null = await this.downloadCount.findOne({
-                    where: { name: addon.name },
-                });
-                if (counted === null) {
-                    await this.downloadCount.create({ name: addon.name, downloads: 0 });
-                }
-            }
-            if (!this.checkedAssets.has(addon.name)) {
-                this.checkedAssets.add(addon.name);
-                const cached: DatabaseModel | null = await this.jarCache.findOne({
-                    where: { name: addon.name },
-                });
-                if (cached === null) this.pendingAssets.push(addon);
-            }
-            for (const version of Object.values(addon.versions || {})) {
-                const key = `${addon.name}@${version}`;
-                if (this.checkedOldVersions.has(key)) continue;
-                this.checkedOldVersions.add(key);
-                const have = await this.oldVersionCache
-                    .findAll({ where: { name: addon.name, version } })
-                    .then((r) => r && r.length > 0);
-                if (!have) this.pendingOldVersions.push({ addon: addon.name, version });
+        // Sequential on purpose: SQLite, and the backlog order follows config order.
+        for (const addon of this.config.addons) await this.queueAddon(addon);
+        await this.generateDownloads();
+    }
+
+    /** Ensure one addon has a download counter, and queue any JAR it is missing. */
+    private async queueAddon(addon: AddonsEntity): Promise<void> {
+        if (addon.name !== 'BentoBox') {
+            const counted: DownloadCountModel | null = await this.downloadCount.findOne({
+                where: { name: addon.name },
+            });
+            if (counted === null) {
+                await this.downloadCount.create({ name: addon.name, downloads: 0 });
             }
         }
-        await this.generateDownloads();
+        if (!this.checkedAssets.has(addon.name)) {
+            this.checkedAssets.add(addon.name);
+            const cached: DatabaseModel | null = await this.jarCache.findOne({
+                where: { name: addon.name },
+            });
+            if (cached === null) this.pendingAssets.push(addon);
+        }
+        for (const version of Object.values(addon.versions || {})) {
+            const key = `${addon.name}@${version}`;
+            if (this.checkedOldVersions.has(key)) continue;
+            this.checkedOldVersions.add(key);
+            const have = await this.oldVersionCache
+                .findAll({ where: { name: addon.name, version } })
+                .then((r) => r && r.length > 0);
+            if (!have) this.pendingOldVersions.push({ addon: addon.name, version });
+        }
     }
 
     private async rebuildAddons(): Promise<void> {
         const next: AddonType[] = [];
-        for await (const addon1 of this.config.addons) {
+        for (const addon1 of this.config.addons) {
             const cached = await this.jarCache.findOne({ where: { name: addon1.name } });
             const versions = {
                 latest: cached?.version || '0',
@@ -268,22 +305,26 @@ export default class ApiManager {
         let overrides: Partial<{ url: string; path: string; branch: string }> = {};
         try {
             const env = require('./../../env.json');
-            if (env && env.weblink) overrides = env.weblink;
-        } catch (e) {}
+            if (env?.weblink) overrides = env.weblink;
+        } catch {
+            /* env.json is optional */
+        }
         return new WeblinkSync(overrides);
     }
 
     private loadSubmissionsConfig() {
         try {
             const env = require('./../../env.json');
-            if (env && env.weblink_github_token) {
+            if (env?.weblink_github_token) {
                 return {
                     weblinkRepo: { owner: 'BentoBoxWorld', repo: 'weblink' },
                     weblinkToken: env.weblink_github_token as string,
-                    weblinkBranch: (env.weblink && env.weblink.branch) || 'master',
+                    weblinkBranch: env.weblink?.branch || 'master',
                 };
             }
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return null;
     }
 
@@ -306,7 +347,9 @@ export default class ApiManager {
                     token: cfg.token,
                 };
             }
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return null;
     }
 
@@ -314,7 +357,7 @@ export default class ApiManager {
         try {
             const env = require('./../../env.json');
             const inProd = process.env.NODE_ENV === 'production';
-            if (env && env.discord_client_id && env.discord_client_secret && env.discord_redirect_uri) {
+            if (env?.discord_client_id && env.discord_client_secret && env.discord_redirect_uri) {
                 const adminDiscordIds = Array.isArray(env.admin_discord_ids)
                     ? (env.admin_discord_ids as unknown[]).filter((x): x is string => typeof x === 'string')
                     : [];
@@ -333,7 +376,9 @@ export default class ApiManager {
                     cookieDomain: typeof env.cookie_domain === 'string' ? env.cookie_domain : undefined,
                 };
             }
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return null;
     }
 
@@ -341,7 +386,9 @@ export default class ApiManager {
         try {
             const env = require('./../../env.json');
             if (typeof env?.curseforge_api_key === 'string' && env.curseforge_api_key) return env.curseforge_api_key;
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return undefined;
     }
 
@@ -372,7 +419,9 @@ export default class ApiManager {
                     theme: typeof g.theme === 'string' ? g.theme : undefined,
                 };
             }
-        } catch (e) {}
+        } catch {
+            /* env.json is optional */
+        }
         return {
             baseUrl,
             discordWebhookPath,
@@ -427,7 +476,7 @@ export default class ApiManager {
                 ciId: latestJenkins,
                 ciJarFile: assetURL,
             });
-            const liveAddon = this.addons.filter((a) => a.name === addon.name)[0];
+            const liveAddon = this.addons.find((a) => a.name === addon.name);
             if (liveAddon) liveAddon.versions.beta = String(latestJenkins);
         });
     }
@@ -474,23 +523,7 @@ export default class ApiManager {
             repo: addon.github.split('/')[1],
             release_id: latestRelease.data.id,
         });
-        let assetURL;
-        if (releaseFiles.data.length === 0) {
-            return;
-        } else if (releaseFiles.data.length === 1) {
-            assetURL = releaseFiles.data[0];
-        } else {
-            for (let i = 0; i < releaseFiles.data.length; i++) {
-                if (
-                    !releaseFiles.data[i].name
-                        .toLowerCase()
-                        .match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`)
-                )
-                    continue;
-                assetURL = releaseFiles.data[i];
-            }
-            if (!assetURL) return;
-        }
+        const assetURL = pickJarAsset(releaseFiles.data);
         if (!assetURL) return;
         const asset = await this.octokit.rest.repos.getReleaseAsset({
             owner: addon.github.split('/')[0],
@@ -518,10 +551,8 @@ export default class ApiManager {
                 version: latestRelease.data.tag_name,
             });
         }
-        const oldAddon = this.addons.filter((a) => a.name === addon.name)[0];
-        const newAddon = oldAddon;
-        newAddon.versions['latest'] = latestRelease.data.tag_name;
-        this.addons[this.addons.indexOf(oldAddon)] = newAddon;
+        const liveEntry = this.addons.find((a) => a.name === addon.name);
+        if (liveEntry) liveEntry.versions['latest'] = latestRelease.data.tag_name;
     }
 
     manageRequest(req: Request, res: Response) {
@@ -552,10 +583,10 @@ export default class ApiManager {
                 this.downloadBlueprintFile(req, res);
                 break;
             case 'blueprints/zip':
-                this.downloadBlueprintZip(req, res).then();
+                this.downloadBlueprintZip(req, res).catch((err) => this.failRequest(res, 'blueprint zip', err));
                 break;
             case 'generate':
-                this.generateZIP(req, res).then();
+                this.generateZIP(req, res).catch((err) => this.failRequest(res, 'zip generation', err));
                 break;
             default:
                 res.setHeader('Content-Type', 'application/json');
@@ -563,6 +594,13 @@ export default class ApiManager {
                 res.statusCode = 404;
                 res.end();
         }
+    }
+
+    /** Log a failed async request handler and end the response if nothing was sent yet. */
+    private failRequest(res: Response, what: string, err: unknown): void {
+        console.error(`[api] ${what} failed:`, (err as Error)?.message ?? err);
+        if (!res.headersSent) res.status(500).json({ Error: 500 });
+        else res.end();
     }
 
     async generateZIP(req: Request, res: Response) {
@@ -585,7 +623,7 @@ export default class ApiManager {
                 res.end();
                 return;
             }
-        } catch (e) {
+        } catch {
             res.setHeader('Content-Type', 'application/json');
             res.send({ Error: 400, Reason: 'Not Valid Json' });
             res.statusCode = 400;
@@ -653,11 +691,11 @@ export default class ApiManager {
                     name: 'BentoBox',
                 },
             });
-            const bentoBoxJar = bentoBoxVersions.filter((a) => {
-                const addons = this.config.addons.filter((a) => a.name === 'BentoBox')[0];
-                if (!addons.versions) return;
-                return a.version === addons.versions[<string>version];
-            })[0];
+            const bentoBoxJar = bentoBoxVersions.find((a) => {
+                const bentoBox = this.config.addons.find((c) => c.name === 'BentoBox');
+                if (!bentoBox?.versions) return false;
+                return a.version === bentoBox.versions[<string>version];
+            });
             if (bentoBoxJar) {
                 archive.append(bentoBoxJar.release, { name: bentoBoxJar.releaseJarFile });
             }
@@ -697,7 +735,7 @@ export default class ApiManager {
                         name: addon.name,
                     },
                 });
-                const addonJar = addonVersions.filter((a) => a.version === addon.versions[<string>version])[0];
+                const addonJar = addonVersions.find((a) => a.version === addon.versions[<string>version]);
                 if (addonJar) {
                     archive.append(addonJar.release, { name: 'BentoBox/addons/' + addonJar.releaseJarFile });
                 }
@@ -822,15 +860,17 @@ export default class ApiManager {
             where: { name: addon },
         });
         if (addonDatabase !== null) {
-            addonDatabase.update({ downloads: addonDatabase.downloads + 1 });
+            await addonDatabase.update({ downloads: addonDatabase.downloads + 1 });
         }
     }
 
     async generateDownloads() {
-        this.addons.map(async (a) => {
-            const downloadCount = await this.downloadCount.findOne({ where: { name: a.name } });
-            a.downloads = downloadCount?.downloads;
-        });
+        await Promise.all(
+            this.addons.map(async (a) => {
+                const downloadCount = await this.downloadCount.findOne({ where: { name: a.name } });
+                a.downloads = downloadCount?.downloads;
+            }),
+        );
     }
 
     getBase64(url: string) {
@@ -843,8 +883,11 @@ export default class ApiManager {
 
     async downloadOldVersion(details: { addon: string; version: string }) {
         let release;
-        let addon: AddonType | AddonsEntity = this.addons.filter((a) => a.name == details.addon)[0];
-        if (details.addon === 'BentoBox') addon = this.config.addons.filter((a) => a.name === 'BentoBox')[0];
+        const addon: AddonType | AddonsEntity | undefined =
+            details.addon === 'BentoBox'
+                ? this.config.addons.find((a) => a.name === 'BentoBox')
+                : this.addons.find((a) => a.name === details.addon);
+        if (!addon) return;
         try {
             release = await this.octokit.rest.repos.getReleaseByTag({
                 owner: addon.github.split('/')[0],
@@ -861,23 +904,7 @@ export default class ApiManager {
             release_id: release.data.id,
         });
 
-        let assetURL;
-        if (releaseFiles.data.length === 0) {
-            return;
-        } else if (releaseFiles.data.length === 1) {
-            assetURL = releaseFiles.data[0];
-        } else {
-            for (let i = 0; i < releaseFiles.data.length; i++) {
-                if (
-                    !releaseFiles.data[i].name
-                        .toLowerCase()
-                        .match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`)
-                )
-                    continue;
-                assetURL = releaseFiles.data[i];
-            }
-            if (!assetURL) return;
-        }
+        const assetURL = pickJarAsset(releaseFiles.data);
         if (!assetURL) return;
         const asset = await this.octokit.rest.repos.getReleaseAsset({
             owner: addon.github.split('/')[0],

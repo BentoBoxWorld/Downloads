@@ -164,13 +164,11 @@ export default function BlogList() {
                 </div>
             )}
 
-            {data && data.posts.length === 0 && (
+            {data?.posts.length === 0 && (
                 <div style={{ color: 'var(--bb-mute)', textAlign: 'center', padding: 40 }}>
-                    {search
-                        ? `No posts match “${search}”.`
-                        : tagParam
-                          ? `No posts tagged “${tagParam}”.`
-                          : 'No posts yet — check back soon.'}
+                    {search && `No posts match “${search}”.`}
+                    {!search && tagParam && `No posts tagged “${tagParam}”.`}
+                    {!search && !tagParam && 'No posts yet — check back soon.'}
                 </div>
             )}
 
@@ -225,7 +223,7 @@ export default function BlogList() {
     );
 }
 
-function PostCard({ post }: { post: BlogPostSummary }) {
+function PostCard({ post }: Readonly<{ post: BlogPostSummary }>) {
     const date = new Date(post.publishedAt);
     return (
         <li

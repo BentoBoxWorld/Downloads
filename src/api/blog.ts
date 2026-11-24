@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 import * as cron from 'node-cron';
 import { Op, Sequelize } from 'sequelize';
 import axios from 'axios';
@@ -85,7 +85,7 @@ export class BlogManager {
 
     constructor(
         private readonly auth: AuthManager,
-        sequelize: Sequelize,
+        private readonly sequelize: Sequelize,
         cfg: BlogConfig,
     ) {
         this.cfg = cfg;
@@ -115,17 +115,21 @@ export class BlogManager {
                 } catch {
                     return '';
                 }
-                const classes = `hljs${language ? ` language-${language}` : ''}`;
+                const classes = language ? `hljs language-${language}` : 'hljs';
                 return `<pre><code class="${classes}">${body}</code></pre>`;
             },
         });
 
-        this.bootstrap(sequelize).catch((err) => console.error('[blog] bootstrap failed:', err));
         try {
             fs.mkdirSync(this.cfg.imageDir, { recursive: true });
         } catch {
-            /* ignore */
+            /* ignore — uploads report their own error if the directory is unusable */
         }
+    }
+
+    /** Sync tables and schedule housekeeping. Call once, right after construction. */
+    start(): void {
+        this.bootstrap(this.sequelize).catch((err) => console.error('[blog] bootstrap failed:', err));
 
         // Daily prune of orphaned revisions older than 90 days.
         cron.schedule('30 4 * * *', () => this.pruneOldRevisions());
@@ -152,7 +156,7 @@ export class BlogManager {
 
     /** GET /api/blog/posts?page=N&tag=X&q=foo */
     handleListPosts: RequestHandler = async (req, res) => {
-        const page = Math.max(1, parseInt(String(req.query.page ?? '1'), 10) || 1);
+        const page = Math.max(1, Number.parseInt(String(req.query.page ?? '1'), 10) || 1);
         const offset = (page - 1) * POSTS_PER_PAGE;
         const tagFilter = typeof req.query.tag === 'string' ? normalizeTag(req.query.tag) : '';
         const q = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 80) : '';
@@ -322,9 +326,10 @@ export class BlogManager {
         const canonical = `${base}/p/${encodeURIComponent(post.slug)}`;
         const title = escapeAttr(post.title);
         const desc = escapeAttr(post.summary || stripTags(post.bodyHtml).slice(0, 280));
-        const cover = post.coverImage
-            ? (post.coverImage.startsWith('http') ? post.coverImage : base + post.coverImage)
-            : '';
+        let cover = '';
+        if (post.coverImage) {
+            cover = post.coverImage.startsWith('http') ? post.coverImage : base + post.coverImage;
+        }
         const ogImage = cover ? `<meta property="og:image" content="${escapeAttr(cover)}" />` : '';
         const twImage = cover ? `<meta name="twitter:image" content="${escapeAttr(cover)}" />` : '';
         const jsonLd = JSON.stringify({
@@ -355,7 +360,7 @@ export class BlogManager {
             `    <meta name="twitter:title" content="${title}" />`,
             `    <meta name="twitter:description" content="${desc}" />`,
             twImage,
-            `    <script type="application/ld+json">${jsonLd.replace(/</g, '\\u003c')}</script>`,
+            `    <script type="application/ld+json">${jsonLd.replace(/</g, String.raw`\u003c`)}</script>`,
         ]
             .filter(Boolean)
             .join('\n');
@@ -375,7 +380,7 @@ export class BlogManager {
 
     /** GET /api/blog/admin/posts/:id */
     handleGetAdminPost: RequestHandler = async (req, res) => {
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -440,7 +445,7 @@ export class BlogManager {
             res.status(401).json({ error: 'unauthenticated' });
             return;
         }
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -507,7 +512,7 @@ export class BlogManager {
      *  Body: { at?: number } — when set to a future ms-epoch, schedules the
      *  post; otherwise publishes immediately. */
     handlePublishPost: RequestHandler = async (req, res) => {
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -546,7 +551,7 @@ export class BlogManager {
 
     /** POST /api/blog/admin/posts/:id/unpublish */
     handleUnpublishPost: RequestHandler = async (req, res) => {
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -562,7 +567,7 @@ export class BlogManager {
 
     /** DELETE /api/blog/admin/posts/:id */
     handleDeletePost: RequestHandler = async (req, res) => {
-        const id = parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
+        const id = Number.parseInt(String((req.params as Record<string, string>).id ?? ''), 10);
         if (!Number.isFinite(id)) {
             res.status(400).json({ error: 'invalid_id' });
             return;
@@ -578,7 +583,7 @@ export class BlogManager {
     };
 
     /** POST /api/blog/admin/images — multipart with field 'image'. */
-    handleUploadImage: RequestHandler = async (req, res) => {
+    handleUploadImage: RequestHandler = (req, res) => {
         type WithFile = typeof req & { file?: Express.Multer.File };
         const r = req as WithFile;
         if (!r.file) {
@@ -823,7 +828,7 @@ function imageExtFor(mime: string): string | null {
 }
 
 function stripTags(html: string): string {
-    return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    return html.replace(/<[^<>]+>/g, '').replace(/\s+/g, ' ').trim();
 }
 
 function escapeAttr(s: string): string {
@@ -843,8 +848,8 @@ function processCallouts(html: string): string {
     return html.replace(
         /<blockquote>([\s\S]*?)<\/blockquote>/g,
         (match: string, inner: string): string => {
-            const m = inner.match(
-                /^\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(?:<br\s*\/?>|\n|\s)*([\s\S]*)$/i,
+            const m = /^\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s|<br\s*\/?>)*([\s\S]*)$/i.exec(
+                inner,
             );
             if (!m) return match;
             const type = m[1].toLowerCase();

@@ -1,19 +1,20 @@
 import * as express from 'express';
 import apiClass from './api/api';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import * as mime from 'mime-types';
 import helmet from 'helmet';
 import cookieParser = require('cookie-parser');
 import { ConfigObject } from './config';
 import { upload as blueprintUpload } from './api/submissions';
 import { imageUpload as blogImageUpload } from './api/blog';
-import * as https from 'https';
+import * as https from 'node:https';
 import axios from 'axios';
 
 const config: ConfigObject = JSON.parse(fs.readFileSync('./../config.json').toString());
 
 const apiManager = new apiClass(config);
+apiManager.start();
 const page = fs.readFileSync('web/index.html');
 const app = express.default();
 const publicFiles = new Map<string, Buffer>();
@@ -428,7 +429,8 @@ app.get('*', function (req, res) {
 });
 
 app.listen(port, () => {
-    console.log(`Web server running on http://localhost${port != 80 ? `:${port}` : ''}/`);
+    const portSuffix = port != 80 ? `:${port}` : '';
+    console.log(`Web server running on http://localhost${portSuffix}/`);
 });
 
 process.on('uncaughtException', async function (err) {

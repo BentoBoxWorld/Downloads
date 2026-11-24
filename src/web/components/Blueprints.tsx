@@ -52,7 +52,7 @@ function BlueprintCard({
     expanded,
     onHover,
     tagColors,
-}: {
+}: Readonly<{
     bp: BlueprintEntry;
     gameModeInfo?: BlueprintCatalogGameMode;
     selected: boolean;
@@ -60,9 +60,10 @@ function BlueprintCard({
     expanded: boolean;
     onHover: (id: string | null) => void;
     tagColors: Record<string, string>;
-}) {
+}>) {
     const gameModeLabel = gameModeInfo?.displayName || bp.gameMode;
     const dims = `${bp.stats.dimensions.x} × ${bp.stats.dimensions.y} × ${bp.stats.dimensions.z}`;
+    const sortedTags = (bp.tags || []).slice().sort((a, b) => a.localeCompare(b));
 
     return (
         <article
@@ -119,7 +120,6 @@ function BlueprintCard({
                     }}
                 >
                     <label
-                        onClick={(e) => e.stopPropagation()}
                         style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -139,7 +139,7 @@ function BlueprintCard({
                             checked={selected}
                             onChange={onToggle}
                             style={{ accentColor: 'var(--bp-accent)' }}
-                        />
+                        />{' '}
                         Select
                     </label>
                     <span className="bp-chip">{dims}</span>
@@ -355,7 +355,7 @@ function BlueprintCard({
                     }}
                 >
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                        {(bp.tags || []).sort().map((t) => (
+                        {sortedTags.map((t) => (
                             <span
                                 key={t}
                                 style={{
@@ -390,7 +390,7 @@ function BlueprintCard({
     );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: Readonly<{ label: string; value: string }>) {
     return (
         <div>
             <div
@@ -416,7 +416,7 @@ function Stat({ label, value }: { label: string; value: string }) {
     );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <div
             style={{
@@ -573,12 +573,12 @@ function ToggleChip({
     onClick,
     swatch,
     children,
-}: {
+}: Readonly<{
     active: boolean;
     onClick: () => void;
     swatch?: string;
     children: React.ReactNode;
-}) {
+}>) {
     return (
         <button
             type="button"
@@ -613,7 +613,7 @@ function ToggleChip({
     );
 }
 
-export default function BlueprintsPage({ data }: { data: BlueprintCatalog }) {
+export default function BlueprintsPage({ data }: Readonly<{ data: BlueprintCatalog }>) {
     const [search, setSearch] = useState('');
     const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
     const [gameModeFilter, setGameModeFilter] = useState<string>('all');
@@ -629,13 +629,13 @@ export default function BlueprintsPage({ data }: { data: BlueprintCatalog }) {
     const allTags = useMemo(() => {
         const s = new Set<string>();
         data.blueprints.forEach((b) => (b.tags || []).forEach((t) => s.add(t)));
-        return [...s].sort();
+        return [...s].sort((a, b) => a.localeCompare(b));
     }, [data.blueprints]);
 
     const allModes = useMemo(() => {
         const s = new Set<string>();
         data.blueprints.forEach((b) => s.add(b.gameMode));
-        return [...s].sort();
+        return [...s].sort((a, b) => a.localeCompare(b));
     }, [data.blueprints]);
 
     const filtered = useMemo(() => {

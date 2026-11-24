@@ -20,7 +20,7 @@ import {
     SessionUser,
 } from '../../ApiRequestManager';
 
-export default function RecentTab({ user }: { user: SessionUser }) {
+export default function RecentTab({ user }: Readonly<{ user: SessionUser }>) {
     const [overrides, setOverrides] = useState<AdminOverride[] | null>(null);
     const [audits, setAudits] = useState<AdminAudit[] | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -251,7 +251,7 @@ export default function RecentTab({ user }: { user: SessionUser }) {
     );
 }
 
-function ErrorBanner({ text }: { text: string }) {
+function ErrorBanner({ text }: Readonly<{ text: string }>) {
     return (
         <div css={tw`p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800`}>{text}</div>
     );

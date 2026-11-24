@@ -4,6 +4,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrashAlt, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { AddonsEntity } from '../../../config';
 
+/** Per-instance id prefix so label/control pairs stay unique when several editors are open. */
+let editorSeq = 0;
+
 const labelStyle: React.CSSProperties = {
     display: 'block',
     fontSize: 12,
@@ -43,7 +46,8 @@ interface Props {
     onCancel: () => void;
 }
 
-export default function AddonEditor({ initial, creating, onSave, onCancel }: Props) {
+export default function AddonEditor({ initial, creating, onSave, onCancel }: Readonly<Props>) {
+    const [uid] = useState(() => `addon-editor-${++editorSeq}`);
     const [draft, setDraft] = useState<AddonsEntity>(() => clone(initial));
     const [versionRows, setVersionRows] = useState<VersionRow[]>(() => versionsToRows(initial.versions));
     const [busy, setBusy] = useState(false);
@@ -111,8 +115,11 @@ export default function AddonEditor({ initial, creating, onSave, onCancel }: Pro
         <div css={tw`grid gap-4 mt-4 pt-4 border-t border-gray-200`}>
             <div css={tw`grid gap-4`} style={{ gridTemplateColumns: '2fr 1fr' }}>
                 <div>
-                    <label style={labelStyle}>Name</label>
+                    <label htmlFor={`${uid}-name`} style={labelStyle}>
+                        Name
+                    </label>
                     <input
+                        id={`${uid}-name`}
                         type="text"
                         value={draft.name}
                         readOnly={!creating}
@@ -127,8 +134,10 @@ export default function AddonEditor({ initial, creating, onSave, onCancel }: Pro
                     )}
                 </div>
                 <div>
-                    <label style={labelStyle}>Type</label>
-                    <div css={tw`flex items-center gap-3 mt-2`}>
+                    <span id={`${uid}-type`} style={labelStyle}>
+                        Type
+                    </span>
+                    <div role="radiogroup" aria-labelledby={`${uid}-type`} css={tw`flex items-center gap-3 mt-2`}>
                         <label css={tw`inline-flex items-center gap-2 cursor-pointer`}>
                             <input
                                 type="radio"
@@ -151,8 +160,11 @@ export default function AddonEditor({ initial, creating, onSave, onCancel }: Pro
 
             <div css={tw`grid gap-4`} style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <div>
-                    <label style={labelStyle}>GitHub repo (owner/repo)</label>
+                    <label htmlFor={`${uid}-github`} style={labelStyle}>
+                        GitHub repo (owner/repo)
+                    </label>
                     <input
+                        id={`${uid}-github`}
                         type="text"
                         value={draft.github}
                         onChange={(e) => set('github', e.target.value as AddonsEntity['github'])}
@@ -161,8 +173,11 @@ export default function AddonEditor({ initial, creating, onSave, onCancel }: Pro
                     />
                 </div>
                 <div>
-                    <label style={labelStyle}>Jenkins / CI path</label>
+                    <label htmlFor={`${uid}-ci`} style={labelStyle}>
+                        Jenkins / CI path
+                    </label>
                     <input
+                        id={`${uid}-ci`}
                         type="text"
                         value={draft.ci}
                         onChange={(e) => set('ci', e.target.value)}
@@ -173,8 +188,11 @@ export default function AddonEditor({ initial, creating, onSave, onCancel }: Pro
             </div>
 
             <div>
-                <label style={labelStyle}>Description (Markdown)</label>
+                <label htmlFor={`${uid}-description`} style={labelStyle}>
+                    Description (Markdown)
+                </label>
                 <textarea
+                    id={`${uid}-description`}
                     value={draft.description}
                     onChange={(e) => set('description', e.target.value)}
                     rows={8}
@@ -263,8 +281,8 @@ export default function AddonEditor({ initial, creating, onSave, onCancel }: Pro
                 >
                     <div css={tw`font-semibold mb-1`}>Validation issues:</div>
                     <ul css={tw`list-disc list-inside space-y-0.5`}>
-                        {issues.map((s, i) => (
-                            <li key={i}>{s}</li>
+                        {issues.map((s) => (
+                            <li key={s}>{s}</li>
                         ))}
                     </ul>
                 </div>
@@ -299,7 +317,8 @@ export default function AddonEditor({ initial, creating, onSave, onCancel }: Pro
                     style={{ border: 'none', cursor: busy ? 'not-allowed' : 'pointer' }}
                 >
                     <FontAwesomeIcon icon={faSave} />
-                    {busy ? 'Saving…' : creating ? 'Create addon' : 'Save changes'}
+                    {busy && 'Saving…'}
+                    {!busy && (creating ? 'Create addon' : 'Save changes')}
                 </button>
             </div>
         </div>
@@ -328,8 +347,8 @@ function rowsToVersions(rows: VersionRow[]): Record<string, string> | undefined 
 }
 
 function compareMcVersion(a: string, b: string): number {
-    const pa = a.split('.').map((n) => parseInt(n, 10) || 0);
-    const pb = b.split('.').map((n) => parseInt(n, 10) || 0);
+    const pa = a.split('.').map((n) => Number.parseInt(n, 10) || 0);
+    const pb = b.split('.').map((n) => Number.parseInt(n, 10) || 0);
     const len = Math.max(pa.length, pb.length);
     for (let i = 0; i < len; i++) {
         const da = pa[i] ?? 0;

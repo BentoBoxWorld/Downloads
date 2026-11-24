@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import apiClass from '../api/api';
 import { ConfigObject } from '../config';
 
@@ -50,6 +50,7 @@ const config: ConfigObject = JSON.parse(
 );
 
 const api = new apiClass(config);
+api.start();
 
 (async () => {
     if (!envHasRealToken()) {

@@ -136,8 +136,20 @@ function daysAgo(n: number): string {
     return utcDay(Date.now() - n * 86400000);
 }
 
+/** 1759 → "1,759". For the non-negative integers the stats deal in. */
 function withCommas(n: number): string {
-    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const digits = String(n);
+    let out = '';
+    for (let i = 0; i < digits.length; i++) {
+        if (i > 0 && (digits.length - i) % 3 === 0) out += ',';
+        out += digits.charAt(i);
+    }
+    return out;
+}
+
+function mcRange(mc: { min: string; max: string } | null): string {
+    if (!mc) return 'latest';
+    return mc.min === mc.max ? mc.max : `${mc.min} – ${mc.max}`;
 }
 
 /**
@@ -154,7 +166,7 @@ export function niceCount(n: number): string {
 }
 
 function versionKey(v: string): number[] {
-    const m = v.match(/^\d+(?:\.\d+)*/);
+    const m = /^\d+(?:\.\d+)*/.exec(v);
     return m ? m[0].split('.').map(Number) : [];
 }
 
@@ -177,16 +189,62 @@ function rank(values: Record<string, { name: string; value: number }>): void {
     });
 }
 
+/** Peaks over the badge window from recent snapshot rows (everything but platform totals). */
+function summariseRecent(rows: SnapshotAttributes[]): Omit<PeakCache, 'platform'> {
+    const since = daysAgo(PEAK_WINDOW_DAYS - 1);
+    const today = utcDay(Date.now());
+    const addons: PeakCache['addons'] = {};
+    const gameModes: PeakCache['gameModes'] = {};
+    let rawServers: number | null = null;
+    let players: number | null = null;
+    let islands: number | null = null;
+    let createdSum = 0;
+    let createdDays = 0;
+
+    for (const r of rows) {
+        // islandsCreated: average of complete days only (exclude today's partial).
+        if (r.metric === 'islandsCreated') {
+            if (r.day < today) {
+                createdSum += r.value;
+                createdDays++;
+            }
+            continue;
+        }
+        if (r.day < since) continue;
+        const peak = (cur: number | null) => (cur === null ? r.value : Math.max(cur, r.value));
+        if (r.metric === 'servers') rawServers = peak(rawServers);
+        else if (r.metric === 'players') players = peak(players);
+        else if (r.metric === 'islands') islands = peak(islands);
+        else if (r.metric === 'addonServers') keepPeak(addons, r);
+        else if (r.metric === 'gameModeServers') keepPeak(gameModes, r);
+    }
+    rank(addons);
+    rank(gameModes);
+    return {
+        addons,
+        gameModes,
+        rawServers,
+        players,
+        islands,
+        islandsPerDay: createdDays > 0 ? Math.round(createdSum / createdDays) : null,
+    };
+}
+
+function keepPeak(map: PeakCache['addons'], r: SnapshotAttributes): void {
+    const k = norm(r.key);
+    if (!map[k] || map[k].value < r.value) map[k] = { name: r.key, value: r.value, rank: 0 };
+}
+
 // ── manager ──────────────────────────────────────────────────────────────────
 
 export class StatsManager {
-    private sequelize = new Sequelize('stats', 'user', 'password', {
+    private readonly sequelize = new Sequelize('stats', 'user', 'password', {
         host: 'localhost',
         dialect: 'sqlite',
         logging: false,
         storage: './../data/Stats.sqlite',
     });
-    private snapshots: SnapshotStatic = SnapshotFactory(this.sequelize);
+    private readonly snapshots: SnapshotStatic = SnapshotFactory(this.sequelize);
     private cache: PeakCache = {
         addons: {},
         gameModes: {},
@@ -265,7 +323,7 @@ export class StatsManager {
         const day = utcDay(Date.now());
         const rows: SnapshotAttributes[] = [];
         for (const e of res.data as { name?: unknown; data?: unknown }[]) {
-            const v = Array.isArray(e?.data) ? Number(e.data[0]) : NaN;
+            const v = Array.isArray(e?.data) ? Number(e.data[0]) : Number.NaN;
             if (typeof e?.name !== 'string' || !e.name || e.name.length > 64 || !Number.isFinite(v)) continue;
             rows.push({ day, metric, key: e.name, value: Math.round(v) });
         }
@@ -332,43 +390,14 @@ export class StatsManager {
     // ── derived numbers ──
 
     private async rebuildCache(): Promise<void> {
-        const since = daysAgo(PEAK_WINDOW_DAYS - 1);
-        const today = utcDay(Date.now());
         const rows = await this.snapshots.findAll({
             where: { day: { [Op.gte]: daysAgo(PEAK_WINDOW_DAYS) } },
         });
+        this.cache = { ...summariseRecent(rows), platform: await this.loadPlatformTotals() };
+    }
 
-        const addons: PeakCache['addons'] = {};
-        const gameModes: PeakCache['gameModes'] = {};
-        let rawServers: number | null = null;
-        let players: number | null = null;
-        let islands: number | null = null;
-        let createdSum = 0;
-        let createdDays = 0;
-
-        for (const r of rows) {
-            // islandsCreated: average of complete days only (exclude today's partial).
-            if (r.metric === 'islandsCreated') {
-                if (r.day < today) {
-                    createdSum += r.value;
-                    createdDays++;
-                }
-                continue;
-            }
-            if (r.day < since) continue;
-            const peak = (cur: number | null) => (cur === null ? r.value : Math.max(cur, r.value));
-            if (r.metric === 'servers') rawServers = peak(rawServers);
-            else if (r.metric === 'players') players = peak(players);
-            else if (r.metric === 'islands') islands = peak(islands);
-            else if (r.metric === 'addonServers' || r.metric === 'gameModeServers') {
-                const map = r.metric === 'addonServers' ? addons : gameModes;
-                const k = norm(r.key);
-                if (!map[k] || map[k].value < r.value) map[k] = { name: r.key, value: r.value, rank: 0 };
-            }
-        }
-        rank(addons);
-        rank(gameModes);
-
+    /** Latest cumulative platform download totals: metric → addon → downloads. */
+    private async loadPlatformTotals(): Promise<Record<string, DownloadCounts>> {
         // Platform totals are cumulative, so the all-time max is the latest value.
         const platform: Record<string, DownloadCounts> = {};
         const totals = (await this.snapshots.findAll({
@@ -381,16 +410,7 @@ export class StatsManager {
             if (!platform[t.metric]) platform[t.metric] = {};
             platform[t.metric][t.key] = Number(t.value);
         }
-
-        this.cache = {
-            addons,
-            gameModes,
-            rawServers,
-            players,
-            islands,
-            islandsPerDay: createdDays > 0 ? Math.round(createdSum / createdDays) : null,
-            platform,
-        };
+        return platform;
     }
 
     private findAddon(name: string): AddonsEntity | undefined {
@@ -401,7 +421,8 @@ export class StatsManager {
     addonStats(addon: AddonsEntity): AddonStats {
         const isCore = addon.name === 'BentoBox';
         const k = norm(addon.name);
-        const entry = isCore ? undefined : addon.gamemode ? this.cache.gameModes[k] : this.cache.addons[k];
+        let entry: PeakCache['addons'][string] | undefined;
+        if (!isCore) entry = addon.gamemode ? this.cache.gameModes[k] : this.cache.addons[k];
 
         let servers: number | null = entry ? entry.value : null;
         let share: number | null = null;
@@ -474,16 +495,14 @@ export class StatsManager {
     private addonBadge(s: AddonStats, metric: string): BadgeContent | null {
         const mc = (): BadgeContent => ({
             label: 'Minecraft',
-            message: s.mc ? (s.mc.min === s.mc.max ? s.mc.max : `${s.mc.min} – ${s.mc.max}`) : 'latest',
+            message: mcRange(s.mc),
         });
-        const servers = (): BadgeContent =>
-            s.servers !== null && s.servers >= MIN_SERVERS
-                ? {
-                      label: 'used on',
-                      // BentoBox's count is already bucketed by ServerStats.
-                      message: `${s.name === 'BentoBox' ? `${withCommas(s.servers)}+` : niceCount(s.servers)} servers`,
-                  }
-                : mc();
+        const servers = (): BadgeContent => {
+            if (s.servers === null || s.servers < MIN_SERVERS) return mc();
+            // BentoBox's count is already bucketed by ServerStats.
+            const count = s.name === 'BentoBox' ? withCommas(s.servers) + '+' : niceCount(s.servers);
+            return { label: 'used on', message: `${count} servers` };
+        };
         switch (metric) {
             case 'servers':
                 return servers();

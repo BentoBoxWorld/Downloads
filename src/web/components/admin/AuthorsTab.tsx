@@ -9,9 +9,9 @@ import {
     SessionUser,
 } from '../../ApiRequestManager';
 
-const DISCORD_ID_RE = /^[0-9]{15,25}$/;
+const DISCORD_ID_RE = /^\d{15,25}$/;
 
-export default function AuthorsTab({ user }: { user: SessionUser }) {
+export default function AuthorsTab({ user }: Readonly<{ user: SessionUser }>) {
     const [authors, setAuthors] = useState<BlogAuthorRow[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
@@ -163,7 +163,7 @@ export default function AuthorsTab({ user }: { user: SessionUser }) {
                         css={tw`flex-1 px-3 py-2 border border-gray-300 rounded text-sm`}
                         style={{ fontFamily: 'var(--bb-mono)' }}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleAdd();
+                            if (e.key === 'Enter') void handleAdd();
                         }}
                     />
                     <button

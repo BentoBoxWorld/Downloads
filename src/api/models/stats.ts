@@ -15,9 +15,8 @@ export interface SnapshotAttributes {
 
 export interface SnapshotModel extends Model<SnapshotAttributes>, SnapshotAttributes {}
 
-export type SnapshotStatic = typeof Model & {
-    new (values?: Record<string, unknown>, options?: BuildOptions): SnapshotModel;
-};
+export type SnapshotStatic = typeof Model &
+    (new (values?: Record<string, unknown>, options?: BuildOptions) => SnapshotModel);
 
 export function SnapshotFactory(sequelize: Sequelize): SnapshotStatic {
     return <SnapshotStatic>sequelize.define(

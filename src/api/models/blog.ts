@@ -23,9 +23,7 @@ export interface PostAttributes {
 
 export interface PostModel extends Model<PostAttributes>, PostAttributes {}
 
-export type PostStatic = typeof Model & {
-    new (values?: Record<string, unknown>, options?: BuildOptions): PostModel;
-};
+export type PostStatic = typeof Model & (new (values?: Record<string, unknown>, options?: BuildOptions) => PostModel);
 
 export function PostFactory(sequelize: Sequelize): PostStatic {
     return <PostStatic>sequelize.define(
@@ -74,9 +72,8 @@ export interface PostRevisionAttributes {
 
 export interface PostRevisionModel extends Model<PostRevisionAttributes>, PostRevisionAttributes {}
 
-export type PostRevisionStatic = typeof Model & {
-    new (values?: Record<string, unknown>, options?: BuildOptions): PostRevisionModel;
-};
+export type PostRevisionStatic = typeof Model &
+    (new (values?: Record<string, unknown>, options?: BuildOptions) => PostRevisionModel);
 
 export function PostRevisionFactory(sequelize: Sequelize): PostRevisionStatic {
     return <PostRevisionStatic>sequelize.define(

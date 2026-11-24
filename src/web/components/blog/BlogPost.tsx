@@ -18,7 +18,7 @@ export default function BlogPost() {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
         link.href = '/blog/highlight.css';
-        link.setAttribute('data-blog-hljs', '');
+        link.dataset.blogHljs = '';
         document.head.appendChild(link);
     }, []);
 

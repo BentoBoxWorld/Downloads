@@ -173,21 +173,27 @@ export default function SubmitPage(): JSX.Element {
             .catch(() => setCatalog(null));
     }, []);
 
-    return (
-        <div style={{ minHeight: '100vh', background: 'var(--bp-paper-2)' }}>
-            {user === undefined ? (
-                <Loading />
-            ) : user === null ? (
-                <LoginGate />
-            ) : (
-                <SubmitForm
-                    user={user}
-                    catalog={catalog}
-                    onLogout={() => setUser(null)}
-                />
-            )}
-        </div>
-    );
+    let body: JSX.Element;
+    if (user === undefined) body = <Loading />;
+    else if (user === null) body = <LoginGate />;
+    else body = <SubmitForm user={user} catalog={catalog} onLogout={() => setUser(null)} />;
+
+    return <div style={{ minHeight: '100vh', background: 'var(--bp-paper-2)' }}>{body}</div>;
+}
+
+interface StepState {
+    done: boolean;
+    active: boolean;
+}
+
+function stepNumberColor(s: StepState): string {
+    if (s.done) return '#06121f';
+    return s.active ? 'var(--bp-accent)' : 'var(--bp-ink-soft)';
+}
+
+function stepLabelColor(s: StepState): string {
+    if (s.active) return '#fff';
+    return s.done ? 'var(--bp-ink)' : 'var(--bp-ink-soft)';
 }
 
 function Loading(): JSX.Element {
@@ -290,13 +296,13 @@ function SubmitHero({
     signedIn,
     user,
     onLogout,
-}: {
+}: Readonly<{
     step: 1 | 2 | 3;
     hasFile: boolean;
     signedIn: boolean;
     user?: SessionUser;
     onLogout?: () => void;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <section
             className="bp-paper with-grid"
@@ -518,17 +524,9 @@ function SubmitHero({
                                         borderRadius: '50%',
                                         background: s.done ? 'var(--bp-accent)' : 'transparent',
                                         border: `1px solid ${
-                                            s.done
-                                                ? 'var(--bp-accent)'
-                                                : s.active
-                                                ? 'var(--bp-accent)'
-                                                : 'var(--bp-line-strong)'
+                                            s.done || s.active ? 'var(--bp-accent)' : 'var(--bp-line-strong)'
                                         }`,
-                                        color: s.done
-                                            ? '#06121f'
-                                            : s.active
-                                            ? 'var(--bp-accent)'
-                                            : 'var(--bp-ink-soft)',
+                                        color: stepNumberColor(s),
                                         display: 'grid',
                                         placeItems: 'center',
                                         fontFamily: 'var(--bb-mono)',
@@ -551,11 +549,7 @@ function SubmitHero({
                                         fontFamily: 'var(--bb-mono)',
                                         textTransform: 'uppercase',
                                         letterSpacing: '0.12em',
-                                        color: s.active
-                                            ? '#fff'
-                                            : s.done
-                                            ? 'var(--bp-ink)'
-                                            : 'var(--bp-ink-soft)',
+                                        color: stepLabelColor(s),
                                         fontWeight: s.active ? 600 : 500,
                                     }}
                                 >
@@ -586,11 +580,11 @@ function SubmitForm({
     user,
     catalog,
     onLogout,
-}: {
+}: Readonly<{
     user: SessionUser;
     catalog: BlueprintCatalog | null;
     onLogout: () => void;
-}): JSX.Element {
+}>): JSX.Element {
     const [dropped, setDropped] = useState<DroppedFile | null>(null);
     const [dropError, setDropError] = useState<string | null>(null);
 
@@ -615,7 +609,7 @@ function SubmitForm({
                   ]),
               ]
             : [];
-        return fromCatalog.sort();
+        return fromCatalog.sort((a, b) => a.localeCompare(b));
     }, [catalog]);
 
     const tagColors = useMemo(() => {
@@ -893,7 +887,7 @@ function SubmitForm({
                                         height: 1,
                                         background: 'var(--bp-line-strong)',
                                     }}
-                                />
+                                />{' '}
                                 Metadata
                             </div>
 
@@ -1251,11 +1245,11 @@ function FieldLabel({
     children,
     hint,
     required,
-}: {
+}: Readonly<{
     children: React.ReactNode;
     hint?: string;
     required?: boolean;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <div
             style={{
@@ -1331,10 +1325,10 @@ function bpSelectStyle(): React.CSSProperties {
 function HelpText({
     children,
     tone = 'soft',
-}: {
+}: Readonly<{
     children: React.ReactNode;
     tone?: 'soft' | 'error';
-}): JSX.Element {
+}>): JSX.Element {
     const color = tone === 'error' ? 'var(--bb-rose)' : 'var(--bp-ink-soft)';
     return (
         <div style={{ fontSize: 12, color, marginTop: 6, lineHeight: 1.45 }}>
@@ -1350,12 +1344,12 @@ function FileReceipt({
     summary,
     derivedSlug,
     onReplace,
-}: {
+}: Readonly<{
     file: File;
     summary: ParsedSummary;
     derivedSlug: string;
     onReplace: () => void;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <div
             style={{
@@ -1505,13 +1499,13 @@ function SpecCell({
     mono,
     accent,
     last,
-}: {
+}: Readonly<{
     label: string;
     value: string;
     mono?: boolean;
     accent?: boolean;
     last?: boolean;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <div
             style={{
@@ -1546,7 +1540,7 @@ function SpecCell({
 
 /* ── Empty drop ────────────────────────────────────────────────── */
 
-function EmptyDrop({ onAccept }: { onAccept: (f: File) => void }): JSX.Element {
+function EmptyDrop({ onAccept }: Readonly<{ onAccept: (f: File) => void }>): JSX.Element {
     const [drag, setDrag] = useState(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
     return (
@@ -1663,12 +1657,12 @@ function GameModePicker({
     onChange,
     options,
     catalog,
-}: {
+}: Readonly<{
     value: string;
     onChange: (v: string) => void;
     options: string[];
     catalog: BlueprintCatalog | null;
-}): JSX.Element {
+}>): JSX.Element {
     const list = options.length ? options : Object.keys(GM_SWATCH);
     return (
         <div
@@ -1759,17 +1753,15 @@ function GameModePicker({
 function DescriptionField({
     value,
     onChange,
-}: {
+}: Readonly<{
     value: string;
     onChange: (v: string) => void;
-}): JSX.Element {
+}>): JSX.Element {
     const lines = value.split('\n').length;
     const overflow = lines > MAX_DESCRIPTION_LINES;
-    const counterColor = overflow
-        ? 'var(--bb-rose)'
-        : lines >= MAX_DESCRIPTION_LINES - 1
-        ? 'var(--bp-accent)'
-        : 'var(--bp-ink-soft)';
+    let counterColor = 'var(--bp-ink-soft)';
+    if (overflow) counterColor = 'var(--bb-rose)';
+    else if (lines >= MAX_DESCRIPTION_LINES - 1) counterColor = 'var(--bp-accent)';
     return (
         <div>
             <textarea
@@ -1817,11 +1809,11 @@ function TagsField({
     tags,
     onChange,
     tagColors,
-}: {
+}: Readonly<{
     tags: string[];
     onChange: (t: string[]) => void;
     tagColors: Record<string, string>;
-}): JSX.Element {
+}>): JSX.Element {
     const [draft, setDraft] = useState('');
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1838,7 +1830,10 @@ function TagsField({
 
     return (
         <div>
+            {/* Mouse convenience only: clicking the box focuses the text input,
+                which keyboard users reach directly with Tab. */}
             <div
+                role="presentation"
                 onClick={() => inputRef.current?.focus()}
                 style={{
                     ...bpInputStyle(),
@@ -1982,7 +1977,7 @@ function PreviewBlueprintCard({
     summary,
     voxels,
     tagColors,
-}: {
+}: Readonly<{
     displayName: string;
     gameMode: string;
     author: string;
@@ -1993,13 +1988,15 @@ function PreviewBlueprintCard({
     summary: ParsedSummary | null;
     voxels: RealVoxel[];
     tagColors: Record<string, string>;
-}): JSX.Element {
+}>): JSX.Element {
     const dim = summary?.dim || { x: 0, y: 0, z: 0 };
     const blocks = summary?.blocks ?? 0;
     const entities = summary?.entities ?? 0;
     const variant: Variant =
-        summary && summary.dim.x ? variantFor(summary.dim) : 'island';
-    const sizeBucket = blocks > 1500 ? 'Large' : blocks > 400 ? 'Medium' : 'Small';
+        summary?.dim.x ? variantFor(summary.dim) : 'island';
+    let sizeBucket = 'Small';
+    if (blocks > 1500) sizeBucket = 'Large';
+    else if (blocks > 400) sizeBucket = 'Medium';
 
     return (
         <div
@@ -2040,7 +2037,7 @@ function PreviewBlueprintCard({
                         borderRadius: '50%',
                         background: 'var(--bp-accent)',
                     }}
-                />
+                />{' '}
                 Live preview
             </div>
 
@@ -2089,20 +2086,11 @@ function PreviewBlueprintCard({
                         zIndex: 1,
                     }}
                 >
-                    {voxels.length > 0 ? (
-                        <BlueprintVoxels
-                            voxels={voxels}
-                            width={260}
-                            height={150}
-                        />
-                    ) : summary ? (
-                        <VoxelStack
-                            topBlocks={summary.topBlocks}
-                            variant={variant}
-                            width={260}
-                            height={150}
-                        />
-                    ) : (
+                    {voxels.length > 0 && <BlueprintVoxels voxels={voxels} width={260} height={150} />}
+                    {voxels.length === 0 && summary && (
+                        <VoxelStack topBlocks={summary.topBlocks} variant={variant} width={260} height={150} />
+                    )}
+                    {voxels.length === 0 && !summary && (
                         <div
                             style={{
                                 fontFamily: 'var(--bb-mono)',
@@ -2274,10 +2262,10 @@ function PreviewBlueprintCard({
 function PreviewStat({
     label,
     value,
-}: {
+}: Readonly<{
     label: string;
     value: string;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <div>
             <div
@@ -2308,10 +2296,10 @@ function PreviewStat({
 function Checklist({
     done,
     items,
-}: {
+}: Readonly<{
     done: number;
     items: { ok: boolean; label: string }[];
-}): JSX.Element {
+}>): JSX.Element {
     const total = items.length;
     return (
         <div
@@ -2362,9 +2350,9 @@ function Checklist({
                     gap: 6,
                 }}
             >
-                {items.map((it, i) => (
+                {items.map((it) => (
                     <li
-                        key={i}
+                        key={it.label}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -2408,10 +2396,10 @@ function Checklist({
 function SuccessState({
     prUrl,
     onAnother,
-}: {
+}: Readonly<{
     prUrl: string;
     onAnother: () => void;
-}): JSX.Element {
+}>): JSX.Element {
     return (
         <>
             <SubmitHero step={3} hasFile signedIn={false} />

@@ -9,6 +9,11 @@ import {
     SessionUser,
 } from '../ApiRequestManager';
 
+function termsStatus(accepted: string | null | undefined, current: string | null | undefined): string {
+    if (!accepted) return 'not yet';
+    return accepted === current ? `${accepted} (current)` : `${accepted} (out of date)`;
+}
+
 export default function AccountPage() {
     const [user, setUser] = useState<SessionUser | null | undefined>(undefined);
     const [submissions, setSubmissions] = useState<MySubmission[] | null>(null);
@@ -17,12 +22,23 @@ export default function AccountPage() {
     const [deleted, setDeleted] = useState(false);
 
     useEffect(() => {
-        GetMe()
-            .then((u) => {
-                setUser(u);
-                if (u) GetMySubmissions().then(setSubmissions).catch(() => setSubmissions([]));
-            })
-            .catch(() => setUser(null));
+        const load = async () => {
+            let u: SessionUser | null;
+            try {
+                u = await GetMe();
+            } catch {
+                setUser(null);
+                return;
+            }
+            setUser(u);
+            if (!u) return;
+            try {
+                setSubmissions(await GetMySubmissions());
+            } catch {
+                setSubmissions([]);
+            }
+        };
+        void load();
     }, []);
 
     if (deleted) {
@@ -77,12 +93,7 @@ export default function AccountPage() {
                     <div css={tw`font-semibold`}>{user.globalName || user.username}</div>
                     <div css={tw`text-xs text-gray-500`}>Discord ID: {user.id}</div>
                     <div css={tw`text-xs text-gray-500`}>
-                        Terms accepted:{' '}
-                        {user.acceptedTermsVersion
-                            ? user.acceptedTermsVersion === user.currentTermsVersion
-                                ? `${user.acceptedTermsVersion} (current)`
-                                : `${user.acceptedTermsVersion} (out of date)`
-                            : 'not yet'}
+                        Terms accepted: {termsStatus(user.acceptedTermsVersion, user.currentTermsVersion)}
                     </div>
                 </div>
                 <button
@@ -97,13 +108,11 @@ export default function AccountPage() {
             <div css={tw`bg-white rounded-md shadow-sm p-4 mb-4`}>
                 <h3 css={tw`font-semibold mb-2`}>Your submissions</h3>
                 {submissions === null && <div css={tw`text-sm text-gray-500`}>Loading…</div>}
-                {submissions && submissions.length === 0 && (
-                    <div css={tw`text-sm text-gray-500`}>No submissions yet.</div>
-                )}
+                {submissions?.length === 0 && <div css={tw`text-sm text-gray-500`}>No submissions yet.</div>}
                 {submissions && submissions.length > 0 && (
                     <ul css={tw`text-sm space-y-1`}>
-                        {submissions.map((s, i) => (
-                            <li key={i}>
+                        {submissions.map((s) => (
+                            <li key={`${s.gameMode}/${s.name}@${s.createdAt}`}>
                                 <a href={s.prUrl} target="_blank" rel="noreferrer" css={tw`text-blue-700 underline`}>
                                     {s.gameMode}/{s.name}
                                 </a>{' '}

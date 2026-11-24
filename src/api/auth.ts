@@ -1,5 +1,5 @@
-import { Request, RequestHandler, Response } from 'express';
-import * as crypto from 'crypto';
+import { Request, RequestHandler } from 'express';
+import * as crypto from 'node:crypto';
 import * as cron from 'node-cron';
 import { BOOLEAN, Op, Sequelize } from 'sequelize';
 import axios from 'axios';
@@ -55,12 +55,18 @@ export class AuthManager {
     private readonly users: UserStatic;
     private readonly sessions: SessionStatic;
     readonly submissions: SubmissionStatic;
+    private readonly sequelize: Sequelize;
 
     constructor(private readonly config: AuthConfig | null, sequelize: Sequelize) {
         this.users = UserFactory(sequelize);
         this.sessions = SessionFactory(sequelize);
         this.submissions = SubmissionFactory(sequelize);
-        this.bootstrap(sequelize).catch((err) => console.error('[auth] bootstrap failed:', err));
+        this.sequelize = sequelize;
+    }
+
+    /** Sync tables and schedule housekeeping. Call once, right after construction. */
+    start(): void {
+        this.bootstrap(this.sequelize).catch((err) => console.error('[auth] bootstrap failed:', err));
 
         // Daily prune of expired sessions.
         cron.schedule('0 4 * * *', () => this.pruneExpiredSessions());
@@ -270,8 +276,8 @@ export class AuthManager {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             identity = me.data;
-        } catch (err) {
-            // Deliberately do not log err.config or err.response.data — token may be in there.
+        } catch {
+            // Deliberately do not log the error: its config/response data may contain the token.
             console.error('[auth] Discord token exchange failed');
             res.status(502).send('Could not complete Discord login. Please try again.');
             return;
@@ -431,7 +437,7 @@ export class AuthManager {
             return;
         }
         const user = await this.users.findByPk(session.userId);
-        if (!user || !user.isAdmin) {
+        if (!user?.isAdmin) {
             res.status(403).json({ error: 'forbidden' });
             return;
         }
@@ -459,9 +465,9 @@ export class AuthManager {
     // and by Discord user-id for submissions. Map entries are pruned lazily
     // on read, so memory stays bounded by active actors.
 
-    private callbackHits = new Map<string, number[]>();
-    private static CALLBACK_WINDOW_MS = 60_000;
-    private static CALLBACK_LIMIT = 30;
+    private readonly callbackHits = new Map<string, number[]>();
+    private static readonly CALLBACK_WINDOW_MS = 60_000;
+    private static readonly CALLBACK_LIMIT = 30;
 
     callbackRateLimit: RequestHandler = (req, res, next) => {
         const ip = (req.ip || req.socket.remoteAddress || 'unknown').toString();
@@ -476,11 +482,11 @@ export class AuthManager {
         next();
     };
 
-    private submissionHits = new Map<string, number[]>();
-    private static SUBMISSION_HOUR_MS = 60 * 60 * 1000;
-    private static SUBMISSION_DAY_MS = 24 * 60 * 60 * 1000;
-    private static SUBMISSION_PER_HOUR = 3;
-    private static SUBMISSION_PER_DAY = 10;
+    private readonly submissionHits = new Map<string, number[]>();
+    private static readonly SUBMISSION_HOUR_MS = 60 * 60 * 1000;
+    private static readonly SUBMISSION_DAY_MS = 24 * 60 * 60 * 1000;
+    private static readonly SUBMISSION_PER_HOUR = 3;
+    private static readonly SUBMISSION_PER_DAY = 10;
 
     consumeSubmissionQuota(userId: string): { ok: true } | { ok: false; reason: string } {
         const now = Date.now();
@@ -505,7 +511,7 @@ export class AuthManager {
         await this.users.update({ acceptedTermsVersion: version }, { where: { id: userId } });
     }
 
-    async findUser(userId: string) {
+    findUser(userId: string) {
         return this.users.findByPk(userId);
     }
 
