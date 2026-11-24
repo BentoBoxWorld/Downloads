@@ -189,6 +189,52 @@ function rank(values: Record<string, { name: string; value: number }>): void {
     });
 }
 
+/** Peaks over the badge window from recent snapshot rows (everything but platform totals). */
+function summariseRecent(rows: SnapshotAttributes[]): Omit<PeakCache, 'platform'> {
+    const since = daysAgo(PEAK_WINDOW_DAYS - 1);
+    const today = utcDay(Date.now());
+    const addons: PeakCache['addons'] = {};
+    const gameModes: PeakCache['gameModes'] = {};
+    let rawServers: number | null = null;
+    let players: number | null = null;
+    let islands: number | null = null;
+    let createdSum = 0;
+    let createdDays = 0;
+
+    for (const r of rows) {
+        // islandsCreated: average of complete days only (exclude today's partial).
+        if (r.metric === 'islandsCreated') {
+            if (r.day < today) {
+                createdSum += r.value;
+                createdDays++;
+            }
+            continue;
+        }
+        if (r.day < since) continue;
+        const peak = (cur: number | null) => (cur === null ? r.value : Math.max(cur, r.value));
+        if (r.metric === 'servers') rawServers = peak(rawServers);
+        else if (r.metric === 'players') players = peak(players);
+        else if (r.metric === 'islands') islands = peak(islands);
+        else if (r.metric === 'addonServers') keepPeak(addons, r);
+        else if (r.metric === 'gameModeServers') keepPeak(gameModes, r);
+    }
+    rank(addons);
+    rank(gameModes);
+    return {
+        addons,
+        gameModes,
+        rawServers,
+        players,
+        islands,
+        islandsPerDay: createdDays > 0 ? Math.round(createdSum / createdDays) : null,
+    };
+}
+
+function keepPeak(map: PeakCache['addons'], r: SnapshotAttributes): void {
+    const k = norm(r.key);
+    if (!map[k] || map[k].value < r.value) map[k] = { name: r.key, value: r.value, rank: 0 };
+}
+
 // ── manager ──────────────────────────────────────────────────────────────────
 
 export class StatsManager {
@@ -344,43 +390,14 @@ export class StatsManager {
     // ── derived numbers ──
 
     private async rebuildCache(): Promise<void> {
-        const since = daysAgo(PEAK_WINDOW_DAYS - 1);
-        const today = utcDay(Date.now());
         const rows = await this.snapshots.findAll({
             where: { day: { [Op.gte]: daysAgo(PEAK_WINDOW_DAYS) } },
         });
+        this.cache = { ...summariseRecent(rows), platform: await this.loadPlatformTotals() };
+    }
 
-        const addons: PeakCache['addons'] = {};
-        const gameModes: PeakCache['gameModes'] = {};
-        let rawServers: number | null = null;
-        let players: number | null = null;
-        let islands: number | null = null;
-        let createdSum = 0;
-        let createdDays = 0;
-
-        for (const r of rows) {
-            // islandsCreated: average of complete days only (exclude today's partial).
-            if (r.metric === 'islandsCreated') {
-                if (r.day < today) {
-                    createdSum += r.value;
-                    createdDays++;
-                }
-                continue;
-            }
-            if (r.day < since) continue;
-            const peak = (cur: number | null) => (cur === null ? r.value : Math.max(cur, r.value));
-            if (r.metric === 'servers') rawServers = peak(rawServers);
-            else if (r.metric === 'players') players = peak(players);
-            else if (r.metric === 'islands') islands = peak(islands);
-            else if (r.metric === 'addonServers' || r.metric === 'gameModeServers') {
-                const map = r.metric === 'addonServers' ? addons : gameModes;
-                const k = norm(r.key);
-                if (!map[k] || map[k].value < r.value) map[k] = { name: r.key, value: r.value, rank: 0 };
-            }
-        }
-        rank(addons);
-        rank(gameModes);
-
+    /** Latest cumulative platform download totals: metric → addon → downloads. */
+    private async loadPlatformTotals(): Promise<Record<string, DownloadCounts>> {
         // Platform totals are cumulative, so the all-time max is the latest value.
         const platform: Record<string, DownloadCounts> = {};
         const totals = (await this.snapshots.findAll({
@@ -393,16 +410,7 @@ export class StatsManager {
             if (!platform[t.metric]) platform[t.metric] = {};
             platform[t.metric][t.key] = Number(t.value);
         }
-
-        this.cache = {
-            addons,
-            gameModes,
-            rawServers,
-            players,
-            islands,
-            islandsPerDay: createdDays > 0 ? Math.round(createdSum / createdDays) : null,
-            platform,
-        };
+        return platform;
     }
 
     private findAddon(name: string): AddonsEntity | undefined {

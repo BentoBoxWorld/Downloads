@@ -37,6 +37,21 @@ try {
     fs.mkdirSync('./../data', { recursive: true });
 } catch (e) {}
 
+/**
+ * Pick the plugin JAR from a release's assets: the only asset if there is
+ * one, otherwise the last one named like `Name-1.2.3[-SNAPSHOT-b45].jar`.
+ */
+function pickJarAsset<T extends { name: string }>(assets: T[]): T | undefined {
+    if (assets.length === 1) return assets[0];
+    let picked: T | undefined;
+    for (const asset of assets) {
+        if (asset.name.toLowerCase().match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`)) {
+            picked = asset;
+        }
+    }
+    return picked;
+}
+
 export default class ApiManager {
     config: ConfigObject;
     addons: AddonType[] = [];
@@ -186,30 +201,35 @@ export default class ApiManager {
             this.refreshBlueprints().catch(logErr('blueprints'));
             const addons = this.config.addons;
             if (addons.length === 0) return;
-            if (this.pendingAssets.length > 0) {
-                for (let i = 0; i < Math.min(this.pendingAssets.length, this.repeats); i++) {
-                    const addon = this.pendingAssets.shift() as AddonsEntity;
-                    this.updateAsset(addon).catch(logErr(addon.name));
-                }
-            } else if (this.pendingOldVersions.length > 0) {
-                for (let i = 0; i < Math.min(this.pendingOldVersions.length, this.repeats); i++) {
-                    const pending = this.pendingOldVersions.shift() as { addon: string; version: string };
-                    this.downloadOldVersion(pending).catch(logErr(pending.addon));
-                }
-            } else {
-                for (let i = 0; i < this.repeats; i++) {
-                    // Re-check the bound each pass: the list can shrink under us.
-                    if (this.updateAddon >= addons.length) this.updateAddon = 0;
-                    const addon = addons[this.updateAddon++];
-                    this.updateAsset(addon).catch(logErr(addon.name));
-                }
-            }
+            this.pollReleases(addons, logErr);
             for (let i = 0; i < 4; i++) {
                 if (this.updateCiAddon >= addons.length) this.updateCiAddon = 0;
                 const addon = addons[this.updateCiAddon++];
                 this.updateJenkins(addon).catch(logErr(addon.name));
             }
         });
+    }
+
+    /** One cron tick of GitHub release work: backlog first, then the round-robin refresh. */
+    private pollReleases(addons: AddonsEntity[], logErr: (name: string) => (e: unknown) => void): void {
+        if (this.pendingAssets.length > 0) {
+            for (let i = 0; i < Math.min(this.pendingAssets.length, this.repeats); i++) {
+                const addon = this.pendingAssets.shift() as AddonsEntity;
+                this.updateAsset(addon).catch(logErr(addon.name));
+            }
+        } else if (this.pendingOldVersions.length > 0) {
+            for (let i = 0; i < Math.min(this.pendingOldVersions.length, this.repeats); i++) {
+                const pending = this.pendingOldVersions.shift() as { addon: string; version: string };
+                this.downloadOldVersion(pending).catch(logErr(pending.addon));
+            }
+        } else {
+            for (let i = 0; i < this.repeats; i++) {
+                // Re-check the bound each pass: the list can shrink under us.
+                if (this.updateAddon >= addons.length) this.updateAddon = 0;
+                const addon = addons[this.updateAddon++];
+                this.updateAsset(addon).catch(logErr(addon.name));
+            }
+        }
     }
 
     /**
@@ -219,33 +239,37 @@ export default class ApiManager {
      */
     private async refreshWorkQueues(): Promise<void> {
         await this.cachesReady;
-        for (const addon of this.config.addons) {
-            if (addon.name !== 'BentoBox') {
-                const counted: DownloadCountModel | null = await this.downloadCount.findOne({
-                    where: { name: addon.name },
-                });
-                if (counted === null) {
-                    await this.downloadCount.create({ name: addon.name, downloads: 0 });
-                }
-            }
-            if (!this.checkedAssets.has(addon.name)) {
-                this.checkedAssets.add(addon.name);
-                const cached: DatabaseModel | null = await this.jarCache.findOne({
-                    where: { name: addon.name },
-                });
-                if (cached === null) this.pendingAssets.push(addon);
-            }
-            for (const version of Object.values(addon.versions || {})) {
-                const key = `${addon.name}@${version}`;
-                if (this.checkedOldVersions.has(key)) continue;
-                this.checkedOldVersions.add(key);
-                const have = await this.oldVersionCache
-                    .findAll({ where: { name: addon.name, version } })
-                    .then((r) => r && r.length > 0);
-                if (!have) this.pendingOldVersions.push({ addon: addon.name, version });
+        // Sequential on purpose: SQLite, and the backlog order follows config order.
+        for (const addon of this.config.addons) await this.queueAddon(addon);
+        await this.generateDownloads();
+    }
+
+    /** Ensure one addon has a download counter, and queue any JAR it is missing. */
+    private async queueAddon(addon: AddonsEntity): Promise<void> {
+        if (addon.name !== 'BentoBox') {
+            const counted: DownloadCountModel | null = await this.downloadCount.findOne({
+                where: { name: addon.name },
+            });
+            if (counted === null) {
+                await this.downloadCount.create({ name: addon.name, downloads: 0 });
             }
         }
-        await this.generateDownloads();
+        if (!this.checkedAssets.has(addon.name)) {
+            this.checkedAssets.add(addon.name);
+            const cached: DatabaseModel | null = await this.jarCache.findOne({
+                where: { name: addon.name },
+            });
+            if (cached === null) this.pendingAssets.push(addon);
+        }
+        for (const version of Object.values(addon.versions || {})) {
+            const key = `${addon.name}@${version}`;
+            if (this.checkedOldVersions.has(key)) continue;
+            this.checkedOldVersions.add(key);
+            const have = await this.oldVersionCache
+                .findAll({ where: { name: addon.name, version } })
+                .then((r) => r && r.length > 0);
+            if (!have) this.pendingOldVersions.push({ addon: addon.name, version });
+        }
     }
 
     private async rebuildAddons(): Promise<void> {
@@ -499,19 +523,7 @@ export default class ApiManager {
             repo: addon.github.split('/')[1],
             release_id: latestRelease.data.id,
         });
-        let assetURL;
-        if (releaseFiles.data.length === 0) {
-            return;
-        } else if (releaseFiles.data.length === 1) {
-            assetURL = releaseFiles.data[0];
-        } else {
-            for (const file of releaseFiles.data) {
-                if (!file.name.toLowerCase().match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`))
-                    continue;
-                assetURL = file;
-            }
-            if (!assetURL) return;
-        }
+        const assetURL = pickJarAsset(releaseFiles.data);
         if (!assetURL) return;
         const asset = await this.octokit.rest.repos.getReleaseAsset({
             owner: addon.github.split('/')[0],
@@ -892,19 +904,7 @@ export default class ApiManager {
             release_id: release.data.id,
         });
 
-        let assetURL;
-        if (releaseFiles.data.length === 0) {
-            return;
-        } else if (releaseFiles.data.length === 1) {
-            assetURL = releaseFiles.data[0];
-        } else {
-            for (const file of releaseFiles.data) {
-                if (!file.name.toLowerCase().match(`[a-zA-Z]{3,20}-[0-9.]{1,10}(?:-snapshot-b[0-9]{0,20})?.jar`))
-                    continue;
-                assetURL = file;
-            }
-            if (!assetURL) return;
-        }
+        const assetURL = pickJarAsset(releaseFiles.data);
         if (!assetURL) return;
         const asset = await this.octokit.rest.repos.getReleaseAsset({
             owner: addon.github.split('/')[0],

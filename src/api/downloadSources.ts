@@ -125,6 +125,28 @@ export async function fetchHangar(addons: AddonsEntity[]): Promise<DownloadCount
  * counting the projects we already know about.
  */
 export async function fetchCurseforge(apiKey: string, addons: AddonsEntity[]): Promise<DownloadCounts> {
+    const ids = await discoverCurseforgeIds(addons);
+    const repos = byRepo(addons);
+    const out: DownloadCounts = {};
+    const matched: number[] = [];
+    // Sequential batches: keeps us well inside CurseForge's rate limits.
+    for (let i = 0; i < ids.length; i += 100) {
+        const mods = await fetchCurseforgeMods(apiKey, ids.slice(i, i + 100));
+        for (const m of mods) {
+            const name = repos[repoKey(m?.links?.sourceUrl) ?? ''];
+            const n = Number(m?.downloadCount);
+            if (name && Number.isFinite(n) && typeof m.id === 'number') {
+                out[name] = (out[name] ?? 0) + n;
+                matched.push(m.id);
+            }
+        }
+    }
+    saveCurseforgeIds(matched);
+    return out;
+}
+
+/** Candidate project IDs: saved matches plus every ServerMods search hit for our names. */
+async function discoverCurseforgeIds(addons: AddonsEntity[]): Promise<number[]> {
     const known = loadCurseforgeIds();
     const ids: Record<string, boolean> = {};
     for (const id of known) ids[id] = true;
@@ -136,57 +158,54 @@ export async function fetchCurseforge(apiKey: string, addons: AddonsEntity[]): P
         }
     }
     let searched = 0;
+    // Sequential on purpose: ~40 small requests to a legacy public endpoint.
     for (const term of terms) {
-        try {
-            const res = await axios.get(SERVERMODS_SEARCH, {
-                params: { search: term },
-                headers: { 'User-Agent': USER_AGENT },
-                timeout: 30000,
-            });
-            if (Array.isArray(res.data)) {
-                for (const p of res.data as { id?: unknown }[]) if (typeof p?.id === 'number') ids[p.id] = true;
-                searched++;
-            }
-        } catch {
-            /* one failed term just narrows discovery */
-        }
+        const hits = await searchServerMods(term);
+        if (hits === null) continue;
+        for (const id of hits) ids[id] = true;
+        searched++;
     }
     if (searched === 0)
         console.warn(`[stats] ServerMods search unavailable; using ${known.length} saved CurseForge IDs`);
+    return Object.keys(ids).map(Number);
+}
 
-    const repos = byRepo(addons);
-    const out: DownloadCounts = {};
-    const matched: number[] = [];
-    const all = Object.keys(ids).map(Number);
-    for (let i = 0; i < all.length; i += 100) {
-        const res = await axios
-            .post(
-                'https://api.curseforge.com/v1/mods',
-                { modIds: all.slice(i, i + 100) },
-                { headers: { 'x-api-key': apiKey, Accept: 'application/json' }, timeout: 30000 },
-            )
-            .catch((e) => {
-                if (e?.response?.status === 403) {
-                    throw new Error(
-                        'key rejected (403) — curseforge_api_key must be a Core API key from ' +
-                            'console.curseforge.com, not the author upload token',
-                    );
-                }
-                throw e;
-            });
-        const mods = res.data?.data;
-        if (!Array.isArray(mods)) throw new Error('unexpected CurseForge response');
-        for (const m of mods as { id?: unknown; downloadCount?: unknown; links?: { sourceUrl?: unknown } }[]) {
-            const name = repos[repoKey(m?.links?.sourceUrl) ?? ''];
-            const n = Number(m?.downloadCount);
-            if (name && Number.isFinite(n) && typeof m.id === 'number') {
-                out[name] = (out[name] ?? 0) + n;
-                matched.push(m.id);
-            }
-        }
+/** Project IDs matching one search term, or null if the search failed. */
+async function searchServerMods(term: string): Promise<number[] | null> {
+    try {
+        const res = await axios.get(SERVERMODS_SEARCH, {
+            params: { search: term },
+            headers: { 'User-Agent': USER_AGENT },
+            timeout: 30000,
+        });
+        if (!Array.isArray(res.data)) return null;
+        return (res.data as { id?: unknown }[]).map((p) => p?.id).filter((id): id is number => typeof id === 'number');
+    } catch {
+        return null; // one failed term just narrows discovery
     }
-    saveCurseforgeIds(matched);
-    return out;
+}
+
+type CurseforgeMod = { id?: unknown; downloadCount?: unknown; links?: { sourceUrl?: unknown } };
+
+async function fetchCurseforgeMods(apiKey: string, modIds: number[]): Promise<CurseforgeMod[]> {
+    const res = await axios
+        .post(
+            'https://api.curseforge.com/v1/mods',
+            { modIds },
+            { headers: { 'x-api-key': apiKey, Accept: 'application/json' }, timeout: 30000 },
+        )
+        .catch((e) => {
+            if (e?.response?.status === 403) {
+                throw new Error(
+                    'key rejected (403) — curseforge_api_key must be a Core API key from ' +
+                        'console.curseforge.com, not the author upload token',
+                );
+            }
+            throw e;
+        });
+    const mods = res.data?.data;
+    if (!Array.isArray(mods)) throw new Error('unexpected CurseForge response');
+    return mods as CurseforgeMod[];
 }
 
 function loadCurseforgeIds(): number[] {
